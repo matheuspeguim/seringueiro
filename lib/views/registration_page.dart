@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_seringueiro/widgets/shared_widgets.dart';
 import 'package:flutter_seringueiro/controllers/registration_controller.dart';
+
+import '../widgets/custom_app_bar.dart';
+import '../widgets/custom_button.dart';
 
 class RegistrationPage extends StatelessWidget {
   RegistrationPage({Key? key}) : super(key: key);
@@ -43,17 +45,19 @@ class RegistrationPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16.0),
-              const TextField(
+              TextField(
                 decoration: InputDecoration(
                   labelText: 'Senha',
                 ),
+                controller: controller.passwordController,
                 obscureText: true,
               ),
               const SizedBox(height: 16.0),
-              const TextField(
+              TextField(
                 decoration: InputDecoration(
                   labelText: 'Confirmar senha ',
                 ),
+                controller: controller.confirmPasswordController,
                 obscureText: true,
               ),
               const SizedBox(height: 16.0),

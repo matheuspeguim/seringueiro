@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_seringueiro/widgets/shared_widgets.dart';
 import 'package:flutter_seringueiro/views/registration_page.dart';
+
+import '../widgets/custom_app_bar.dart';
+import '../widgets/custom_button.dart';
+import '../widgets/custom_check_box.dart';
+import '../widgets/custom_text_field.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({Key? key}) : super(key: key);
