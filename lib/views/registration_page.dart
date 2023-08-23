@@ -46,7 +46,7 @@ class RegistrationPage extends StatelessWidget {
               ),
               const SizedBox(height: 16.0),
               TextField(
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Senha',
                 ),
                 controller: controller.passwordController,
@@ -54,7 +54,7 @@ class RegistrationPage extends StatelessWidget {
               ),
               const SizedBox(height: 16.0),
               TextField(
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Confirmar senha ',
                 ),
                 controller: controller.confirmPasswordController,
