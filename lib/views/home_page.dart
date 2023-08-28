@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:table_calendar/table_calendar.dart';
 import 'package:flutter_seringueiro/widgets/custom_app_bar.dart';
 
 class HomePage extends StatefulWidget {
@@ -11,11 +12,14 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
+  CalendarFormat _calendarFormat = CalendarFormat.month;
+  DateTime _focusedDay = DateTime.now();
+  DateTime? _selectedDay;
 
   final List<String> titles = [
     "Página Inicial",
     "Mídias sociais",
-    "Tarefas",
+    "Conversas",
     "Configurações",
     // Adicione mais títulos para páginas conforme necessário
   ];
@@ -23,13 +27,36 @@ class _HomePageState extends State<HomePage> {
   final List<Widget> _children = [
     const Text("Página Inicial"),
     const Text("Social"),
-    const Text("Tarefas"),
+    const Text("Conversas"),
     const Text("Configurações"),
     // Adicione mais páginas conforme necessário
   ];
 
   @override
   Widget build(BuildContext context) {
+    _children[0] = TableCalendar(
+      firstDay: DateTime.utc(2022, 1, 1),
+      lastDay: DateTime.utc(2031, 12, 31),
+      focusedDay: _focusedDay,
+      calendarFormat: _calendarFormat,
+      selectedDayPredicate: (DateTime day) {
+        return isSameDay(_selectedDay, day);
+      },
+      onDaySelected: (selectedDay, focusedDay) {
+        setState(() {
+          _selectedDay = selectedDay;
+          _focusedDay = focusedDay;
+        });
+      },
+      onFormatChanged: (format) {
+        setState(() {
+          _calendarFormat = format;
+        });
+      },
+      onPageChanged: (focusedDay) {
+        _focusedDay = focusedDay;
+      },
+    );
     return Scaffold(
       appBar: CustomAppBar(
         title: titles[_currentIndex],
@@ -47,18 +74,19 @@ class _HomePageState extends State<HomePage> {
         },
         unselectedItemColor: Colors.grey,
         selectedItemColor: Colors.green,
+        showSelectedLabels: false,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
-            label: 'Início',
+            label: 'Tarefas',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person_add),
+            icon: Icon(Icons.people),
             label: 'Mídias Sociais',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.task),
-            label: 'Tarefas',
+            icon: Icon(Icons.chat),
+            label: 'Conversas',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
