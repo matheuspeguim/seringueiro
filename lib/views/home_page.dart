@@ -1,62 +1,38 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
-import 'package:table_calendar/table_calendar.dart';
 import 'package:flutter_seringueiro/widgets/custom_app_bar.dart';
+import 'package:table_calendar/table_calendar.dart';
+import '../widgets/custom_calendar.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
-  CalendarFormat _calendarFormat = CalendarFormat.month;
-  DateTime _focusedDay = DateTime.now();
-  DateTime? _selectedDay;
 
   final List<String> titles = [
     "Página Inicial",
     "Mídias sociais",
     "Conversas",
     "Configurações",
-    // Adicione mais títulos para páginas conforme necessário
   ];
 
   final List<Widget> _children = [
-    const Text("Página Inicial"),
-    const Text("Social"),
+    CustomCalendar(
+      calendarFormat: CalendarFormat.week,
+    ),
+    const Text("Mídias sociais"),
     const Text("Conversas"),
     const Text("Configurações"),
-    // Adicione mais páginas conforme necessário
   ];
 
   @override
   Widget build(BuildContext context) {
-    _children[0] = TableCalendar(
-      firstDay: DateTime.utc(2022, 1, 1),
-      lastDay: DateTime.utc(2031, 12, 31),
-      focusedDay: _focusedDay,
-      calendarFormat: _calendarFormat,
-      selectedDayPredicate: (DateTime day) {
-        return isSameDay(_selectedDay, day);
-      },
-      onDaySelected: (selectedDay, focusedDay) {
-        setState(() {
-          _selectedDay = selectedDay;
-          _focusedDay = focusedDay;
-        });
-      },
-      onFormatChanged: (format) {
-        setState(() {
-          _calendarFormat = format;
-        });
-      },
-      onPageChanged: (focusedDay) {
-        _focusedDay = focusedDay;
-      },
-    );
     return Scaffold(
       appBar: CustomAppBar(
         title: titles[_currentIndex],
@@ -91,8 +67,7 @@ class _HomePageState extends State<HomePage> {
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
             label: 'Configurações',
-          )
-          // Adicione mais itens conforme necessário
+          ),
         ],
       ),
       floatingActionButton: _getFab(_currentIndex),
@@ -115,11 +90,8 @@ class _HomePageState extends State<HomePage> {
         onPressed: () => print("Nova Sangria"),
         child: const Icon(Icons.add_task),
       );
-    } else if (index == 3) {
-      // Corrigido o posicionamento deste bloco
-      return null;
     } else {
-      return null; // ou algum FAB padrão
+      return null;
     }
   }
 }
