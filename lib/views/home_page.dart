@@ -1,12 +1,11 @@
-// ignore_for_file: library_private_types_in_public_api
-
 import 'package:flutter/material.dart';
 import 'package:flutter_seringueiro/widgets/custom_app_bar.dart';
+import 'package:flutter_seringueiro/widgets/custom_card.dart';
+import 'package:flutter_seringueiro/widgets/custom_calendar.dart';
 import 'package:table_calendar/table_calendar.dart';
-import '../widgets/custom_calendar.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  const HomePage({Key? key}) : super(key: key);
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -22,17 +21,37 @@ class _HomePageState extends State<HomePage> {
     "Configurações",
   ];
 
-  final List<Widget> _children = [
-    CustomCalendar(
-      calendarFormat: CalendarFormat.week,
-    ),
-    const Text("Mídias sociais"),
-    const Text("Conversas"),
-    const Text("Configurações"),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final List<Widget> _children = [
+      ListView(
+        children: [
+          CustomCard(
+            title: "Calendário de atividades",
+            trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey),
+            child: CustomCalendar(
+                calendarFormat: CalendarFormat.week,
+                footer: Column(
+                  children: [
+                    Text("Informações do clima"),
+                    Icon(Icons.wb_sunny),
+                    Text("Atividades programadas"),
+                    Icon(Icons.agriculture),
+                  ],
+                )),
+          ),
+          CustomCard(
+            title: "Card 2",
+            trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey),
+          ),
+          // adicione outros CustomCards conforme necessário
+        ],
+      ),
+      const Text("Mídias sociais"),
+      const Text("Conversas"),
+      const Text("Configurações"),
+    ];
+
     return Scaffold(
       appBar: CustomAppBar(
         title: titles[_currentIndex],
