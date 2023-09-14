@@ -4,6 +4,8 @@ import 'package:flutter_seringueiro/widgets/custom_card.dart';
 import 'package:flutter_seringueiro/widgets/custom_calendar.dart';
 import 'package:table_calendar/table_calendar.dart';
 
+import '../widgets/weekly_weather_forecast.dart';
+
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
 
@@ -13,6 +15,8 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
+  CalendarFormat _calendarFormat =
+      CalendarFormat.week; // Você pode alterar isso conforme necessário
 
   final List<String> titles = [
     "Página Inicial",
@@ -20,30 +24,20 @@ class _HomePageState extends State<HomePage> {
     "Conversas",
     "Configurações",
   ];
-
   @override
   Widget build(BuildContext context) {
     final List<Widget> _children = [
       ListView(
         children: [
           CustomCard(
-            title: "Calendário de atividades",
-            trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey),
-            child: CustomCalendar(
-                calendarFormat: CalendarFormat.week,
-                footer: Column(
-                  children: [
-                    Text("Informações do clima"),
-                    Icon(Icons.wb_sunny),
-                    Text("Atividades programadas"),
-                    Icon(Icons.agriculture),
-                  ],
-                )),
-          ),
-          CustomCard(
-            title: "Card 2",
-            trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey),
-          ),
+              title: "Calendário de atividades",
+              trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey),
+              children: [
+                CustomCalendar(
+                  calendarFormat: _calendarFormat,
+                ),
+                WeeklyWeatherForecast(),
+              ]),
           // adicione outros CustomCards conforme necessário
         ],
       ),
