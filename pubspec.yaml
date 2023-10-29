@@ -17,6 +17,10 @@ dependencies:
   table_calendar: ^3.0.0
   cupertino_icons: ^1.0.2
   intl: ^0.18.0
+  weather_icons: ^3.0.0
+  flutter_typeahead: ^4.8.0
+  flutter_masked_text2: ^0.9.1
+  validators: ^3.0.0
 
 dev_dependencies:
   flutter_test:

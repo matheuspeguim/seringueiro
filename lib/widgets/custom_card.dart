@@ -14,6 +14,7 @@ class CustomCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: Colors.lightGreen.shade50,
       child: Column(
         children: [
           ListTile(

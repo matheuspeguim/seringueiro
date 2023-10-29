@@ -33,10 +33,10 @@ class _HomePageState extends State<HomePage> {
               title: "Calendário de atividades",
               trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey),
               children: [
+                WeeklyWeatherForecast(),
                 CustomCalendar(
                   calendarFormat: _calendarFormat,
                 ),
-                WeeklyWeatherForecast(),
               ]),
           // adicione outros CustomCards conforme necessário
         ],

@@ -18,12 +18,15 @@ class CustomCalendar extends StatelessWidget {
       focusedDay: now,
       calendarFormat: calendarFormat ?? CalendarFormat.month,
       headerVisible: calendarFormat == CalendarFormat.month,
+      rowHeight: 50.0, // Ajuste este valor conforme necessário
       calendarBuilders: CalendarBuilders(
           todayBuilder: (context, date, events) => Container(
-              margin: const EdgeInsets.all(4.0),
+              margin: const EdgeInsets.all(8.0),
               alignment: Alignment.center,
-              decoration:
-                  BoxDecoration(color: Colors.green, shape: BoxShape.circle),
+              decoration: BoxDecoration(
+                color: Colors.green,
+                shape: BoxShape.circle,
+              ),
               child: Text(
                 date.day.toString(),
                 style: TextStyle(color: Colors.white),
