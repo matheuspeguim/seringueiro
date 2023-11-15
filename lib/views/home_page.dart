@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_seringueiro/widgets/custom_app_bar.dart';
 import 'package:flutter_seringueiro/widgets/custom_card.dart';
 import 'package:flutter_seringueiro/widgets/custom_calendar.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -47,8 +46,12 @@ class _HomePageState extends State<HomePage> {
     ];
 
     return Scaffold(
-      appBar: CustomAppBar(
-        title: titles[_currentIndex],
+      backgroundColor: Colors.green.shade900,
+      appBar: AppBar(
+        title:
+            Text(titles[_currentIndex], style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.green.shade900,
+        centerTitle: true,
       ),
       body: IndexedStack(
         index: _currentIndex,

@@ -1,92 +1,160 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_seringueiro/views/registration_page.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_seringueiro/blocs/login/login_bloc.dart';
+import 'package:flutter_seringueiro/blocs/login/login_event.dart';
+import 'package:flutter_seringueiro/blocs/login/login_state.dart';
+import 'package:flutter_seringueiro/views/home_page.dart';
+import 'package:flutter_seringueiro/views/signup_page.dart';
+import 'package:flutter_seringueiro/views/user_data/adress_info_page.dart';
+import 'package:flutter_seringueiro/views/user_data/personal_info_page.dart';
+import 'package:flutter_seringueiro/views/user_data/professional_info_page.dart';
 
-import '../widgets/custom_app_bar.dart';
-import '../widgets/custom_button.dart';
-import '../widgets/custom_check_box.dart';
-import '../widgets/custom_text_field.dart';
+class LoginPage extends StatefulWidget {
+  @override
+  _LoginPageState createState() => _LoginPageState();
+}
 
-class LoginPage extends StatelessWidget {
-  const LoginPage({Key? key}) : super(key: key);
+class _LoginPageState extends State<LoginPage> {
+  final _formKey = GlobalKey<FormState>();
+  final emailController = TextEditingController();
+  final senhaController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(
-        title: 'Entrar na conta',
+      backgroundColor: Colors.green.shade900,
+      appBar: AppBar(
+        title: Text('Entrar na conta', style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.green.shade900,
+        centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              const CustomTextField(
-                hintText: 'E-mail',
-              ),
-              const SizedBox(height: 16.0),
-              PasswordField(), // Usando o novo widget PasswordField
-              const SizedBox(height: 16.0),
-              const CustomCheckBox(
-                text: 'Lembrar-me',
-              ),
-
-              CustomButton(
-                onPressed: () {
-                  // Lógica de login aqui
-                },
-                text: 'Entrar',
-                child: const Text('Entrar'),
-              ),
-              const SizedBox(height: 8.0), // Espaço entre os botões
-              const Text('ou'), // Adicione a frase "ou"
-              const SizedBox(height: 8.0), // Espaço entre os botões
-              CustomButton(
-                onPressed: () {
-                  // Navegar para a página de registro
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => RegistrationPage(),
+      body: BlocListener<LoginBloc, LoginState>(
+        listener: (context, state) {
+          if (state is LoginSuccess) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => HomePage()),
+            );
+          } else if (state is PersonalInfoMissing) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => PersonalInfoPage(user: state.user)),
+            );
+          } else if (state is AdressInfoMissing) {
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => AdressInfoPage(user: state.user)));
+          } else if (state is ProfessionalInfoMissing) {
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        ProfessionalInfoPage(user: state.user)));
+          } else if (state is LoginFailure) {
+            // Aqui você pode mostrar uma mensagem de erro
+            ScaffoldMessenger.of(context)
+                .showSnackBar(SnackBar(content: Text(state.error)));
+          }
+        },
+        child: Form(
+          key: _formKey,
+          child: Padding(
+            padding: EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                TextFormField(
+                  controller: emailController,
+                  decoration: InputDecoration(
+                      labelText: 'E-mail',
+                      labelStyle: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18.0,
+                      )),
+                  style: TextStyle(color: Colors.white, fontSize: 18.0),
+                  validator: (value) {
+                    if (value == null ||
+                        value.isEmpty ||
+                        !value.contains('@')) {
+                      return 'Por favor, insira um e-mail válido';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: 32.0),
+                TextFormField(
+                  controller: senhaController,
+                  decoration: InputDecoration(
+                      labelText: 'Senha',
+                      labelStyle: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18.0,
+                      )),
+                  style: TextStyle(color: Colors.white, fontSize: 18.0),
+                  obscureText: true,
+                ),
+                SizedBox(height: 32.0),
+                ElevatedButton(
+                  onPressed: () {
+                    if (_formKey.currentState!.validate()) {
+                      // Disparar evento de login
+                      BlocProvider.of<LoginBloc>(context).add(
+                        LoginSubmitted(
+                            email: emailController.text,
+                            senha: senhaController.text),
+                      );
+                    }
+                  },
+                  child: Text('Entrar'),
+                ),
+                SizedBox(
+                  height: 32.0,
+                ),
+                Center(
+                  child: RichText(
+                    text: TextSpan(
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.white, // Cor base para o texto
+                      ),
+                      children: <TextSpan>[
+                        TextSpan(text: 'Novo usuário? '),
+                        TextSpan(
+                          text: 'Criar uma conta',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white, // Cor de destaque
+                          ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                    builder: (context) => SignUpPage()),
+                              );
+                            },
+                          // },
+                        ),
+                      ],
                     ),
-                  );
-                },
-                text: 'Cadastrar',
-                child: const Text("Criar conta"),
-              ),
-            ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
-}
-
-class PasswordField extends StatefulWidget {
-  @override
-  _PasswordFieldState createState() => _PasswordFieldState();
-}
-
-class _PasswordFieldState extends State<PasswordField> {
-  bool _isPasswordVisible = false;
 
   @override
-  Widget build(BuildContext context) {
-    return TextFormField(
-      decoration: InputDecoration(
-        labelText: 'Senha',
-        suffixIcon: IconButton(
-          icon: Icon(
-            _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-          ),
-          onPressed: () {
-            setState(() {
-              _isPasswordVisible = !_isPasswordVisible;
-            });
-          },
-        ),
-      ),
-      obscureText: !_isPasswordVisible,
-    );
+  void dispose() {
+    emailController.dispose();
+    senhaController.dispose();
+    super.dispose();
   }
 }

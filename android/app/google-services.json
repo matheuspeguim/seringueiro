@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "699625603364",
+    "firebase_url": "https://seringueiroapp-default-rtdb.firebaseio.com",
+    "project_id": "seringueiroapp",
+    "storage_bucket": "seringueiroapp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:699625603364:android:4fe2f10c94b5c4c49473b1",
+        "android_client_info": {
+          "package_name": "com.example.flutter_seringueiro"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "699625603364-aguu0mc2kl2hkgcjitms8qnubf43psb1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDbwakF8efURz0oDhA37jwPNVXzp-UmyAo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "699625603364-aguu0mc2kl2hkgcjitms8qnubf43psb1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
