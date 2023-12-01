@@ -6,13 +6,10 @@ class WeatherApiService {
 
   WeatherApiService({required this.apiKey});
 
-  Future<Map<String, dynamic>> fetchWeeklyWeather() async {
-    // Latitude e Longitude de Poloni, SP
-    final double lat = -20.7828;
-    final double lon = -49.8258;
-
+  Future<Map<String, dynamic>> fetchWeather(
+      double latitude, double longitude) async {
     final url =
-        "https://api.openweathermap.org/data/3.0/onecall?lat=$lat&lon=$lon&exclude=hourly,minutely&appid=$apiKey";
+        "https://api.openweathermap.org/data/3.0/onecall?lat=$latitude&lon=$longitude&exclude=minutely&appid=$apiKey";
 
     final response = await http.get(Uri.parse(url));
 
