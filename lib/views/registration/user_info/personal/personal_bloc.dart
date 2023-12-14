@@ -26,7 +26,6 @@ class PersonalBloc extends Bloc<PersonalEvent, PersonalState> {
       emit(PersonalInfoSuccess());
     } catch (e) {
       emit(PersonalFailure(e.toString()));
-      emit(PersonalInitial());
     }
   }
 }

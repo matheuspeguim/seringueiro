@@ -103,6 +103,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                   TextFormField(
                     controller: nomeController,
                     focusNode: nomeFocus,
+                    keyboardType: TextInputType.name,
                     decoration: InputDecoration(
                       labelText: 'Nome completo',
                       labelStyle: TextStyle(color: Colors.white),
@@ -118,6 +119,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                   TextFormField(
                     controller: nascimentoController,
                     focusNode: nascimentoFocus,
+                    keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                       labelText: 'Data de nascimento',
                       labelStyle: TextStyle(color: Colors.white),
@@ -133,6 +135,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                   TextFormField(
                     controller: cpfController,
                     focusNode: cpfFocus,
+                    keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                       labelText: 'CPF',
                       labelStyle: TextStyle(color: Colors.white),
@@ -155,42 +158,11 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                     style: TextStyle(color: Colors.white, fontSize: 18.0),
                     validator: PersonalInfoValidator.validarRG,
                     autovalidateMode: AutovalidateMode.onUserInteraction,
+                    onFieldSubmitted: (value) => _onSubmitForm(),
                   ),
                   SizedBox(height: 32.0),
                   ElevatedButton(
-                    onPressed: () {
-                      // Verifica se todos os campos do formulário são válidos.
-                      bool isFormValid =
-                          _formKey.currentState?.validate() ?? false;
-                      if (isFormValid) {
-                        try {
-                          DateTime dataDeNascimento = DateFormat("dd/MM/yyyy")
-                              .parseStrict(nascimentoController.text);
-
-                          // Envie o evento para o BLoC aqui
-                          BlocProvider.of<PersonalBloc>(context).add(
-                            PersonalInfoSubmitted(
-                              user: widget.user,
-                              nome: nomeController.text,
-                              dataDeNascimento: dataDeNascimento,
-                              cpf: cpfController.text,
-                              rg: rgController.text,
-                            ),
-                          );
-                        } on FormatException {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                                content: Text('Data de nascimento inválida')),
-                          );
-                        }
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              content: Text(
-                                  'Por favor, corrija os erros no formulário antes de continuar.')),
-                        );
-                      }
-                    },
+                    onPressed: _onSubmitForm,
                     child: Text('Continuar'),
                   ),
                 ],
@@ -200,5 +172,37 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
         ),
       ),
     );
+  }
+
+  void _onSubmitForm() {
+    // Verifica se todos os campos do formulário são válidos.
+    bool isFormValid = _formKey.currentState?.validate() ?? false;
+    if (isFormValid) {
+      try {
+        DateTime dataDeNascimento =
+            DateFormat("dd/MM/yyyy").parseStrict(nascimentoController.text);
+
+        // Envie o evento para o BLoC aqui
+        BlocProvider.of<PersonalBloc>(context).add(
+          PersonalInfoSubmitted(
+            user: widget.user,
+            nome: nomeController.text,
+            dataDeNascimento: dataDeNascimento,
+            cpf: cpfController.text,
+            rg: rgController.text,
+          ),
+        );
+      } on FormatException {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Data de nascimento inválida')),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text(
+                'Por favor, corrija os erros no formulário antes de continuar.')),
+      );
+    }
   }
 }

@@ -10,6 +10,8 @@ import 'package:flutter_seringueiro/views/main/home/property/property.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_bloc.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_event.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_page.dart';
+import 'package:flutter_seringueiro/views/main/home/property/searcher/search_property_bloc.dart';
+import 'package:flutter_seringueiro/views/main/home/property/searcher/search_property_page.dart';
 import 'package:flutter_seringueiro/views/main/home/weather/weather_page.dart';
 
 class HomePage extends StatelessWidget {
@@ -22,37 +24,13 @@ class HomePage extends StatelessWidget {
     return BlocProvider(
       create: (context) {
         var bloc = HomePageBloc(user: user);
-        bloc.add(FetchUserDataEvent());
         bloc.add(FetchPropertiesEvent(user: user));
         return bloc;
       },
       child: Scaffold(
         backgroundColor: Colors.green.shade200,
-        appBar: AppBar(
-          centerTitle: true,
-          backgroundColor: Colors.green.shade900,
-          elevation: 5.0,
-          shadowColor: Colors.grey.shade900,
-          title: _buildUserGreeting(context),
-        ),
         body: _buildPropertiesList(context),
       ),
-    );
-  }
-
-  Widget _buildUserGreeting(BuildContext context) {
-    return BlocBuilder<HomePageBloc, HomePageState>(
-      builder: (context, state) {
-        if (state is UserDataLoading) {
-          return Text("");
-        } else if (state is UserDataLoaded) {
-          return Text("Olá, ${state.firstName}",
-              style: TextStyle(color: Colors.white));
-        } else if (state is UserDataError) {
-          return Text("Olá, Usuário", style: TextStyle(color: Colors.white));
-        }
-        return Text("Olá, usuário", style: TextStyle(color: Colors.white));
-      },
     );
   }
 
@@ -64,7 +42,7 @@ class HomePage extends StatelessWidget {
         } else if (state is PropertiesLoaded) {
           return _propertiesListWidget(context, state);
         } else if (state is PropertiesError) {
-          return _errorWidget(state.message);
+          return _errorWidget(state.message, context);
         }
         return _buildNewPropertyButton(context); // Default case
       },
@@ -108,7 +86,7 @@ class HomePage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  WeatherWidget(location: property.localizacao),
+                  DailyWeatherWidget(location: property.localizacao),
                   // Outras informações da propriedade aqui
                 ],
               ),
@@ -160,9 +138,9 @@ class HomePage extends StatelessWidget {
         onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute(builder: (context) {
-              return BlocProvider<NewPropertyBloc>(
-                create: (context) => NewPropertyBloc(),
-                child: NewPropertyPage(user: user),
+              return BlocProvider<SearchPropertyBloc>(
+                create: (context) => SearchPropertyBloc(),
+                child: SearchPropertyPage(user: user),
               );
             }),
           );
@@ -176,8 +154,30 @@ class HomePage extends StatelessWidget {
     return Center(child: CircularProgressIndicator());
   }
 
-  Widget _errorWidget(String message) {
-    return Center(child: Text(message));
+  Widget _errorWidget(String message, BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(message),
+          ElevatedButton(
+            onPressed: () => _showNewPropertyPage(context),
+            child: Text('Cadastrar novo local de trabalho'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showNewPropertyPage(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) {
+        return BlocProvider<NewPropertyBloc>(
+          create: (context) => NewPropertyBloc(),
+          child: NewPropertyPage(user: user),
+        );
+      }),
+    );
   }
 
   Widget _propertiesListWidget(BuildContext context, PropertiesLoaded state) {

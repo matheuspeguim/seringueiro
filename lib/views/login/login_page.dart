@@ -8,8 +8,6 @@ import 'package:flutter_seringueiro/views/login/login_state.dart';
 import 'package:flutter_seringueiro/views/main/main_page.dart';
 import 'package:flutter_seringueiro/views/registration/user_info/adress/adress_bloc.dart';
 import 'package:flutter_seringueiro/views/registration/user_info/adress/adress_info_page.dart';
-import 'package:flutter_seringueiro/views/registration/user_info/contact/contact_bloc.dart';
-import 'package:flutter_seringueiro/views/registration/user_info/contact/contact_info_page.dart';
 import 'package:flutter_seringueiro/views/registration/user_info/personal/personal_bloc.dart';
 import 'package:flutter_seringueiro/views/registration/user_info/personal/personal_info_page.dart';
 import 'package:flutter_seringueiro/views/registration/signup_page.dart';
@@ -23,6 +21,9 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();
   final senhaController = TextEditingController();
+  final emailFocus = FocusNode();
+  final senhaFocus = FocusNode();
+  bool _senhaVisivel = false;
 
   @override
   Widget build(BuildContext context) {
@@ -60,15 +61,6 @@ class _LoginPageState extends State<LoginPage> {
                     child: AdressInfoPage(user: state.user),
                   ),
                 ));
-          } else if (state is ContactInfoMissing) {
-            Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => BlocProvider<ContactBloc>(
-                    create: (context) => ContactBloc(),
-                    child: ContactInfoPage(user: state.user),
-                  ),
-                ));
           } else if (state is LoginFailure) {
             // Aqui você pode mostrar uma mensagem de erro
             ScaffoldMessenger.of(context)
@@ -89,6 +81,7 @@ class _LoginPageState extends State<LoginPage> {
                 children: <Widget>[
                   TextFormField(
                     controller: emailController,
+                    focusNode: emailFocus,
                     decoration: InputDecoration(
                         labelText: 'E-mail',
                         labelStyle: TextStyle(
@@ -96,6 +89,9 @@ class _LoginPageState extends State<LoginPage> {
                           fontSize: 18.0,
                         )),
                     style: TextStyle(color: Colors.white, fontSize: 18.0),
+                    onFieldSubmitted: (value) {
+                      FocusScope.of(context).requestFocus(senhaFocus);
+                    },
                     validator: (value) {
                       if (value == null ||
                           value.isEmpty ||
@@ -108,27 +104,36 @@ class _LoginPageState extends State<LoginPage> {
                   SizedBox(height: 32.0),
                   TextFormField(
                     controller: senhaController,
+                    focusNode: senhaFocus,
                     decoration: InputDecoration(
-                        labelText: 'Senha',
-                        labelStyle: TextStyle(
+                      labelText: 'Senha',
+                      labelStyle: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18.0,
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          // Alterna os ícones
+                          _senhaVisivel
+                              ? Icons.visibility
+                              : Icons.visibility_off,
                           color: Colors.white,
-                          fontSize: 18.0,
-                        )),
+                        ),
+                        onPressed: () {
+                          // Alterna o estado da visibilidade da senha
+                          setState(() {
+                            _senhaVisivel = !_senhaVisivel;
+                          });
+                        },
+                      ),
+                    ),
                     style: TextStyle(color: Colors.white, fontSize: 18.0),
-                    obscureText: true,
+                    obscureText: !_senhaVisivel,
+                    onFieldSubmitted: (value) => _executarLogin(context),
                   ),
                   SizedBox(height: 32.0),
                   ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        // Disparar evento de login
-                        BlocProvider.of<LoginBloc>(context).add(
-                          LoginSubmitted(
-                              email: emailController.text,
-                              senha: senhaController.text),
-                        );
-                      }
-                    },
+                    onPressed: () => _executarLogin(context),
                     child: Text('Entrar'),
                   ),
                   SizedBox(
@@ -171,10 +176,22 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  void _executarLogin(BuildContext context) {
+    if (_formKey.currentState!.validate()) {
+      // Disparar evento de login
+      BlocProvider.of<LoginBloc>(context).add(
+        LoginSubmitted(
+            email: emailController.text, senha: senhaController.text),
+      );
+    }
+  }
+
   @override
   void dispose() {
     emailController.dispose();
     senhaController.dispose();
+    emailFocus.dispose();
+    senhaFocus.dispose();
     super.dispose();
   }
 }

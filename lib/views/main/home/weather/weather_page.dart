@@ -13,11 +13,13 @@ class HourlyWeatherForecast {
   final DateTime time;
   final String weatherIcon;
   final double temperature;
+  final double precipitation; // Adicionado para precipitação
 
   HourlyWeatherForecast({
     required this.time,
     required this.weatherIcon,
     required this.temperature,
+    required this.precipitation, // Incluir na construção
   });
 }
 
@@ -29,16 +31,20 @@ List<HourlyWeatherForecast> parseWeatherData(Map<String, dynamic> weatherData) {
         final time =
             DateTime.fromMillisecondsSinceEpoch(hourlyData['dt'] * 1000);
         final weatherIcon = hourlyData['weather'][0]['icon'];
-        // Convertendo a temperatura
         final temperature = hourlyData['temp'].toDouble() - 273.15;
+        final precipitation = hourlyData['rain'] != null
+            ? (hourlyData['rain']['1h']?.toDouble() ?? 0.0)
+            : 0.0;
+
         return HourlyWeatherForecast(
           time: time,
           weatherIcon: weatherIcon,
           temperature: temperature,
+          precipitation: precipitation,
         );
       })
       .take(24)
-      .toList(); // Pega as próximas 24 horas
+      .toList();
 }
 
 // Widget para mostrar um cartão de previsão individual horária
@@ -74,7 +80,27 @@ class HourlyForecastCard extends StatelessWidget {
             width: 50,
             height: 50,
           ),
-          Text('${forecast.temperature.toStringAsFixed(1)}°'),
+          Row(
+            children: [
+              Icon(Icons.thermostat, size: 16, color: Colors.orange),
+              SizedBox(width: 4),
+              Text('${forecast.temperature.toStringAsFixed(1)}°C',
+                  style: (TextStyle(fontSize: 12))),
+            ],
+          ),
+          if (forecast.precipitation > 0) // Exibir se houver precipitação
+            Row(
+              children: [
+                Icon(
+                  Icons.water_drop,
+                  size: 16,
+                  color: Colors.blue,
+                ),
+                SizedBox(width: 4),
+                Text('${forecast.precipitation.toStringAsFixed(1)}mm',
+                    style: TextStyle(fontSize: 12)),
+              ],
+            ),
         ],
       ),
     );
@@ -102,10 +128,10 @@ class HourlyWeatherRow extends StatelessWidget {
 }
 
 // Widget principal que usa o WeatherBloc para buscar e exibir a previsão do tempo por hora
-class WeatherWidget extends StatelessWidget {
+class HourlyWeatherWidget extends StatelessWidget {
   final GeoPoint location;
 
-  WeatherWidget({Key? key, required this.location}) : super(key: key);
+  HourlyWeatherWidget({Key? key, required this.location}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -124,6 +150,143 @@ class WeatherWidget extends StatelessWidget {
           } else if (state is WeatherLoadSuccess) {
             final forecastList = parseWeatherData(state.weatherData);
             return HourlyWeatherRow(forecastList: forecastList);
+          } else if (state is WeatherLoadFailure) {
+            return Text('Falha ao carregar dados do clima');
+          } else {
+            return Container(); // Estado inicial ou desconhecido
+          }
+        },
+      ),
+    );
+  }
+}
+
+// Modelo de dados para a previsão diária
+class DailyWeatherForecast {
+  final DateTime date;
+  final String weatherIcon;
+  final double rain;
+
+  DailyWeatherForecast({
+    required this.date,
+    required this.weatherIcon,
+    required this.rain,
+  });
+}
+
+// Função para analisar os dados da API e obter a previsão diária
+List<DailyWeatherForecast> parseDailyWeatherData(
+    Map<String, dynamic> weatherData) {
+  var dailyForecasts = weatherData['daily'] as List;
+  return dailyForecasts.map((dailyData) {
+    final date = DateTime.fromMillisecondsSinceEpoch(dailyData['dt'] * 1000);
+    final weatherIcon = dailyData['weather'][0]['icon'];
+    final rain = dailyData['rain']?.toDouble() ?? 0.0;
+
+    return DailyWeatherForecast(
+      date: date,
+      weatherIcon: weatherIcon,
+      rain: rain,
+    );
+  }).toList();
+}
+
+class DailyForecastCard extends StatelessWidget {
+  final DailyWeatherForecast forecast;
+
+  DailyForecastCard({Key? key, required this.forecast}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    DateTime now = DateTime.now();
+    String displayDate = DateFormat('EEE').format(forecast.date);
+    if (now.day == forecast.date.day &&
+        now.month == forecast.date.month &&
+        now.year == forecast.date.year) {
+      displayDate = "Hoje";
+    }
+
+    return Container(
+      width: 75,
+      child: Column(
+        children: [
+          Text(
+            displayDate,
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          Container(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.network(
+                  'http://openweathermap.org/img/wn/${forecast.weatherIcon}.png',
+                  width: 50,
+                  height: 50,
+                ),
+                if (forecast.rain > 0) // Exibir se houver precipitação
+                  Row(
+                    children: [
+                      Icon(Icons.water_drop,
+                          size: 12, color: Colors.blue), // Ícone de chuva
+                      SizedBox(width: 4),
+                      Text(
+                        '${forecast.rain.toStringAsFixed(1)}mm', // Mostrando a quantidade de chuva com uma casa decimal
+                        style: TextStyle(fontSize: 12),
+                      ),
+                    ],
+                  ),
+              ],
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+// Widget para mostrar a linha de previsões do tempo diárias
+class DailyWeatherRow extends StatelessWidget {
+  final List<DailyWeatherForecast> forecastList;
+
+  DailyWeatherRow({Key? key, required this.forecastList}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: forecastList
+            .map((forecast) => DailyForecastCard(forecast: forecast))
+            .toList(),
+      ),
+    );
+  }
+}
+
+// Widget principal para a previsão do tempo diária
+class DailyWeatherWidget extends StatelessWidget {
+  final GeoPoint location;
+
+  DailyWeatherWidget({Key? key, required this.location}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final double latitude = location.latitude;
+    final double longitude = location.longitude;
+
+    return BlocProvider<WeatherBloc>(
+      create: (context) => WeatherBloc(
+          weatherApiService:
+              WeatherApiService(apiKey: dotenv.env['OPENWEATHER_API_KEY']!))
+        ..add(WeatherRequested(latitude, longitude)),
+      child: BlocBuilder<WeatherBloc, WeatherState>(
+        builder: (context, state) {
+          if (state is WeatherLoadInProgress) {
+            return Center(child: CircularProgressIndicator());
+          } else if (state is WeatherLoadSuccess) {
+            final forecastList = parseDailyWeatherData(state.weatherData);
+            return DailyWeatherRow(forecastList: forecastList);
           } else if (state is WeatherLoadFailure) {
             return Text('Falha ao carregar dados do clima');
           } else {

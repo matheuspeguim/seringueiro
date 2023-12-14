@@ -16,10 +16,6 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Sala de Conversas'),
-        backgroundColor: Colors.green.shade900,
-      ),
       body: Column(
         children: <Widget>[
           // Aqui você pode colocar a lista de conversas ou mensagens

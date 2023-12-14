@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -20,6 +21,7 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   int _currentIndex = 0;
   late List<BlocProvider> _blocProviders;
+  String userName = "";
 
   @override
   void initState() {
@@ -38,6 +40,31 @@ class _MainPageState extends State<MainPage> {
         lazy: false,
       ),
     ];
+    _fetchUserName(); // Chama o método para buscar o nome do usuário
+  }
+
+  void _fetchUserName() async {
+    try {
+      DocumentSnapshot personalInfoDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.user.uid)
+          .collection('personal_info')
+          .doc('info')
+          .get();
+
+      if (personalInfoDoc.exists) {
+        Map<String, dynamic>? data =
+            personalInfoDoc.data() as Map<String, dynamic>?;
+        String fullName = data?['nome'] ?? "Usuário";
+        List<String> nameParts = fullName.split(" ");
+        setState(() {
+          userName = nameParts.first;
+        });
+      }
+    } catch (e) {
+      print("Erro ao buscar dados do usuário: $e");
+      // Lidar com o erro conforme necessário
+    }
   }
 
   Widget _buildPage(int index) {
@@ -56,6 +83,15 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+          centerTitle: true,
+          backgroundColor: Colors.green.shade900,
+          elevation: 5.0,
+          shadowColor: Colors.grey.shade900,
+          title: Text(
+            'Olá, $userName',
+            style: TextStyle(color: Colors.white),
+          )),
       body: IndexedStack(
         index: _currentIndex,
         children: List.generate(

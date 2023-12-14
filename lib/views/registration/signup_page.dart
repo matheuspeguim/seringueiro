@@ -15,7 +15,11 @@ class _SignUpPageState extends State<SignUpPage> {
   final _celularController = TextEditingController();
   final _senhaController = TextEditingController();
   final _confirmarSenhaController = TextEditingController();
-  bool _isFormValid = false;
+
+  final _emailFocus = FocusNode();
+  final _celularFocus = FocusNode();
+  final _senhaFocus = FocusNode();
+  final _confirmarSenhaFocus = FocusNode();
   bool _isLoading = false;
 
   @override
@@ -24,6 +28,10 @@ class _SignUpPageState extends State<SignUpPage> {
     _celularController.dispose();
     _senhaController.dispose();
     _confirmarSenhaController.dispose();
+    _emailFocus.dispose();
+    _celularFocus.dispose();
+    _senhaFocus.dispose();
+    _confirmarSenhaFocus.dispose();
     super.dispose();
   }
 
@@ -188,6 +196,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   children: <Widget>[
                     TextFormField(
                       controller: _emailController,
+                      focusNode: _emailFocus,
                       validator: validarEmail,
                       autovalidateMode: AutovalidateMode.onUserInteraction,
                       keyboardType: TextInputType.emailAddress,
@@ -198,10 +207,14 @@ class _SignUpPageState extends State<SignUpPage> {
                             fontSize: 18.0,
                           )),
                       style: TextStyle(color: Colors.white, fontSize: 18.0),
+                      onFieldSubmitted: (value) {
+                        FocusScope.of(context).requestFocus(_celularFocus);
+                      },
                     ),
                     SizedBox(height: 32.0),
                     TextFormField(
                       controller: _celularController,
+                      focusNode: _celularFocus,
                       validator: validarCelular,
                       autovalidateMode: AutovalidateMode.onUserInteraction,
                       keyboardType: TextInputType.number,
@@ -212,10 +225,14 @@ class _SignUpPageState extends State<SignUpPage> {
                             fontSize: 18.0,
                           )),
                       style: TextStyle(color: Colors.white, fontSize: 18.0),
+                      onFieldSubmitted: (value) {
+                        FocusScope.of(context).requestFocus(_senhaFocus);
+                      },
                     ),
                     SizedBox(height: 32.0),
                     TextFormField(
                       controller: _senhaController,
+                      focusNode: _senhaFocus,
                       validator: validarSenha,
                       autovalidateMode: AutovalidateMode.onUserInteraction,
                       keyboardType: TextInputType.text,
@@ -227,15 +244,18 @@ class _SignUpPageState extends State<SignUpPage> {
                           )),
                       style: TextStyle(color: Colors.white, fontSize: 18.0),
                       onChanged: (valor) {
-                        setState(() {
-                          _isFormValid = validarSenha(valor) == null;
-                        });
+                        setState(() {});
                       },
                       obscureText: true,
+                      onFieldSubmitted: (value) {
+                        FocusScope.of(context)
+                            .requestFocus(_confirmarSenhaFocus);
+                      },
                     ),
                     SizedBox(height: 32.0),
                     TextFormField(
                       controller: _confirmarSenhaController,
+                      focusNode: _confirmarSenhaFocus,
                       validator: validarConfirmaSenha,
                       autovalidateMode: AutovalidateMode.onUserInteraction,
                       keyboardType: TextInputType.text,
@@ -247,9 +267,17 @@ class _SignUpPageState extends State<SignUpPage> {
                           )),
                       style: TextStyle(color: Colors.white, fontSize: 18.0),
                       onChanged: (valor) {
-                        setState(() {
-                          _isFormValid = validarSenha(valor) == null;
-                        });
+                        setState(() {});
+                      },
+                      onFieldSubmitted: (value) {
+                        if (_validateForm()) {
+                          _registerAccount();
+                        } else {
+                          // Exibir mensagem de erro
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: Text(
+                                  'Por favor, preencha o formulário corretamente.')));
+                        }
                       },
                       obscureText: true,
                     ),

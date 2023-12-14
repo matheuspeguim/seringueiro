@@ -11,34 +11,7 @@ class HomePageBloc extends Bloc<HomePageEvent, HomePageState> {
   final User user;
 
   HomePageBloc({required this.user}) : super(HomePageInitial()) {
-    on<FetchUserDataEvent>(_onFetchUserData);
     on<FetchPropertiesEvent>(_onFetchProperties);
-  }
-
-  void _onFetchUserData(
-      FetchUserDataEvent event, Emitter<HomePageState> emit) async {
-    emit(UserDataLoading());
-    try {
-      DocumentSnapshot personalInfoDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .collection('personal_info')
-          .doc('info')
-          .get();
-
-      if (personalInfoDoc.exists) {
-        Map<String, dynamic>? data =
-            personalInfoDoc.data() as Map<String, dynamic>?;
-        String fullName = data?['nome'] ?? "Usuário";
-        List<String> nameParts = fullName.split(" ");
-        String firstName = nameParts.first;
-        emit(UserDataLoaded(firstName));
-      } else {
-        emit(UserDataError("Nenhum dado de usuário encontrado."));
-      }
-    } catch (e) {
-      emit(UserDataError("Erro ao buscar dados do usuário: $e"));
-    }
   }
 
   void _onFetchProperties(

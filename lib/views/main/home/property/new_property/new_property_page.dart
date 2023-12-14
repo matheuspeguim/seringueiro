@@ -1,5 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_seringueiro/validators/property_info_validator.dart';
@@ -24,16 +23,22 @@ class _NewPropertyPageState extends State<NewPropertyPage> {
   late GoogleMapController mapController;
   LatLng? currentMapPosition;
   String? _profissao;
-  TextEditingController _nomeDaPropriedade = TextEditingController();
-  TextEditingController _quantidadeDeArvores = TextEditingController();
-  TextEditingController _areaEmHectares = TextEditingController();
+  final _nomeDaPropriedadeController = TextEditingController();
+  final _quantidadeDeArvoresController = TextEditingController();
+  final _areaEmHectaresController = TextEditingController();
+  final _nomeDaPropriedadeFocus = FocusNode();
+  final _quantidadeDeArvoresFocus = FocusNode();
+  final _areaEmHectaresFocus = FocusNode();
 
   @override
   void dispose() {
     mapController.dispose();
-    _nomeDaPropriedade.dispose();
-    _quantidadeDeArvores.dispose();
-    _areaEmHectares.dispose();
+    _nomeDaPropriedadeController.dispose();
+    _quantidadeDeArvoresController.dispose();
+    _areaEmHectaresController.dispose();
+    _nomeDaPropriedadeFocus.dispose();
+    _quantidadeDeArvoresFocus.dispose();
+    _areaEmHectaresFocus.dispose();
     super.dispose();
   }
 
@@ -105,6 +110,7 @@ class _NewPropertyPageState extends State<NewPropertyPage> {
         appBar: AppBar(
           title:
               Text('Nova Propriedade', style: TextStyle(color: Colors.white)),
+          centerTitle: true,
           backgroundColor: Colors.green.shade900,
         ),
         body: BlocListener<NewPropertyBloc, NewPropertyState>(
@@ -227,7 +233,8 @@ class _NewPropertyPageState extends State<NewPropertyPage> {
                       },
                     ),
                     TextFormField(
-                      controller: _nomeDaPropriedade,
+                      controller: _nomeDaPropriedadeController,
+                      focusNode: _nomeDaPropriedadeFocus,
                       validator: PropertyInfoValidator.validarNomeDaPropriedade,
                       autovalidateMode: AutovalidateMode.onUserInteraction,
                       decoration: InputDecoration(
@@ -235,10 +242,16 @@ class _NewPropertyPageState extends State<NewPropertyPage> {
                         labelStyle: TextStyle(color: Colors.white),
                       ),
                       style: TextStyle(color: Colors.white, fontSize: 18.0),
+                      keyboardType: TextInputType.name,
+                      onFieldSubmitted: (_) {
+                        FocusScope.of(context)
+                            .requestFocus(_areaEmHectaresFocus);
+                      },
                     ),
                     SizedBox(height: 16.0),
                     TextFormField(
-                      controller: _areaEmHectares,
+                      controller: _areaEmHectaresController,
+                      focusNode: _areaEmHectaresFocus,
                       validator: PropertyInfoValidator.validarAreasEmHectares,
                       autovalidateMode: AutovalidateMode.onUserInteraction,
                       decoration: InputDecoration(
@@ -246,10 +259,16 @@ class _NewPropertyPageState extends State<NewPropertyPage> {
                         labelStyle: TextStyle(color: Colors.white),
                       ),
                       style: TextStyle(color: Colors.white, fontSize: 18.0),
+                      keyboardType: TextInputType.number,
+                      onFieldSubmitted: (_) {
+                        FocusScope.of(context)
+                            .requestFocus(_quantidadeDeArvoresFocus);
+                      },
                     ),
                     SizedBox(height: 16.0),
                     TextFormField(
-                      controller: _quantidadeDeArvores,
+                      controller: _quantidadeDeArvoresController,
+                      focusNode: _quantidadeDeArvoresFocus,
                       validator:
                           PropertyInfoValidator.validarQuantidadeDeArvores,
                       autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -258,6 +277,7 @@ class _NewPropertyPageState extends State<NewPropertyPage> {
                         labelStyle: TextStyle(color: Colors.white),
                       ),
                       style: TextStyle(color: Colors.white, fontSize: 18.0),
+                      keyboardType: TextInputType.number,
                     ),
                     SizedBox(height: 16.0),
                     TextFormField(
@@ -281,15 +301,19 @@ class _NewPropertyPageState extends State<NewPropertyPage> {
                       onPressed: () {
                         if (_profissao != null) {
                           final String nomeDaPropriedade =
-                              _nomeDaPropriedade.text;
-                          final int quantidadeDeArvores =
-                              int.tryParse(_quantidadeDeArvores.text) ?? 0;
+                              _nomeDaPropriedadeController.text;
+                          final int areaEmHectares =
+                              int.tryParse(_areaEmHectaresController.text) ?? 0;
+                          final int quantidadeDeArvores = int.tryParse(
+                                  _quantidadeDeArvoresController.text) ??
+                              0;
                           String? atividadeSelecionada = _profissao;
 
                           BlocProvider.of<NewPropertyBloc>(context).add(
                             SubmitPropertyData(
                               user: widget.user,
                               nomeDaPropriedade: nomeDaPropriedade,
+                              areaEmHectares: areaEmHectares,
                               quantidadeDeArvores: quantidadeDeArvores,
                               atividadeSelecionada: atividadeSelecionada,
                               localizacao: currentMapPosition!,

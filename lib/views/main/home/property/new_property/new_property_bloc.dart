@@ -32,18 +32,28 @@ class NewPropertyBloc extends Bloc<NewPropertyEvent, NewPropertyState> {
     try {
       emit(PropertySubmissionInProgress());
       final FirebaseFirestore firestore = FirebaseFirestore.instance;
-      GeoPoint geoPointLocation = GeoPoint(
-        event.localizacao.latitude,
-        event.localizacao.longitude,
-      );
+
+      // Obter informações do usuário administrador
+      DocumentSnapshot userSnapshot = await firestore
+          .collection('users')
+          .doc(event.user.uid)
+          .collection('personal_info') // Acessando a subcoleção
+          .doc('info') // Acessando o documento específico
+          .get();
+      Map<String, dynamic> userData =
+          userSnapshot.data() as Map<String, dynamic>;
+      String adminName = userData[
+          'nome']; // Assumindo que 'nome' é o campo que contém o nome do usuário
 
       // Criando o documento da propriedade na coleção 'properties'
       DocumentReference propertyRef =
           await firestore.collection('properties').add({
         'nomeDaPropriedade': event.nomeDaPropriedade,
         'quantidadeDeArvores': event.quantidadeDeArvores,
-        'localizacao': geoPointLocation,
-        'admin': firestore.collection('users').doc(event.user.uid).id,
+        'localizacao':
+            GeoPoint(event.localizacao.latitude, event.localizacao.longitude),
+        'admin': event.user.uid, // ID do administrador
+        'adminName': adminName, // Nome do administrador
       });
 
       // Adicionando a referência da propriedade no documento do usuário

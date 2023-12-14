@@ -18,11 +18,6 @@ class AdressInfoMissing extends LoginState {
   AdressInfoMissing({required this.user});
 }
 
-class ContactInfoMissing extends LoginState {
-  final User user;
-  ContactInfoMissing({required this.user});
-}
-
 class LoginSuccess extends LoginState {
   final User user;
 

@@ -3,7 +3,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_seringueiro/views/main/home/home_page.dart';
 import 'login_event.dart';
 import 'login_state.dart';
 
@@ -24,7 +23,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         email: event.email,
         password: event.senha,
       );
-      User? user = userCredential.user;
 
       if (userCredential.user != null) {
         // Chama o método para verificar as informações do usuário
@@ -58,17 +56,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     if (adressInfo.docs.isEmpty) {
       emit(AdressInfoMissing(
           user: user)); //Estado para infomação de endereço faltante
-      return;
-    }
-
-    var contactInfo = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid)
-        .collection('contact_info')
-        .get();
-    if (contactInfo.docs.isEmpty) {
-      emit(ContactInfoMissing(
-          user: user)); //Estado para infomação de contato faltante
       return;
     }
     emit(LoginSuccess(user: user));

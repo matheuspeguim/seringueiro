@@ -5,11 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:flutter_seringueiro/validators/adress_info_validator.dart';
+import 'package:flutter_seringueiro/views/main/main_page.dart';
 import 'package:flutter_seringueiro/views/registration/user_info/adress/adress_bloc.dart';
 import 'package:flutter_seringueiro/views/registration/user_info/adress/adress_event.dart';
 import 'package:flutter_seringueiro/views/registration/user_info/adress/adress_state.dart';
-import 'package:flutter_seringueiro/views/registration/user_info/contact/contact_bloc.dart';
-import 'package:flutter_seringueiro/views/registration/user_info/contact/contact_info_page.dart';
 
 class AdressInfoPage extends StatefulWidget {
   final User user;
@@ -39,14 +38,14 @@ class _AdressInfoPageState extends State<AdressInfoPage> {
   final bairroFocus = FocusNode();
   final cidadeFocus = FocusNode();
   final estadoFocus = FocusNode();
-  final elevatedButtomFocus = FocusNode();
+
+  bool _cidadeEEstadoEnabled = true;
 
   void _submitCep() {
     if (cepController.text.isNotEmpty && cepController.text.length == 9) {
       BlocProvider.of<AdressBloc>(context).add(
         FetchAdressByCep(cep: cepController.text),
       );
-      FocusScope.of(context).requestFocus(ruaOuSitioFocus);
     }
   }
 
@@ -75,7 +74,6 @@ class _AdressInfoPageState extends State<AdressInfoPage> {
     bairroFocus.dispose();
     cidadeFocus.dispose();
     estadoFocus.dispose();
-    elevatedButtomFocus.dispose();
     super.dispose();
   }
 
@@ -97,6 +95,8 @@ class _AdressInfoPageState extends State<AdressInfoPage> {
               bairroController.text = state.bairro;
               cidadeController.text = state.cidade;
               estadoController.text = state.estado;
+
+              _cidadeEEstadoEnabled = false;
             }
           },
           child: Padding(
@@ -111,6 +111,7 @@ class _AdressInfoPageState extends State<AdressInfoPage> {
                     TextFormField(
                       controller: cepController,
                       focusNode: cepFocus,
+                      keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                         labelText: 'CEP da cidade que você mora',
                         labelStyle: TextStyle(color: Colors.white),
@@ -120,6 +121,7 @@ class _AdressInfoPageState extends State<AdressInfoPage> {
                       autovalidateMode: AutovalidateMode.onUserInteraction,
                       onFieldSubmitted: (_) {
                         _submitCep();
+                        FocusScope.of(context).requestFocus(ruaOuSitioFocus);
                       },
                     ),
                     SizedBox(height: 32.0),
@@ -130,6 +132,7 @@ class _AdressInfoPageState extends State<AdressInfoPage> {
                           child: TextFormField(
                             controller: ruaOuSitioController,
                             focusNode: ruaOuSitioFocus,
+                            keyboardType: TextInputType.name,
                             decoration: InputDecoration(
                               labelText: 'Nome da rua ou sítio',
                               labelStyle: TextStyle(color: Colors.white),
@@ -150,6 +153,7 @@ class _AdressInfoPageState extends State<AdressInfoPage> {
                           child: TextFormField(
                             controller: numeroController,
                             focusNode: numeroFocus,
+                            keyboardType: TextInputType.numberWithOptions(),
                             decoration: InputDecoration(
                               labelText: 'Número',
                               labelStyle: TextStyle(color: Colors.white),
@@ -170,6 +174,7 @@ class _AdressInfoPageState extends State<AdressInfoPage> {
                     TextFormField(
                       controller: bairroController,
                       focusNode: bairroFocus,
+                      keyboardType: TextInputType.name,
                       decoration: InputDecoration(
                         labelText: 'Bairro',
                         labelStyle: TextStyle(color: Colors.white),
@@ -178,7 +183,11 @@ class _AdressInfoPageState extends State<AdressInfoPage> {
                       validator: AdressInfoValidator.validarBairro,
                       autovalidateMode: AutovalidateMode.onUserInteraction,
                       onFieldSubmitted: (_) {
-                        FocusScope.of(context).requestFocus(cidadeFocus);
+                        if (_cidadeEEstadoEnabled == false) {
+                          _onSubmitAdressInfo();
+                        } else {
+                          FocusScope.of(context).requestFocus(cidadeFocus);
+                        }
                       },
                     ),
                     SizedBox(height: 32.0),
@@ -189,6 +198,7 @@ class _AdressInfoPageState extends State<AdressInfoPage> {
                           child: TextFormField(
                             controller: cidadeController,
                             focusNode: cidadeFocus,
+                            keyboardType: TextInputType.name,
                             decoration: InputDecoration(
                               labelText: 'Cidade',
                               labelStyle: TextStyle(color: Colors.white),
@@ -201,6 +211,7 @@ class _AdressInfoPageState extends State<AdressInfoPage> {
                             onFieldSubmitted: (_) {
                               FocusScope.of(context).requestFocus(estadoFocus);
                             },
+                            enabled: _cidadeEEstadoEnabled,
                           ),
                         ),
                         SizedBox(width: 32.0),
@@ -209,6 +220,7 @@ class _AdressInfoPageState extends State<AdressInfoPage> {
                           child: TextFormField(
                             controller: estadoController,
                             focusNode: estadoFocus,
+                            keyboardType: TextInputType.name,
                             decoration: InputDecoration(
                               labelText: 'Estado',
                               labelStyle: TextStyle(color: Colors.white),
@@ -219,38 +231,17 @@ class _AdressInfoPageState extends State<AdressInfoPage> {
                             autovalidateMode:
                                 AutovalidateMode.onUserInteraction,
                             onFieldSubmitted: (_) {
-                              FocusScope.of(context)
-                                  .requestFocus(elevatedButtomFocus);
+                              _onSubmitAdressInfo();
+                              ;
                             },
+                            enabled: _cidadeEEstadoEnabled,
                           ),
                         ),
                       ],
                     ),
                     SizedBox(height: 32.0),
                     ElevatedButton(
-                      focusNode: elevatedButtomFocus,
-                      onPressed: () {
-                        if (_formKey.currentState?.validate() ?? false) {
-                          BlocProvider.of<AdressBloc>(context).add(
-                            AdressInfoSubmitted(
-                              user: widget.user,
-                              cep: cepController.text,
-                              rua: ruaOuSitioController.text,
-                              numero: numeroController.text,
-                              bairro: bairroController.text,
-                              cidade: cidadeController.text,
-                              estado: estadoController.text,
-                            ),
-                          );
-                        }
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => BlocProvider<ContactBloc>(
-                                      create: (context) => ContactBloc(),
-                                      child: ContactInfoPage(user: widget.user),
-                                    )));
-                      },
+                      onPressed: _onSubmitAdressInfo,
                       child: Text('Continuar'),
                     ),
                   ],
@@ -259,5 +250,32 @@ class _AdressInfoPageState extends State<AdressInfoPage> {
             ),
           ),
         ));
+  }
+
+  void _onSubmitAdressInfo() {
+    if (_formKey.currentState?.validate() ?? false) {
+      // Disparar evento para o AdressBloc
+      BlocProvider.of<AdressBloc>(context).add(
+        AdressInfoSubmitted(
+          user: widget.user,
+          cep: cepController.text,
+          rua: ruaOuSitioController.text,
+          numero: numeroController.text,
+          bairro: bairroController.text,
+          cidade: cidadeController.text,
+          estado: estadoController.text,
+        ),
+      );
+
+      // Navegar para a próxima página
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MainPage(user: widget.user),
+        ),
+        ModalRoute.withName(
+            '/main'), // Remove todas as rotas abaixo da pilha até '/main'
+      );
+    }
   }
 }

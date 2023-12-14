@@ -15,6 +15,7 @@ class EnterPropertyName extends NewPropertyEvent {}
 class SubmitPropertyData extends NewPropertyEvent {
   final User user;
   final String nomeDaPropriedade;
+  final int areaEmHectares;
   final int quantidadeDeArvores;
   final String? atividadeSelecionada;
   final LatLng localizacao;
@@ -22,6 +23,7 @@ class SubmitPropertyData extends NewPropertyEvent {
   SubmitPropertyData({
     required this.user,
     required this.nomeDaPropriedade,
+    required this.areaEmHectares,
     required this.quantidadeDeArvores,
     required this.atividadeSelecionada,
     required this.localizacao,

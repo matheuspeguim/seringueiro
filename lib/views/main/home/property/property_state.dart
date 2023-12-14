@@ -4,6 +4,8 @@ import 'package:flutter_seringueiro/views/main/home/property/property.dart';
 abstract class PropertyState extends Equatable {
   @override
   List<Object> get props => [];
+
+  get property => null;
 }
 
 //PROPERTY STATE

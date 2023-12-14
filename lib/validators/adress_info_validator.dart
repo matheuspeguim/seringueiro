@@ -1,5 +1,3 @@
-import 'package:intl/intl.dart';
-
 class AdressInfoValidator {
   //VALIDAR CEP
   static String? validarCEP(String? valor) {

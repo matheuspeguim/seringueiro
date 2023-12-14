@@ -17,16 +17,6 @@ class _JotinhaPageState extends State<JotinhaPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.green.shade200,
-      appBar: AppBar(
-        title: Text(
-          'Portal Jotinha',
-          style: TextStyle(
-            color: Colors.white,
-          ),
-        ),
-        centerTitle: true,
-        backgroundColor: Colors.green.shade900,
-      ),
       body: SingleChildScrollView(
         child: Column(
           children: <Widget>[
