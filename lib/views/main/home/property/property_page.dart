@@ -1,5 +1,3 @@
-import 'dart:async';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -8,7 +6,8 @@ import 'package:flutter_seringueiro/views/main/home/property/property.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_bloc.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_event.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_state.dart';
-import 'package:flutter_seringueiro/views/main/home/property/sangria.dart';
+import 'package:flutter_seringueiro/views/main/home/property/sangria/sangria.dart';
+import 'package:flutter_seringueiro/views/main/home/property/sangria/sangria_manager.dart';
 import 'package:flutter_seringueiro/views/main/home/weather/weather_page.dart';
 import 'package:flutter_seringueiro/views/main/main_page.dart';
 
@@ -24,12 +23,11 @@ class PropertyPage extends StatefulWidget {
 }
 
 class _PropertyPageState extends State<PropertyPage> {
-  Timer? _timer;
-  Duration _duration = Duration.zero;
   bool _isSangriaIniciada = false;
   Property? _currentProperty;
+  final SangriaManager sangriaManager = SangriaManager();
+  Sangria? sangriaAtual;
 
-  final SangriaService sangriaService = SangriaService();
   final LocalStorageService localStorageService = LocalStorageService();
 
   @override
@@ -88,7 +86,7 @@ class _PropertyPageState extends State<PropertyPage> {
               SizedBox(height: 8),
               _buildWeatherAndDetails(state.property),
               SizedBox(height: 8),
-              _buildSangriasSection(context),
+              _buildSangriaPainel(state.property),
               SizedBox(height: 8),
               _buildDeleteButton(context, state.property),
             ],
@@ -113,63 +111,21 @@ class _PropertyPageState extends State<PropertyPage> {
     );
   }
 
-  Widget _buildSangriasSection(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(8.0),
-      decoration: BoxDecoration(
-        color: Colors.green,
-        borderRadius: BorderRadius.circular(10.0),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black26,
-            blurRadius: 4,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          _buildSangriasHeader(),
-          _buildSangriasList(
-              context), // Implemente esta função para mostrar a lista de sangrias
-          _buildSangriasFooter(
-              context), // Implemente esta função para adicionar botões de ação
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSangriasHeader() {
-    return Padding(
-      padding: EdgeInsets.all(8.0),
-      child: Center(
-        child: Text(
-          'Painel de sangrias',
-          style: TextStyle(
-            fontSize: 18.0,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
+  Widget _buildSangriaPainel(Property property) {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              'Nome da Propriedade: ${property.nomeDaPropriedade}', // Substitua 'name' pelo atributo correspondente
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 10),
+            // Adicione mais Widgets aqui para exibir os detalhes da propriedade
+          ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildSangriasList(BuildContext context) {
-    // Aqui você pode buscar os dados das sangrias e montar uma lista
-    // Por exemplo, usando um ListView.builder ou widgets semelhantes
-    return Container(); // Substitua por sua implementação
-  }
-
-  Widget _buildSangriasFooter(BuildContext context) {
-    return TextButton(
-      onPressed: () {
-        // Implemente a ação desejada, como abrir uma nova tela com todas as sangrias
-      },
-      child: Text(
-        'Ver todas as sangrias',
-        style: TextStyle(color: Colors.green.shade900),
       ),
     );
   }
@@ -181,50 +137,74 @@ class _PropertyPageState extends State<PropertyPage> {
     );
   }
 
-  String _formatDuration(Duration duration) {
-    String twoDigits(int n) => n.toString().padLeft(2, '0');
-    String hours = twoDigits(duration.inHours);
-    String minutes = twoDigits(duration.inMinutes.remainder(60));
-    String seconds = twoDigits(duration.inSeconds.remainder(60));
-    return "$hours:$minutes:$seconds";
+  Future<String?> _escolherTabela(BuildContext context) async {
+    String? tabelaSelecionada;
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Escolha uma Tabela'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                for (var i = 1; i <= 5; i++)
+                  ListTile(
+                    title: Text('Tabela $i'),
+                    onTap: () {
+                      tabelaSelecionada = 'Tabela $i';
+                      Navigator.of(context).pop();
+                    },
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    return tabelaSelecionada;
   }
 
-  void _toggleSangria() {
-    if (_currentProperty == null) {
-      print("Erro: a propriedade atual é nula.");
-      return; // Não continue se a propriedade atual for nula
-    }
+  void _toggleSangria() async {
+    print("Estado inicial de _isSangriaIniciada: $_isSangriaIniciada");
 
     setState(() {
       _isSangriaIniciada = !_isSangriaIniciada;
     });
 
+    print("Estado final de _isSangriaIniciada: $_isSangriaIniciada");
     if (_isSangriaIniciada) {
-      _startSangria(_currentProperty!); // Inicia a sangria
+      String? tabelaSelecionada = await _escolherTabela(context);
+
+      if (tabelaSelecionada != null) {
+        // Iniciar uma nova sangria com a tabela selecionada
+        sangriaAtual = await sangriaManager.iniciarSangria(
+            _currentProperty!, widget.user, tabelaSelecionada);
+        if (sangriaAtual == null) {
+          print("Falha ao iniciar a sangria.");
+          setState(() {
+            _isSangriaIniciada = false;
+          });
+          return;
+        }
+        // Continuar com a lógica de sangria iniciada
+        // Por exemplo, mostrar uma notificação ou atualizar a UI
+      } else {
+        // O usuário não escolheu uma tabela, cancelar a iniciação da sangria
+        print("Iniciação da sangria cancelada pelo usuário.");
+        setState(() {
+          _isSangriaIniciada = false;
+        });
+      }
     } else {
-      _finalizeSangria(); // Finaliza a sangria
+      // Finalizar a sangria atual
+      if (sangriaAtual != null) {
+        await sangriaManager.finalizarSangria(sangriaAtual!);
+        // Tratar o pós-finalização da sangria
+        // Por exemplo, atualizar a UI ou salvar dados
+      }
     }
-  }
-
-  void _startSangria(Property property) {
-    print("Iniciando Sangria para a propriedade: ${property.id}");
-    _duration = Duration.zero;
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-      setState(() => _duration += Duration(seconds: 1));
-    });
-    // Assumindo que property.localizacao já é do tipo GeoPoint
-    sangriaService.gerenciarSangria(context, property.localizacao, widget.user,
-        iniciar: true);
-  }
-
-  void _finalizeSangria() {
-    _timer?.cancel();
-    setState(() {
-      _duration = Duration.zero;
-      _isSangriaIniciada = false;
-    });
-    sangriaService.gerenciarSangria(context, GeoPoint(0, 0), widget.user,
-        iniciar: false); // Assume a localização padrão
   }
 
   Widget _buildSangriaButton() {
@@ -240,22 +220,6 @@ class _PropertyPageState extends State<PropertyPage> {
         style: TextStyle(color: Colors.white),
       ),
     );
-  }
-
-  Widget _buildSangriaControlPanel() {
-    return _isSangriaIniciada
-        ? Card(
-            child: Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Column(
-                children: [
-                  Text("Tempo de Sangria: ${_formatDuration(_duration)}"),
-                  // Adicione outros elementos necessários ao painel
-                ],
-              ),
-            ),
-          )
-        : Container(); // Não exibe nada se a sangria não estiver ativa
   }
 
   void _confirmDeletion(BuildContext blocContext, Property property) {

@@ -1,13 +1,14 @@
 buildscript {
-    ext.kotlin_version = '1.7.10'
+     ext.kotlin_version = '1.9.21'
     repositories {
         google()
         mavenCentral()
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.3.0'
+        classpath 'com.android.tools.build:gradle:8.2.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        // Assegure-se de que não há outras dependências de classpath necessárias para seus plugins
     }
 }
 
@@ -15,17 +16,21 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        // Inclua quaisquer outros repositórios necessários para suas dependências aqui
     }
 }
 
 rootProject.buildDir = '../build'
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
+    // Certifique-se de que todas as configurações necessárias para os subprojetos estejam aqui
 }
 subprojects {
     project.evaluationDependsOn(':app')
+    // Isto pode não ser necessário a menos que você tenha uma razão específica para configurar a dependência de avaliação do projeto
 }
 
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
+    // A tarefa 'clean' é configurada corretamente para limpar o diretório de build
 }

@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -9,6 +10,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:path_provider/path_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,24 +22,24 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Inicialize o Hive
-  await Hive.initFlutter(); // Adicionando a inicialização do Hive
+  // Limpa o Hive (utilizar quando der erro de incompatibilidade)
+  //await _limparBancoDeDadosHive();
+
+  // Inicializa o Hive
+  await Hive.initFlutter();
   Hive
     ..registerAdapter(TimestampAdapter())
+    ..registerAdapter(DurationAdapter())
     ..registerAdapter(SangriaAdapter())
     ..registerAdapter(PontoDeSangriaAdapter())
-    ..registerAdapter(WeatherDataAdapter());
+    ..registerAdapter(WeatherDataAdapter())
+    ..registerAdapter(GeoPointAdapter());
 
   // Crie uma instância do seu serviço de armazenamento local
   LocalStorageService localStorageService = LocalStorageService();
   await localStorageService.init();
-
   // Verifique e sincronize sangrias, se necessário
   await localStorageService.verificarConexaoESincronizarSeNecessario();
-
-  // Limpe a Box do Hive
-  var box = await Hive.openBox('sangriasLocalCache');
-  await box.clear();
 
   runApp(
     BlocProvider<LoginBloc>(
@@ -45,6 +47,14 @@ Future<void> main() async {
       child: MyApp(),
     ),
   );
+}
+
+Future<void> _limparBancoDeDadosHive() async {
+  final directory = await getApplicationDocumentsDirectory();
+  final hiveDirectory = Directory(directory.path + '/hive');
+  if (hiveDirectory.existsSync()) {
+    hiveDirectory.deleteSync(recursive: true);
+  }
 }
 
 class MyApp extends StatelessWidget {
