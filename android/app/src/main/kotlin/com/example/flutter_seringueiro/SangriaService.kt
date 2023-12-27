@@ -256,11 +256,11 @@ class SangriaService(private val messenger: BinaryMessenger? = null) : Service()
 
     private fun feedbackTatil() {
         val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+            val vibratorManager = getSystemService(VIBRATOR_MANAGER_SERVICE) as VibratorManager
             vibratorManager.defaultVibrator
         } else {
             @Suppress("DEPRECATION")
-            getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+            getSystemService(VIBRATOR_SERVICE) as Vibrator
         }
     
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

@@ -22,13 +22,9 @@ allprojects {
 
 rootProject.buildDir = '../build'
 subprojects {
-    project.buildDir = "${rootProject.buildDir}/${project.name}"
-    // Certifique-se de que todas as configurações necessárias para os subprojetos estejam aqui
-}
-subprojects {
     project.evaluationDependsOn(':app')
-    // Isto pode não ser necessário a menos que você tenha uma razão específica para configurar a dependência de avaliação do projeto
-}
+        project.buildDir = "${rootProject.buildDir}/${project.name}"
+    }
 
 tasks.register("clean", Delete) {
     delete rootProject.buildDir

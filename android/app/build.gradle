@@ -30,7 +30,7 @@ apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 android {
     namespace "com.example.flutter_seringueiro"
     compileSdkVersion flutter.compileSdkVersion
-    ndkVersion flutter.ndkVersion
+    ndkVersion "25.1.8937393"
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -69,7 +69,6 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'com.android.support:multidex:1.0.3'
     implementation 'com.google.android.gms:play-services-location:21.0.1'
-    implementation 'com.google.android.gms:play-services-location:17.1.0'
 
     // Gson para manipulação de JSON no lugar do Room
     implementation "com.google.code.gson:gson:$gson_version"
