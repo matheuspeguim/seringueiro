@@ -50,7 +50,7 @@ class SangriaService(private val messenger: BinaryMessenger? = null) : Service()
         locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         messenger?.let {
-            channel = MethodChannel(it, "com.seuapp/sangria")
+            channel = MethodChannel(it, "com.example.flutter_seringueiro/sangria")
         }
     }
 

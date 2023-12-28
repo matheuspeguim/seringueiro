@@ -15,7 +15,8 @@ import 'package:url_launcher/url_launcher.dart';
 // CLASSE RESPONSÁVEL POR GERENCIAR A ATIVIDADE DE SANGRIA.
 
 class SangriaManager {
-  final MethodChannel _platform = MethodChannel('com.seuapp/sangria');
+  final MethodChannel _platform =
+      MethodChannel('com.example.flutter_seringueiro/sangria');
 
   //INICIALIZAÇÃO DE SANGRIA
 
@@ -45,7 +46,7 @@ class SangriaManager {
       builder: (BuildContext dialogContext) {
         return AlertDialog(
           title: Text('Permissão de Localização Necessária'),
-          content: SingleChildScrollView(
+          content: const SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
                 Text(

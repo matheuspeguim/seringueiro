@@ -12,7 +12,7 @@ class MainActivity: FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: io.flutter.embedding.engine.FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
 
-        val channel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.seuapp/sangria")
+        val channel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.example.flutter_seringueiro/sangria")
         channel.setMethodCallHandler { call, result ->
             when (call.method) {
                 "iniciarRegistroPontos" -> {
