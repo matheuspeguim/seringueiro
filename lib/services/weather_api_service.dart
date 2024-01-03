@@ -85,4 +85,33 @@ class WeatherApiService {
       throw Exception("Sem conexão com a internet");
     }
   }
+
+  Future<Map<String, dynamic>> getCurrentWeatherSnapshot(
+      double latitude, double longitude) async {
+    _cleanUpCache();
+
+    final url = Uri.parse(
+        "https://api.openweathermap.org/data/2.5/weather?lat=$latitude&lon=$longitude&appid=$apiKey&units=metric");
+
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        var data = json.decode(response.body);
+
+        // Processando e retornando apenas os dados relevantes
+        return {
+          'temperature': data['main']['temp'],
+          'humidity': data['main']['humidity'],
+          'condition': data['weather'][0]['main'],
+          // Inclua outros campos relevantes conforme necessário
+        };
+      } else {
+        print('Erro na API: ${response.statusCode} - ${response.body}');
+        throw Exception("Falha ao buscar dados da API de clima");
+      }
+    } catch (e) {
+      print('Erro ao fazer a chamada da API: $e');
+      rethrow; // Relançar a exceção capturada
+    }
+  }
 }

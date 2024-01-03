@@ -113,17 +113,52 @@ class _PropertyPageState extends State<PropertyPage> {
 
   Widget _buildSangriaPainel(Property property) {
     return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
+      child: Card(
+        elevation: 5.0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15.0),
+        ),
+        color: Colors.green.shade200,
+        margin: EdgeInsets.all(8.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text(
-              'Nome da Propriedade: ${property.nomeDaPropriedade}', // Substitua 'name' pelo atributo correspondente
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Cabeçalho
+            Container(
+              padding: EdgeInsets.symmetric(vertical: 10.0),
+              decoration: BoxDecoration(
+                color: Colors.green.shade800,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(15.0)),
+              ),
+              child: Text(
+                "Painel de sangria",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
-            SizedBox(height: 10),
-            // Adicione mais Widgets aqui para exibir os detalhes da propriedade
+
+            // Corpo
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    '',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 10),
+                  // Adicione mais Widgets aqui para exibir os detalhes da propriedade
+                ],
+              ),
+            ),
+
+            // Rodapé (se necessário, adicione funcionalidades similares ao _buildPropertyCard)
           ],
         ),
       ),
@@ -216,7 +251,7 @@ class _PropertyPageState extends State<PropertyPage> {
       icon: Icon(_isSangriaIniciada ? Icons.stop : Icons.add,
           color: Colors.white),
       label: Text(
-        _isSangriaIniciada ? 'Finalizar Sangria' : 'Iniciar Sangria',
+        _isSangriaIniciada ? 'Finalizar Sangria' : 'Nova Sangria',
         style: TextStyle(color: Colors.white),
       ),
     );

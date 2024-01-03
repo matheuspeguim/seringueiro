@@ -79,7 +79,7 @@ class LocalStorageService {
 //ADAPTADORES
 class TimestampAdapter extends TypeAdapter<Timestamp> {
   @override
-  final typeId = 1; // Escolha um ID único para este tipo de adaptador
+  final typeId = 1;
 
   @override
   Timestamp read(BinaryReader reader) {

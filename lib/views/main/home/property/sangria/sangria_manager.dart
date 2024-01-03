@@ -8,7 +8,6 @@ import 'package:flutter_seringueiro/views/main/home/property/property.dart';
 import 'package:flutter_seringueiro/views/main/home/property/sangria/sangria.dart';
 import 'package:flutter_seringueiro/services/local_storage_service.dart';
 import 'package:flutter_seringueiro/services/weather_api_service.dart';
-import 'package:hive/hive.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -16,26 +15,99 @@ import 'package:url_launcher/url_launcher.dart';
 
 class SangriaManager {
   final MethodChannel _platform =
-      MethodChannel('com.example.flutter_seringueiro/sangria');
-
-  //INICIALIZAÇÃO DE SANGRIA
+      const MethodChannel('com.example.flutter_seringueiro/sangria');
 
   Future<Sangria?> iniciarSangria(
       Property property, User user, String tabelaSelecionada) async {
-    // Verificar se a permissão de localização foi concedida
-    var status = await Permission.location.status;
-    if (!status.isGranted) {
-      // Solicitar permissão de localização, caso ainda não concedido
-      status = await Permission.location.request();
-    }
-
-    if (!status.isGranted) {
-      print("Permissão de localização não concedida");
+    if (!await _verificarEObterPermissaoLocalizacao()) {
       return null;
     }
 
-    // Prosseguir com a iniciação da sangria
-    return _criarSangria(property, user, tabelaSelecionada);
+    var condicoesClimaticas =
+        await _obterCondicoesClimaticas(property.localizacao);
+
+    return _criarSangria(
+        property, user, tabelaSelecionada, condicoesClimaticas);
+  }
+
+  Future<Sangria> _criarSangria(
+      Property property,
+      User user,
+      String tabelaSelecionada,
+      Map<String, dynamic> condicoesClimaticas) async {
+    var sangria = Sangria(
+      id: Sangria.gerarUuid(),
+      momento: DateTime.now(),
+      duracaoTotal: Duration.zero,
+      tabela: tabelaSelecionada,
+      usuarioId: user.uid,
+      propertyId: property.id,
+      condicoesClimaticas: condicoesClimaticas,
+      finalizada: false,
+      pontos: [],
+    );
+
+    //Salva a sangria vazia localmente
+    await LocalStorageService().saveSangria(sangria);
+
+    //Solicita ao kotlin para iniciar o registro de pontos
+    await _platform
+        .invokeMethod('iniciarRegistroPontos', {'sangriaId': sangria.id});
+
+    return sangria;
+  }
+
+  Future<void> finalizarSangria(Sangria sangria) async {
+    //finaliza o timer da sangria
+    sangria.duracaoTotal = DateTime.now().difference(sangria.momento);
+
+    //recupera os pontos de sangria salvos no lado kotlin
+    await _recuperarPontosDeSangria(sangria);
+
+    // Marcar a sangria como finalizada
+    sangria.finalizada = true;
+
+    //sava a sangria no hive
+    await LocalStorageService().saveSangria(sangria);
+
+    //tenta sincronizar se possível
+    await LocalStorageService().verificarConexaoESincronizarSeNecessario();
+  }
+
+  Future<void> _recuperarPontosDeSangria(Sangria sangria) async {
+    try {
+      final pontosMapList = await _platform
+          .invokeMethod('finalizarRegistroPontos', {'sangriaId': sangria.id});
+      if (pontosMapList != null) {
+        final pontosDeSangria = pontosMapList
+            .map<PontoDeSangria>(
+                (map) => PontoDeSangria.fromMap(map as Map<String, dynamic>))
+            .toList();
+        sangria.pontos.addAll(pontosDeSangria);
+      }
+    } catch (e) {
+      print("Erro ao recuperar pontos de sangria: $e");
+    }
+  }
+
+  Future<void> cancelarSangria(Sangria sangria) async {
+    // Comunicar com o Kotlin para parar qualquer processo de sangria
+    try {
+      await _platform.invokeMethod('pararRegistroPontos');
+
+      //Remove a sangria do armazenamento local
+      await LocalStorageService().deleteSangria(sangria.id);
+    } catch (e) {
+      print("Erro ao parar a sangria no lado do Kotlin: $e");
+    }
+  }
+
+  Future<bool> _verificarEObterPermissaoLocalizacao() async {
+    var status = await Permission.location.status;
+    if (!status.isGranted) {
+      status = await Permission.location.request();
+    }
+    return status.isGranted;
   }
 
   Future<void> mostrarDialogoPermissaoLocalizacao(BuildContext context) async {
@@ -82,113 +154,15 @@ class SangriaManager {
     );
   }
 
-  Future<Sangria> _criarSangria(
-      Property property, User user, String tabelaSelecionada) async {
-    // Obter as condições climáticas
-    var condicoesClimaticas =
-        await _obterCondicoesClimaticas(property.localizacao);
-
-    // Criar o objeto Sangria
-    var sangria = Sangria(
-      id: Sangria.gerarUuid(),
-      momento: DateTime.now(),
-      duracaoTotal: Duration.zero,
-      tabela: tabelaSelecionada,
-      usuarioId: user.uid,
-      propertyId: property.id,
-      condicoesClimaticas: condicoesClimaticas,
-      finalizada: false,
-      pontos: [],
-    );
-
-    await _salvarNovaSangria(sangria);
-
-    await _platform
-        .invokeMethod('iniciarRegistroPontos', {'sangriaId': sangria.id});
-
-    return sangria;
-  }
-
-  //CONDIÇÕES CLIMÁTICAS PARA RASTREABILIDADE DE UMA SANGRIA
   Future<Map<String, dynamic>> _obterCondicoesClimaticas(
       GeoPoint localizacao) async {
     WeatherApiService weatherService =
         WeatherApiService(apiKey: dotenv.env['OPENWEATHER_API_KEY']!);
     try {
-      return await weatherService.getCurrentWeather(
+      return await weatherService.getCurrentWeatherSnapshot(
           localizacao.latitude, localizacao.longitude);
     } catch (e) {
       return {/* Dados climáticos padrão ou vazios */};
     }
-  }
-
-  //SALVA A SANGRIA NO ARMAZENAMENTO LOCAL PARA POSTERIOR ALIMENTAÇÃO
-  // COM OS PONTOS DE SANGRIA
-
-  Future<void> _salvarNovaSangria(Sangria sangria) async {
-    var box = await Hive.openBox<Sangria>('sangrias');
-    await box.put(sangria.id, sangria);
-    await box.close();
-  }
-
-  //FINALIZA A SANGRIA E DÁ O COMANDO PARA FINALIZAR NO LADO KOTLIN
-  Future<void> finalizarSangria(Sangria sangria) async {
-    //recupera os pontos de sangria salvos no lado kotlin
-    await _recuperarPontosDeSangria(sangria);
-
-    //finaliza o timer da sangria
-    sangria.duracaoTotal = DateTime.now().difference(sangria.momento);
-
-    // Marcar a sangria como finalizada
-    sangria.finalizada = true;
-
-    //sava a sangria no hive
-    await _salvarSangria(sangria);
-
-    //tenta sincronizar se possível
-    await LocalStorageService().verificarConexaoESincronizarSeNecessario();
-  }
-
-  Future<void> _recuperarPontosDeSangria(Sangria sangria) async {
-    try {
-      final pontosMapList = await _platform
-          .invokeMethod('transferirPontosDeSangria', {'sangriaId': sangria.id});
-      final pontosDeSangria =
-          _convertMapListToPontoDeSangriaList(pontosMapList);
-      sangria.pontos.addAll(pontosDeSangria);
-    } catch (e) {
-      print("Erro ao recuperar pontos de sangria: $e");
-    }
-  }
-
-  Future<void> _salvarSangria(Sangria sangria) async {
-    await LocalStorageService().saveSangria(sangria);
-  }
-
-  List<PontoDeSangria> _convertMapListToPontoDeSangriaList(
-      List<dynamic> mapList) {
-    return mapList
-        .map((map) => PontoDeSangria.fromMap(map as Map<String, dynamic>))
-        .toList();
-  }
-
-  Future<void> cancelarSangria(Sangria sangria) async {
-    // Aqui você pode adicionar lógica para redefinir o estado do Flutter
-    // Por exemplo, limpar variáveis, fechar caixas de diálogo, etc.
-
-    // Comunicar com o Kotlin para parar qualquer processo de sangria
-    try {
-      await _platform.invokeMethod('pararRegistroPontos');
-      await _removerSangriaLocal(sangria);
-    } catch (e) {
-      print("Erro ao parar a sangria no lado do Kotlin: $e");
-    }
-
-    // Redefinir o estado do aplicativo para o inicial
-    // Por exemplo, definir variáveis para seus valores padrão
-  }
-
-  Future<void> _removerSangriaLocal(Sangria sangria) async {
-    await LocalStorageService().deleteSangria(sangria.id);
   }
 }

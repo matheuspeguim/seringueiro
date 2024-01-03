@@ -23,7 +23,7 @@ Future<void> main() async {
   );
 
   // Limpa o Hive (utilizar quando der erro de incompatibilidade)
-  //await _limparBancoDeDadosHive();
+  await _limparBancoDeDadosHive();
 
   // Inicializa o Hive
   await Hive.initFlutter();

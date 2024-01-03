@@ -16,30 +16,15 @@ class MainActivity: FlutterActivity() {
         channel.setMethodCallHandler { call, result ->
             when (call.method) {
                 "iniciarRegistroPontos" -> {
-                    val intent = Intent(this, SangriaService::class.java)
+                    val sangriaId = call.argument<String>("sangriaId")
+                    val intent = Intent(this, SangriaService::class.java).apply {
+                        putExtra("sangriaId", sangriaId)
+                    }
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         startForegroundService(intent)
                     } else {
                         startService(intent)
                     }
-                    result.success(null)
-                }
-                "pausarRegistroPontos" -> {
-                    val intent = Intent(this, SangriaService::class.java)
-                    intent.action = SangriaService.ACTION_PAUSE
-                    startService(intent)
-                    result.success(null)
-                }
-                "resumirRegistroPontos" -> {
-                    val intent = Intent(this, SangriaService::class.java)
-                    intent.action = SangriaService.ACTION_RESUME
-                    startService(intent)
-                    result.success(null)
-                }
-                "statusRegistroPontos" -> {
-                    val intent = Intent(this, SangriaService::class.java)
-                    intent.action = SangriaService.ACTION_STATUS
-                    startService(intent)
                     result.success(null)
                 }
                 
@@ -51,14 +36,29 @@ class MainActivity: FlutterActivity() {
                 }
                 
                 "finalizarRegistroPontos" -> {
-                    val intent = Intent(this, SangriaService::class.java)
-                    intent.action = SangriaService.ACTION_FINISH
+                    val sangriaId = call.argument<String>("sangriaId") // Obter sangriaId do Flutter
+                    val intent = Intent(this, SangriaService::class.java).apply {
+                        action = SangriaService.ACTION_FINISH
+                        putExtra("sangriaId", sangriaId) // Adicionar sangriaId ao Intent
+                    }
                     startService(intent)
                     result.success(null)
+                
+                    transferirPontos(call, result)
+                }
+
+                "transferirPontosDeSangria" -> {
+                    transferirPontos(call, result)
                 }
                 
                 else -> result.notImplemented()
             }
         }
+    }
+
+    private fun transferirPontos(call: MethodCall, result: MethodChannel.Result) {
+        val sangriaId = call.argument<String>("sangriaId")
+        val pontosDeSangria = LocalStorageService(context).recuperarPontos(sangriaId ?: "")
+        result.success(pontosDeSangria)
     }
 }

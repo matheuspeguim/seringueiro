@@ -27,13 +27,15 @@ import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodChannel
 import kotlin.math.pow
 import kotlin.math.sqrt
+import android.util.Log
+import com.example.flutter_seringueiro.R
+
 
 class SangriaService(private val messenger: BinaryMessenger? = null) : Service(), SensorEventListener, LocationListener {
     private lateinit var sensorManager: SensorManager
     private lateinit var locationManager: LocationManager
     private var sangriaId: String? = null
     private val pontosDeSangria = mutableListOf<PontoDeSangria>()
-    private var inicioParada: Long? = null
     private var fimParada: Long? = null
     private var ultimaLocalizacao: Location? = null
     private val localStorageService = LocalStorageService(this)
@@ -42,9 +44,13 @@ class SangriaService(private val messenger: BinaryMessenger? = null) : Service()
     private val channelId = "sangria_service_channel"
     private var isMonitoringPaused = false
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private var estaEmMovimento = false
+    private var ultimaVezEmMovimento: Long? = null
+    private var inicioParada: Long? = null
 
     override fun onCreate() {
         super.onCreate()
+        Log.d("SangriaService", "Serviço criado.")
         createNotificationChannel()
         sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
         locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
@@ -55,50 +61,46 @@ class SangriaService(private val messenger: BinaryMessenger? = null) : Service()
     }
 
     companion object {
-        const val ACTION_PAUSE = "ACTION_PAUSE"
-        const val ACTION_RESUME = "ACTION_RESUME"
-        const val ACTION_STATUS = "ACTION_STATUS"
         const val ACTION_CANCEL = "ACTION_CANCEL"
         const val ACTION_FINISH = "ACTION_FINISH"
         // outras constantes
     }
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+        sangriaId = intent.getStringExtra("sangriaId")
+        Log.d("SangriaService", "Serviço iniciado com sangriaId: $sangriaId e ação: ${intent.action}")
+        val notification = createNotification()
+        startForeground(notificationId, notification)
+    
+        // Inicia o monitoramento do acelerômetro quando o serviço começa
+        iniciarMonitoramentoAcelerometro()
+    
         when (intent.action) {
-            ACTION_PAUSE -> pauseMonitoring()
-            ACTION_RESUME -> resumeMonitoring()
-            ACTION_STATUS -> statusMonitoring()
-            ACTION_CANCEL -> cancelMonitoring()
-            ACTION_FINISH -> finishMonitoring()
+            ACTION_CANCEL -> {
+                cancelMonitoring()
+                return START_NOT_STICKY
+            }
+            ACTION_FINISH -> {
+                finishMonitoring()
+                return START_NOT_STICKY
+            }
             else -> super.onStartCommand(intent, flags, startId)
         }
         return START_STICKY
     }
-
-    private fun pauseMonitoring() {
-        sensorManager.unregisterListener(this)
-        isMonitoringPaused = true
-        updateNotification(pause = true)
-    }
-
-    private fun resumeMonitoring() {
-        sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL)
-        isMonitoringPaused = false
-        updateNotification(pause = false)
-    }
-
-    private fun statusMonitoring() {
-
-    }
+    
+    
 
     private fun cancelMonitoring() {
         cancelarSangria()
+        Log.d("SangriaService", "Monitoramento cancelado.")
     }
 
     private fun finishMonitoring() {
         sensorManager.unregisterListener(this)
         finalizarSangria()
         stopSelf()
+        Log.d("SangriaService", "Monitoramento finalizado.")
     }
 
     private fun createNotificationChannel() {
@@ -117,89 +119,84 @@ class SangriaService(private val messenger: BinaryMessenger? = null) : Service()
     }
 
     private fun createNotification(): Notification {
-        val pauseIntent = PendingIntent.getService(
+        val finishIntent = PendingIntent.getService(
             this, 0, Intent(this, SangriaService::class.java).apply {
-                action = "ACTION_PAUSE"
+                action = ACTION_FINISH
             }, PendingIntent.FLAG_UPDATE_CURRENT
         )
-    
-        val playIntent = PendingIntent.getService(
+
+        val cancelIntent = PendingIntent.getService(
             this, 0, Intent(this, SangriaService::class.java).apply {
-                action = "ACTION_PLAY"
+                action = ACTION_CANCEL
             }, PendingIntent.FLAG_UPDATE_CURRENT
         )
-    
-        val stopIntent = PendingIntent.getService(
-            this, 0, Intent(this, SangriaService::class.java).apply {
-                action = "ACTION_STOP"
-            }, PendingIntent.FLAG_UPDATE_CURRENT
-        )
-    
-        // Construindo a notificação com ações dinâmicas baseadas no estado de pausa
+
         val notificationBuilder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Notification.Builder(this, channelId)
                 .setContentTitle("Sangria em Andamento")
-                .setContentText("Toque para gerenciar")
-                .setSmallIcon(R.drawable.ic_notification)
-                .setOngoing(true)
+                .setContentText("Guarde o celular no bolso e retorne quando terminar.")
+                .setSmallIcon(R.drawable.icon) // Ícone obrigatório
+                .addAction(Notification.Action.Builder(null, "Finalizar", finishIntent).build()) // Sem ícone
+                .addAction(Notification.Action.Builder(null, "Cancelar", cancelIntent).build()) // Sem ícone
         } else {
             TODO("VERSION.SDK_INT < O")
         }
 
-        if (isMonitoringPaused) {
-            val playAction = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                Notification.Action.Builder(
-                    Icon.createWithResource(this, R.drawable.ic_play),
-                    "Continuar",
-                    playIntent
-                ).build()
-            } else {
-                TODO("VERSION.SDK_INT < M")
-            }
-            notificationBuilder.addAction(playAction)
-        } else {
-            val pauseAction = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                Notification.Action.Builder(
-                    Icon.createWithResource(this, R.drawable.ic_pause),
-                    "Pausar",
-                    pauseIntent
-                ).build()
-            } else {
-                TODO("VERSION.SDK_INT < M")
-            }
-            notificationBuilder.addAction(pauseAction)
-        }
-    
-        val stopAction = Notification.Action.Builder(
-            Icon.createWithResource(this, R.drawable.ic_stop),
-            "Finalizar",
-            stopIntent
-        ).build()
-        notificationBuilder.addAction(stopAction)
-    
         return notificationBuilder.build()
     }
+    
+    
+    
+    
     
     private fun cancelNotification() {
         val notificationManager: NotificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancel(notificationId)
     }
 
-    private fun updateNotification(pause: Boolean) {
-        val notification = createNotification()
-        val notificationManager: NotificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.notify(notificationId, notification)
-    }
-
     private fun iniciarMonitoramentoAcelerometro() {
+        Log.d("SangriaService", "Iniciando monitoramento do acelerômetro.")
         sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
         sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)?.also { acelerometro ->
             sensorManager.registerListener(this, acelerometro, SensorManager.SENSOR_DELAY_NORMAL)
         }
     }
 
-    @SuppressLint("MissingPermission")
+    override fun onSensorChanged(event: SensorEvent?) {
+        event?.let {
+            val magnitude = sqrt(it.values[0].pow(2) + it.values[1].pow(2) + it.values[2].pow(2))
+            Log.d("SangriaService", "Mudança detectada no sensor. Magnitude: $magnitude")
+
+            val LIMITE_MOVIMENTO = 11.0
+            val TEMPO_MINIMO_PARADA = 2000
+
+            if (magnitude < LIMITE_MOVIMENTO) {
+                if (estaEmMovimento) {
+                    // O usuário acabou de parar
+                    inicioParada = System.currentTimeMillis()
+                    estaEmMovimento = false
+                } else if (inicioParada != null && System.currentTimeMillis() - inicioParada!! > TEMPO_MINIMO_PARADA) {
+                    // Usuário parou por tempo suficiente, registrar parada
+                    iniciarMonitoramentoGPS()
+                    registrarNovoPontoDeSangria()
+                    inicioParada = null
+                }
+            } else {
+                if (!estaEmMovimento && (ultimaVezEmMovimento == null || System.currentTimeMillis() - ultimaVezEmMovimento!! > TEMPO_MINIMO_PARADA)) {
+                    // O usuário começou a se mover
+                    estaEmMovimento = true
+                    ultimaVezEmMovimento = System.currentTimeMillis()
+                }
+                inicioParada = null // Usuário se moveu, resetar o contador de parada
+            }
+        }
+    }
+
+    
+    @SuppressLint("MissingPermission") //Avisa o sistema que não é necessário avisar a falta de permissão.
+    
     private fun iniciarMonitoramentoGPS() {
+        Log.d("SangriaService", "Iniciando monitoramento do GPS.")
         val locationRequest = LocationRequest.Builder(10000L).apply {
             // Outras configurações, se necessário
         }.build()
@@ -216,27 +213,13 @@ class SangriaService(private val messenger: BinaryMessenger? = null) : Service()
         }
     }
 
-    override fun onSensorChanged(event: SensorEvent?) {
-        event?.let {
-            val magnitude = sqrt(it.values[0].pow(2) + it.values[1].pow(2) + it.values[2].pow(2))
-            if (magnitude < 10.5) {
-                if (inicioParada == null) {
-                    inicioParada = System.currentTimeMillis()
-                    // Usuário parou, ativar GPS para obter localização
-                    iniciarMonitoramentoGPS()
-                }
-            } else if (inicioParada != null) {
-                // Usuário retomou movimento, desativar GPS se necessário
-                locationManager.removeUpdates(this)
-                fimParada = System.currentTimeMillis()
-                registrarNovoPontoDeSangria()
-                inicioParada = null
-                fimParada = null
-            }
-        }
+    private fun calcularDuracao(): Int {
+        return ((fimParada ?: System.currentTimeMillis()) - (inicioParada ?: System.currentTimeMillis())).toInt()
     }
 
     private fun registrarNovoPontoDeSangria() {
+        Log.d("SangriaService", "Registrando novo ponto de sangria. SangriaId: $sangriaId")
+        fimParada = System.currentTimeMillis()
         ultimaLocalizacao?.let { location ->
             val ponto = PontoDeSangria(
                 id = pontosDeSangria.size + 1,
@@ -247,12 +230,17 @@ class SangriaService(private val messenger: BinaryMessenger? = null) : Service()
                 sangriaId = sangriaId ?: return
             )
             pontosDeSangria.add(ponto)
-            salvarPontoDeSangriaLocalmente(ponto)
-
+    
+            // Salvando o ponto de sangria localmente
+            Log.d("SangriaService", "Salvando Ponto de Sangria localmente")
+            localStorageService.inserirPonto(ponto)
+    
             // Adiciona a vibração aqui
-            feedbackTatil()
+            //feedbackTatil()
         }
+        fimParada = null
     }
+    
 
     private fun feedbackTatil() {
         val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -276,9 +264,7 @@ class SangriaService(private val messenger: BinaryMessenger? = null) : Service()
     
     
 
-    private fun calcularDuracao(): Int {
-        return ((fimParada ?: System.currentTimeMillis()) - (inicioParada ?: System.currentTimeMillis())).toInt()
-    }
+
 
     override fun onLocationChanged(location: Location) {
         ultimaLocalizacao = location
@@ -286,11 +272,8 @@ class SangriaService(private val messenger: BinaryMessenger? = null) : Service()
         locationManager.removeUpdates(this)
     }
 
-    private fun salvarPontoDeSangriaLocalmente(ponto: PontoDeSangria) {
-        localStorageService.inserirPonto(ponto)
-    }
-
     fun cancelarSangria() {
+        Log.d("SangriaService", "Cancelando sangria.")
         // 1. Interromper a leitura dos sensores
         sensorManager.unregisterListener(this)
         locationManager.removeUpdates(this)
@@ -313,10 +296,14 @@ class SangriaService(private val messenger: BinaryMessenger? = null) : Service()
     }
 
     fun finalizarSangria() {
-        val pontosDeSangria = localStorageService.recuperarPontos(sangriaId!!)
-        val pontosMapList = pontosDeSangria.map { it.toMap() }
-        channel.invokeMethod("transferirPontosDeSangria", pontosMapList)
-    }    
+        Log.d("SangriaService", "Finalizando sangria.")
+        sangriaId?.let { id ->
+            val pontosDeSangria = localStorageService.recuperarPontos(id)
+            val pontosMapList = pontosDeSangria.map { it.toMap() }
+            channel.invokeMethod("transferirPontosDeSangria", pontosMapList)
+        } ?: Log.e("SangriaService", "sangriaId é nulo.")
+    }
+      
 
     override fun onBind(intent: Intent): IBinder? {
         return null
