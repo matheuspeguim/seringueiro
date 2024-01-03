@@ -17,7 +17,7 @@ class SubmitPropertyData extends NewPropertyEvent {
   final String nomeDaPropriedade;
   final int areaEmHectares;
   final int quantidadeDeArvores;
-  final String? atividadeSelecionada;
+  final Map<String, bool> atividadesSelecionadas; // Tipo atualizado para Map
   final LatLng localizacao;
 
   SubmitPropertyData({
@@ -25,7 +25,7 @@ class SubmitPropertyData extends NewPropertyEvent {
     required this.nomeDaPropriedade,
     required this.areaEmHectares,
     required this.quantidadeDeArvores,
-    required this.atividadeSelecionada,
+    required this.atividadesSelecionadas, // Parâmetro atualizado
     required this.localizacao,
   });
 }

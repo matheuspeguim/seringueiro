@@ -22,7 +22,9 @@ class _NewPropertyPageState extends State<NewPropertyPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   late GoogleMapController mapController;
   LatLng? currentMapPosition;
-  String? _profissao;
+  bool isSeringueiro = false;
+  bool isAgronomo = false;
+  bool isProprietario = false;
   final _nomeDaPropriedadeController = TextEditingController();
   final _quantidadeDeArvoresController = TextEditingController();
   final _areaEmHectaresController = TextEditingController();
@@ -42,34 +44,8 @@ class _NewPropertyPageState extends State<NewPropertyPage> {
     super.dispose();
   }
 
-  void _showProfessionPicker(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext bc) {
-        return Container(
-          height: 200,
-          decoration: BoxDecoration(
-            color: Colors.green.shade800,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(15.0)),
-          ),
-          child: ListView(
-            children: <String>['Seringueiro', 'Agrônomo', 'Proprietário']
-                .map((String profissao) {
-              return ListTile(
-                title: Text(profissao),
-                textColor: Colors.white,
-                onTap: () {
-                  setState(() {
-                    _profissao = profissao;
-                  });
-                  Navigator.pop(context);
-                },
-              );
-            }).toList(),
-          ),
-        );
-      },
-    );
+  bool _validateProfessionSelected() {
+    return isSeringueiro || isAgronomo || isProprietario;
   }
 
   Future<LatLng> _determinePosition() async {
@@ -280,52 +256,77 @@ class _NewPropertyPageState extends State<NewPropertyPage> {
                       keyboardType: TextInputType.number,
                     ),
                     SizedBox(height: 16.0),
-                    TextFormField(
-                      readOnly: true, // Isso evita que o teclado apareça
-                      decoration: InputDecoration(
-                          labelText: 'Selecione a sua função',
-                          hintText: _profissao ?? '',
-                          labelStyle: TextStyle(color: Colors.white),
-                          hintStyle: TextStyle(
-                            color: Colors.white,
-                          )
-                          // ... outras propriedades da decoração
-                          ),
-                      onTap: () {
-                        _showProfessionPicker(context);
+
+                    // Checkbox para Seringueiro
+                    CheckboxListTile(
+                      title: Text('Seringueiro'),
+                      value: isSeringueiro,
+                      onChanged: (bool? value) {
+                        setState(() {
+                          isSeringueiro = value!;
+                        });
                       },
-                      // ... outras propriedades do TextFormField
+                    ),
+                    SizedBox(height: 16.0),
+
+                    // Checkbox para Agrônomo
+                    CheckboxListTile(
+                      title: Text('Agrônomo'),
+                      value: isAgronomo,
+                      onChanged: (bool? value) {
+                        setState(() {
+                          isAgronomo = value!;
+                        });
+                      },
+                    ),
+                    SizedBox(height: 16.0),
+
+                    // Checkbox para Proprietário
+                    CheckboxListTile(
+                      title: Text('Proprietário'),
+                      value: isProprietario,
+                      onChanged: (bool? value) {
+                        setState(() {
+                          isProprietario = value!;
+                        });
+                      },
                     ),
                     SizedBox(height: 16.0),
                     ElevatedButton(
                       onPressed: () {
-                        if (_profissao != null) {
-                          final String nomeDaPropriedade =
-                              _nomeDaPropriedadeController.text;
-                          final int areaEmHectares =
-                              int.tryParse(_areaEmHectaresController.text) ?? 0;
-                          final int quantidadeDeArvores = int.tryParse(
-                                  _quantidadeDeArvoresController.text) ??
-                              0;
-                          String? atividadeSelecionada = _profissao;
+                        final String nomeDaPropriedade =
+                            _nomeDaPropriedadeController.text;
+                        final int areaEmHectares =
+                            int.tryParse(_areaEmHectaresController.text) ?? 0;
+                        final int quantidadeDeArvores =
+                            int.tryParse(_quantidadeDeArvoresController.text) ??
+                                0;
 
+                        // Garantir que pelo menos uma profissão seja selecionada
+                        if (isSeringueiro || isAgronomo || isProprietario) {
                           BlocProvider.of<NewPropertyBloc>(context).add(
                             SubmitPropertyData(
                               user: widget.user,
                               nomeDaPropriedade: nomeDaPropriedade,
                               areaEmHectares: areaEmHectares,
                               quantidadeDeArvores: quantidadeDeArvores,
-                              atividadeSelecionada: atividadeSelecionada,
+                              // Novos parâmetros passados como um Map
+                              atividadesSelecionadas: {
+                                'seringueiro': isSeringueiro,
+                                'agronomo': isAgronomo,
+                                'proprietario': isProprietario,
+                              },
                               localizacao: currentMapPosition!,
                             ),
                           );
                         } else {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content:
-                                Text('Por favor, corrija os campos marcados'),
-                          ));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                  'Por favor, selecione pelo menos uma profissão'),
+                            ),
+                          );
                         }
-                        ;
                       },
                       child: Text('Cadastrar'),
                     ),

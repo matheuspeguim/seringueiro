@@ -14,8 +14,72 @@ import 'package:url_launcher/url_launcher.dart';
 // CLASSE RESPONSÁVEL POR GERENCIAR A ATIVIDADE DE SANGRIA.
 
 class SangriaManager {
+  bool _isSangriaIniciada = false;
+  Sangria? sangriaAtual;
+  Property? currentProperty;
+
+  bool get isSangriaIniciada => _isSangriaIniciada;
+// Adicionando um callback para atualizar a UI quando o estado muda
+  Function(bool)? onSangriaStateChanged;
+
+  SangriaManager({this.onSangriaStateChanged});
+
   final MethodChannel _platform =
       const MethodChannel('com.example.flutter_seringueiro/sangria');
+
+  void toggleSangria(BuildContext context, User user, Property property) async {
+    _isSangriaIniciada = !_isSangriaIniciada;
+    onSangriaStateChanged?.call(_isSangriaIniciada); // Chamando o callback
+
+    if (_isSangriaIniciada) {
+      String? tabelaSelecionada = await _escolherTabela(context);
+      if (tabelaSelecionada != null) {
+        sangriaAtual = await iniciarSangria(property, user, tabelaSelecionada);
+        if (sangriaAtual == null) {
+          _isSangriaIniciada = false;
+          onSangriaStateChanged?.call(_isSangriaIniciada);
+          return;
+        }
+      } else {
+        _isSangriaIniciada = false;
+        onSangriaStateChanged?.call(_isSangriaIniciada);
+      }
+    } else {
+      if (sangriaAtual != null) {
+        await finalizarSangria(sangriaAtual!);
+        sangriaAtual = null;
+      }
+    }
+  }
+
+  Future<String?> _escolherTabela(BuildContext context) async {
+    String? tabelaSelecionada;
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Escolha uma Tabela'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                for (var i = 1; i <= 5; i++)
+                  ListTile(
+                    title: Text('Tabela $i'),
+                    onTap: () {
+                      tabelaSelecionada = 'Tabela $i';
+                      Navigator.of(context).pop();
+                    },
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    return tabelaSelecionada;
+  }
 
   Future<Sangria?> iniciarSangria(
       Property property, User user, String tabelaSelecionada) async {

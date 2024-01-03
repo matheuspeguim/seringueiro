@@ -89,10 +89,11 @@ class _PropertyPageState extends State<PropertyPage> {
               _buildSangriaPainel(state.property),
               SizedBox(height: 8),
               _buildDeleteButton(context, state.property),
+              SizedBox(height: 8),
+              _buildSangriaButton(),
             ],
           ),
         ),
-        floatingActionButton: _buildSangriaButton(),
       );
     } else if (state is PropertyError) {
       return Center(child: Text('Erro ao carregar a propriedade'));
@@ -243,16 +244,22 @@ class _PropertyPageState extends State<PropertyPage> {
   }
 
   Widget _buildSangriaButton() {
-    return FloatingActionButton.extended(
-      elevation: 5,
-      onPressed: _toggleSangria,
-      backgroundColor:
-          _isSangriaIniciada ? Colors.red.shade700 : Colors.green.shade700,
-      icon: Icon(_isSangriaIniciada ? Icons.stop : Icons.add,
-          color: Colors.white),
-      label: Text(
-        _isSangriaIniciada ? 'Finalizar Sangria' : 'Nova Sangria',
-        style: TextStyle(color: Colors.white),
+    return Center(
+      // Centralizando o botão
+      child: ElevatedButton.icon(
+        onPressed: _toggleSangria,
+        icon: Icon(_isSangriaIniciada ? Icons.stop : Icons.add,
+            color: Colors.white),
+        label: Text(
+          _isSangriaIniciada ? 'Finalizar Sangria' : 'Nova Sangria',
+          style: TextStyle(color: Colors.white),
+        ),
+        style: ElevatedButton.styleFrom(
+          primary:
+              _isSangriaIniciada ? Colors.red.shade700 : Colors.green.shade700,
+          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          textStyle: TextStyle(fontSize: 16),
+        ),
       ),
     );
   }

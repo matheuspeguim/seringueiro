@@ -77,44 +77,20 @@ class PropertyBloc extends Bloc<PropertyEvent, PropertyState> {
     emit(PropertyLoading());
 
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
-    WriteBatch batch = firestore.batch();
 
     try {
-      // Excluir o documento da propriedade na coleção `properties`
+      // Referência ao documento da propriedade na coleção `properties`
       DocumentReference propertyRef =
           firestore.collection('properties').doc(event.propertyId);
-      batch.delete(propertyRef);
 
-      // Encontrar todos os usuários que têm essa propriedade em `propriedadesRelacionadas`
-      QuerySnapshot usersSnapshot = await firestore
-          .collection('users')
-          .where('propriedadesRelacionadas', arrayContains: propertyRef)
-          .get();
-
-      for (var userDoc in usersSnapshot.docs) {
-        // Obter dados do documento do usuário como um Map<String, dynamic>
-        Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
-        // Extrair a lista atual de propriedadesRelacionadas do usuário
-        List<dynamic> updatedProperties =
-            List.from(userData['propriedadesRelacionadas'] ?? []);
-        // Remover a propriedade que está sendo excluída
-        updatedProperties.removeWhere((prop) =>
-            (prop as Map<String, dynamic>)['propertyRef'] == propertyRef);
-
-        DocumentReference userRef =
-            firestore.collection('users').doc(userDoc.id);
-        batch.update(userRef, {'propriedadesRelacionadas': updatedProperties});
-      }
-
-      // Executar o lote de operações
-      await batch.commit();
+      // Excluir o documento da propriedade
+      await propertyRef.delete();
 
       emit(PropertyDeleted());
     } catch (e, stackTrace) {
-      print('Erro ao excluir propriedade e atualizar usuários: $e');
+      print('Erro ao excluir propriedade: $e');
       print(stackTrace);
-      emit(PropertyError(
-          "Erro ao excluir propriedade e atualizar usuários: $e"));
+      emit(PropertyError("Erro ao excluir propriedade: $e"));
     }
   }
 

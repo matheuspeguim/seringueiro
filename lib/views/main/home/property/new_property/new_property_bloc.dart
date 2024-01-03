@@ -33,18 +33,6 @@ class NewPropertyBloc extends Bloc<NewPropertyEvent, NewPropertyState> {
       emit(PropertySubmissionInProgress());
       final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-      // Obter informações do usuário administrador
-      DocumentSnapshot userSnapshot = await firestore
-          .collection('users')
-          .doc(event.user.uid)
-          .collection('personal_info') // Acessando a subcoleção
-          .doc('info') // Acessando o documento específico
-          .get();
-      Map<String, dynamic> userData =
-          userSnapshot.data() as Map<String, dynamic>;
-      String adminName = userData[
-          'nome']; // Assumindo que 'nome' é o campo que contém o nome do usuário
-
       // Criando o documento da propriedade na coleção 'properties'
       DocumentReference propertyRef =
           await firestore.collection('properties').add({
@@ -52,19 +40,19 @@ class NewPropertyBloc extends Bloc<NewPropertyEvent, NewPropertyState> {
         'quantidadeDeArvores': event.quantidadeDeArvores,
         'localizacao':
             GeoPoint(event.localizacao.latitude, event.localizacao.longitude),
-        'admin': event.user.uid, // ID do administrador
-        'adminName': adminName, // Nome do administrador
       });
 
-      // Adicionando a referência da propriedade no documento do usuário
-      Map<String, dynamic> propertyData = {
-        'propertyRef': propertyRef,
-        'funcao': event.atividadeSelecionada,
-      };
-
-      await firestore.collection('users').doc(event.user.uid).set({
-        'propriedades': FieldValue.arrayUnion([propertyData]),
-      }, SetOptions(merge: true));
+      // Criar a subcoleção 'property_users' para armazenar os usuários relacionados à propriedade
+      CollectionReference usersRef = propertyRef.collection('property_users');
+      await usersRef.add({
+        'uid': event.user.uid,
+        'funcoes': {
+          'seringueiro': event.atividadesSelecionadas['seringueiro'] ?? false,
+          'agronomo': event.atividadesSelecionadas['agronomo'] ?? false,
+          'proprietario': event.atividadesSelecionadas['proprietario'] ?? false,
+        },
+        'isAdmin': true, // A pessoa que cria a propriedade é o admin por padrão
+      });
 
       emit(PropertySubmissionSuccess());
     } catch (e) {

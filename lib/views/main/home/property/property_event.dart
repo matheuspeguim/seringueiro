@@ -6,8 +6,6 @@ abstract class PropertyEvent extends Equatable {
   List<Object> get props => [];
 }
 
-//PROPERTY EVENTS
-
 class LoadPropertyDetails extends PropertyEvent {
   final User user;
   final String propertyId;
@@ -34,7 +32,3 @@ class FetchUserActivity extends PropertyEvent {
 
   FetchUserActivity({required this.userId, required this.propertyId});
 }
-
-//SANGRIA EVENTS
-
-class StartSangria extends PropertyEvent {}
