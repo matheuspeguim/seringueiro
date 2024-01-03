@@ -52,7 +52,7 @@ class SangriaService(private val messenger: BinaryMessenger? = null) : Service()
         super.onCreate()
         Log.d("SangriaService", "Serviço criado.")
         createNotificationChannel()
-        sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
+        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         messenger?.let {
@@ -76,15 +76,8 @@ class SangriaService(private val messenger: BinaryMessenger? = null) : Service()
         iniciarMonitoramentoAcelerometro()
     
         when (intent.action) {
-            ACTION_CANCEL -> {
-                cancelMonitoring()
-                return START_NOT_STICKY
-            }
-            ACTION_FINISH -> {
-                finishMonitoring()
-                return START_NOT_STICKY
-            }
-            else -> super.onStartCommand(intent, flags, startId)
+            ACTION_CANCEL -> cancelMonitoring()
+            ACTION_FINISH -> finishMonitoring()
         }
         return START_STICKY
     }
@@ -124,26 +117,31 @@ class SangriaService(private val messenger: BinaryMessenger? = null) : Service()
                 action = ACTION_FINISH
             }, PendingIntent.FLAG_UPDATE_CURRENT
         )
-
+    
         val cancelIntent = PendingIntent.getService(
             this, 0, Intent(this, SangriaService::class.java).apply {
                 action = ACTION_CANCEL
             }, PendingIntent.FLAG_UPDATE_CURRENT
         )
-
+    
         val notificationBuilder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Notification.Builder(this, channelId)
                 .setContentTitle("Sangria em Andamento")
                 .setContentText("Guarde o celular no bolso e retorne quando terminar.")
                 .setSmallIcon(R.drawable.icon) // Ícone obrigatório
-                .addAction(Notification.Action.Builder(null, "Finalizar", finishIntent).build()) // Sem ícone
-                .addAction(Notification.Action.Builder(null, "Cancelar", cancelIntent).build()) // Sem ícone
+                .addAction(Notification.Action.Builder(null, "Finalizar", finishIntent).build()) // Botão Finalizar
+                .addAction(Notification.Action.Builder(null, "Cancelar", cancelIntent).build()) // Botão Cancelar
+                .setStyle(Notification.BigTextStyle().bigText("Guarde o celular no bolso e retorne quando terminar."))
+                .setPriority(Notification.PRIORITY_MAX) // Definir a prioridade para a visibilidade máxima
+                .setOngoing(true) // Torna a notificação não removível
         } else {
+            // Implementação para versões anteriores do Android
             TODO("VERSION.SDK_INT < O")
         }
-
+    
         return notificationBuilder.build()
     }
+    
     
     
     
@@ -155,10 +153,10 @@ class SangriaService(private val messenger: BinaryMessenger? = null) : Service()
     }
 
     private fun iniciarMonitoramentoAcelerometro() {
-        Log.d("SangriaService", "Iniciando monitoramento do acelerômetro.")
-        sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
-        sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)?.also { acelerometro ->
-            sensorManager.registerListener(this, acelerometro, SensorManager.SENSOR_DELAY_NORMAL)
+        val acelerometro = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+        if (acelerometro != null) {
+            // 1.000.000 microssegundos = 1 segundo
+            sensorManager.registerListener(this, acelerometro, 2000000)
         }
     }
 
@@ -167,8 +165,8 @@ class SangriaService(private val messenger: BinaryMessenger? = null) : Service()
             val magnitude = sqrt(it.values[0].pow(2) + it.values[1].pow(2) + it.values[2].pow(2))
             Log.d("SangriaService", "Mudança detectada no sensor. Magnitude: $magnitude")
 
-            val LIMITE_MOVIMENTO = 11.0
-            val TEMPO_MINIMO_PARADA = 2000
+            val LIMITE_MOVIMENTO = 10.5
+            val TEMPO_MINIMO_PARADA = 1000
 
             if (magnitude < LIMITE_MOVIMENTO) {
                 if (estaEmMovimento) {
@@ -300,7 +298,6 @@ class SangriaService(private val messenger: BinaryMessenger? = null) : Service()
         sangriaId?.let { id ->
             val pontosDeSangria = localStorageService.recuperarPontos(id)
             val pontosMapList = pontosDeSangria.map { it.toMap() }
-            channel.invokeMethod("transferirPontosDeSangria", pontosMapList)
         } ?: Log.e("SangriaService", "sangriaId é nulo.")
     }
       

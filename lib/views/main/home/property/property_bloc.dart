@@ -7,12 +7,10 @@ import 'package:flutter_seringueiro/views/main/home/property/property.dart';
 
 class PropertyBloc extends Bloc<PropertyEvent, PropertyState> {
   Timer? _timer;
-  Stopwatch? _stopwatch;
   PropertyBloc() : super(PropertyInitial()) {
     on<LoadPropertyDetails>(_onLoadPropertyDetails);
     on<FetchUserActivity>(_onFetchUserActivity);
     on<DeleteProperty>(_onDeleteProperty);
-    on<StartSangria>(_onStartSangria);
   }
 
   Future<void> _onLoadPropertyDetails(
@@ -118,18 +116,6 @@ class PropertyBloc extends Bloc<PropertyEvent, PropertyState> {
       emit(PropertyError(
           "Erro ao excluir propriedade e atualizar usuários: $e"));
     }
-  }
-
-  void _onStartSangria(StartSangria event, Emitter<PropertyState> emit) {
-    _stopwatch = Stopwatch()..start();
-    _timer?.cancel();
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-      if (emit.isDone) {
-        timer.cancel();
-      } else {
-        emit(SangriaInProgress(_stopwatch!.elapsed));
-      }
-    });
   }
 
   @override
