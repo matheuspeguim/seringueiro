@@ -50,8 +50,8 @@ class NewPropertyBloc extends Bloc<NewPropertyEvent, NewPropertyState> {
           'seringueiro': event.atividadesSelecionadas['seringueiro'] ?? false,
           'agronomo': event.atividadesSelecionadas['agronomo'] ?? false,
           'proprietario': event.atividadesSelecionadas['proprietario'] ?? false,
+          'admin': event.atividadesSelecionadas['admin'] ?? false,
         },
-        'isAdmin': true, // A pessoa que cria a propriedade é o admin por padrão
       });
 
       emit(PropertySubmissionSuccess());

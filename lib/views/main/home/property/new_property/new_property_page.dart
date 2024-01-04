@@ -25,6 +25,7 @@ class _NewPropertyPageState extends State<NewPropertyPage> {
   bool isSeringueiro = false;
   bool isAgronomo = false;
   bool isProprietario = false;
+  bool isAdmin = true;
   final _nomeDaPropriedadeController = TextEditingController();
   final _quantidadeDeArvoresController = TextEditingController();
   final _areaEmHectaresController = TextEditingController();
@@ -292,6 +293,17 @@ class _NewPropertyPageState extends State<NewPropertyPage> {
                       },
                     ),
                     SizedBox(height: 16.0),
+                    CheckboxListTile(
+                      enabled: false,
+                      title: Text('Administrador'),
+                      value: isAdmin,
+                      onChanged: (bool? value) {
+                        setState(() {
+                          isAdmin = value!;
+                        });
+                      },
+                    ),
+                    SizedBox(height: 16.0),
                     ElevatedButton(
                       onPressed: () {
                         final String nomeDaPropriedade =
@@ -315,6 +327,7 @@ class _NewPropertyPageState extends State<NewPropertyPage> {
                                 'seringueiro': isSeringueiro,
                                 'agronomo': isAgronomo,
                                 'proprietario': isProprietario,
+                                'admin': isAdmin,
                               },
                               localizacao: currentMapPosition!,
                             ),

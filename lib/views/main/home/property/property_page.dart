@@ -6,9 +6,13 @@ import 'package:flutter_seringueiro/views/main/home/property/property.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_bloc.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_event.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_state.dart';
+import 'package:flutter_seringueiro/views/main/home/property/property_widgets/admin_widgets.dart';
+import 'package:flutter_seringueiro/views/main/home/property/property_widgets/agronomo_widgets.dart';
+import 'package:flutter_seringueiro/views/main/home/property/property_widgets/comum_widgets.dart';
+import 'package:flutter_seringueiro/views/main/home/property/property_widgets/propietario_widgets.dart';
+import 'package:flutter_seringueiro/views/main/home/property/property_widgets/seringueiro_widgets.dart';
 import 'package:flutter_seringueiro/views/main/home/property/sangria/sangria.dart';
 import 'package:flutter_seringueiro/views/main/home/property/sangria/sangria_manager.dart';
-import 'package:flutter_seringueiro/views/main/home/weather/weather_page.dart';
 import 'package:flutter_seringueiro/views/main/main_page.dart';
 
 class PropertyPage extends StatefulWidget {
@@ -23,8 +27,6 @@ class PropertyPage extends StatefulWidget {
 }
 
 class _PropertyPageState extends State<PropertyPage> {
-  bool _isSangriaIniciada = false;
-  Property? _currentProperty;
   final SangriaManager sangriaManager = SangriaManager();
   Sangria? sangriaAtual;
 
@@ -65,7 +67,6 @@ class _PropertyPageState extends State<PropertyPage> {
 
   String _getAppBarTitle(PropertyState state) {
     if (state is PropertyLoaded) {
-      _currentProperty = state.property;
       return state.property.nomeDaPropriedade.toUpperCase();
     }
     return 'Detalhes da Propriedade';
@@ -75,229 +76,112 @@ class _PropertyPageState extends State<PropertyPage> {
     if (state is PropertyLoading) {
       return Center(child: CircularProgressIndicator());
     } else if (state is PropertyLoaded) {
-      return Scaffold(
-        backgroundColor: Colors.green.shade200,
-        body: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 8.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              SizedBox(height: 8),
-              _buildWeatherAndDetails(state.property),
-              SizedBox(height: 8),
-              _buildSangriaPainel(state.property),
-              SizedBox(height: 8),
-              _buildDeleteButton(context, state.property),
-              SizedBox(height: 8),
-              _buildSangriaButton(),
-            ],
-          ),
-        ),
-      );
-    } else if (state is PropertyError) {
+      return _buildPropertyContent(context, state.property);
+    } else if (state is SeringueiroViewState) {
+      return _buildPropertyContent(context, state.property);
+    } else if (state is AgronomoViewState) {
+      return _buildPropertyContent(context, state.property);
+    } else if (state is ProprietarioViewState) {
+      return _buildPropertyContent(context, state.property);
+    } else if (state is AdminViewState) {
+      return _buildPropertyContent(context, state.property);
+    }
+    // Inclua outros estados aqui, como SeringueiroAgronomoViewState, etc.
+    else if (state is PropertyError) {
       return Center(child: Text('Erro ao carregar a propriedade'));
     } else {
-      return Container();
+      // Caso padrão para estados não reconhecidos
+      return Center(child: Text('Estado não reconhecido!'));
     }
   }
 
-  Widget _buildWeatherAndDetails(Property property) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        HourlyWeatherWidget(location: property.localizacao),
-        // Adicione aqui outros widgets importantes
-      ],
-    );
-  }
-
-  Widget _buildSangriaPainel(Property property) {
+  Widget _buildPropertyContent(BuildContext context, Property property) {
     return SingleChildScrollView(
-      child: Card(
-        elevation: 5.0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15.0),
-        ),
-        color: Colors.green.shade200,
-        margin: EdgeInsets.all(8.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Cabeçalho
-            Container(
-              padding: EdgeInsets.symmetric(vertical: 10.0),
-              decoration: BoxDecoration(
-                color: Colors.green.shade800,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(15.0)),
-              ),
-              child: Text(
-                "Painel de sangria",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-
-            // Corpo
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    '',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 10),
-                  // Adicione mais Widgets aqui para exibir os detalhes da propriedade
-                ],
-              ),
-            ),
-
-            // Rodapé (se necessário, adicione funcionalidades similares ao _buildPropertyCard)
-          ],
-        ),
+      child: Column(
+        children: [
+          ...CommonWidgets.buildCommonWidgets(property),
+          buildRoleSpecificWidgets(context, property),
+        ],
       ),
     );
   }
 
-  Widget _buildDeleteButton(BuildContext context, Property property) {
-    return TextButton(
-      onPressed: () => _confirmDeletion(context, property),
-      child: Text('Excluir Propriedade', style: TextStyle(color: Colors.red)),
-    );
-  }
+  Widget buildRoleSpecificWidgets(BuildContext context, Property state) {
+    List<Widget> widgets = [];
+    Property? property;
 
-  Future<String?> _escolherTabela(BuildContext context) async {
-    String? tabelaSelecionada;
+    // Extrair o objeto Property dos diferentes estados
+    if (state is PropertyLoaded) {
+    } else if (state is SeringueiroViewState) {
+    } else if (state is AgronomoViewState) {
+    } else if (state is ProprietarioViewState) {
+    } else if (state is AdminViewState) {
+    } else if (state is SeringueiroAgronomoViewState ||
+        state is SeringueiroProprietarioViewState ||
+        state is AgronomoProprietarioViewState ||
+        state is TodosViewState ||
+        state is SeringueiroAgronomoAdminViewState ||
+        state is SeringueiroProprietarioAdminViewState ||
+        state is AgronomoProprietarioAdminViewState ||
+        state is SeringueiroAdminViewState ||
+        state is AgronomoAdminViewState ||
+        state is ProprietarioAdminViewState ||
+        state is TodosViewStateAdmin) {}
 
-    await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Escolha uma Tabela'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                for (var i = 1; i <= 5; i++)
-                  ListTile(
-                    title: Text('Tabela $i'),
-                    onTap: () {
-                      tabelaSelecionada = 'Tabela $i';
-                      Navigator.of(context).pop();
-                    },
-                  ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
+    // Adicionar widgets específicos com base na propriedade e no papel do usuário
+    if (property != null) {
+      widgets.addAll(CommonWidgets.buildCommonWidgets(property));
 
-    return tabelaSelecionada;
-  }
-
-  void _toggleSangria() async {
-    print("Estado inicial de _isSangriaIniciada: $_isSangriaIniciada");
-
-    setState(() {
-      _isSangriaIniciada = !_isSangriaIniciada;
-    });
-
-    print("Estado final de _isSangriaIniciada: $_isSangriaIniciada");
-    if (_isSangriaIniciada) {
-      String? tabelaSelecionada = await _escolherTabela(context);
-
-      if (tabelaSelecionada != null) {
-        // Iniciar uma nova sangria com a tabela selecionada
-        sangriaAtual = await sangriaManager.iniciarSangria(
-            _currentProperty!, widget.user, tabelaSelecionada);
-        if (sangriaAtual == null) {
-          print("Falha ao iniciar a sangria.");
-          setState(() {
-            _isSangriaIniciada = false;
-          });
-          return;
-        }
-        // Continuar com a lógica de sangria iniciada
-        // Por exemplo, mostrar uma notificação ou atualizar a UI
-      } else {
-        // O usuário não escolheu uma tabela, cancelar a iniciação da sangria
-        print("Iniciação da sangria cancelada pelo usuário.");
-        setState(() {
-          _isSangriaIniciada = false;
-        });
+      if (state is SeringueiroViewState ||
+          state is SeringueiroAgronomoViewState ||
+          state is SeringueiroProprietarioViewState ||
+          state is SeringueiroAgronomoAdminViewState ||
+          state is SeringueiroProprietarioAdminViewState ||
+          state is SeringueiroAdminViewState ||
+          state is TodosViewState ||
+          state is TodosViewStateAdmin) {
+        widgets.addAll(SeringueiroWidgets.buildSeringueiroWidgets(
+            context, widget.user, property, sangriaManager));
       }
-    } else {
-      // Finalizar a sangria atual
-      if (sangriaAtual != null) {
-        await sangriaManager.finalizarSangria(sangriaAtual!);
-        // Tratar o pós-finalização da sangria
-        // Por exemplo, atualizar a UI ou salvar dados
+      if (state is AgronomoViewState ||
+          state is SeringueiroAgronomoViewState ||
+          state is AgronomoProprietarioViewState ||
+          state is SeringueiroAgronomoAdminViewState ||
+          state is AgronomoProprietarioAdminViewState ||
+          state is AgronomoAdminViewState ||
+          state is TodosViewState ||
+          state is TodosViewStateAdmin) {
+        widgets.addAll(AgronomoWidgets.buildAgronomoWidgets(property));
+      }
+      if (state is ProprietarioViewState ||
+          state is SeringueiroProprietarioViewState ||
+          state is AgronomoProprietarioViewState ||
+          state is SeringueiroProprietarioAdminViewState ||
+          state is AgronomoProprietarioAdminViewState ||
+          state is ProprietarioAdminViewState ||
+          state is TodosViewState ||
+          state is TodosViewStateAdmin) {
+        widgets.addAll(ProprietarioWidgets.buildProprietarioWidgets(property));
+      }
+      if (state is AdminViewState ||
+          state is SeringueiroAgronomoAdminViewState ||
+          state is SeringueiroProprietarioAdminViewState ||
+          state is AgronomoProprietarioAdminViewState ||
+          state is SeringueiroAdminViewState ||
+          state is AgronomoAdminViewState ||
+          state is ProprietarioAdminViewState ||
+          state is TodosViewStateAdmin) {
+        widgets.addAll(AdminWidgets.buildAdminWidgets(context, property));
       }
     }
-  }
 
-  Widget _buildSangriaButton() {
-    return Center(
-      // Centralizando o botão
-      child: ElevatedButton.icon(
-        onPressed: _toggleSangria,
-        icon: Icon(_isSangriaIniciada ? Icons.stop : Icons.add,
-            color: Colors.white),
-        label: Text(
-          _isSangriaIniciada ? 'Finalizar Sangria' : 'Nova Sangria',
-          style: TextStyle(color: Colors.white),
-        ),
-        style: ElevatedButton.styleFrom(
-          primary:
-              _isSangriaIniciada ? Colors.red.shade700 : Colors.green.shade700,
-          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          textStyle: TextStyle(fontSize: 16),
-        ),
-      ),
-    );
-  }
+    // Caso padrão ou se nenhum papel específico for encontrado
+    if (widgets.isEmpty) {
+      widgets.add(
+          Center(child: Text('Nenhuma visualização específica disponível')));
+    }
 
-  void _confirmDeletion(BuildContext blocContext, Property property) {
-    showDialog(
-      context: blocContext,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: Text('Confirmar Exclusão'),
-          content: Text(
-              'Deseja realmente excluir a propriedade ${property.nomeDaPropriedade.toUpperCase()}?'),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Cancelar'),
-              onPressed: () {
-                Navigator.of(dialogContext).pop(); // Fecha o diálogo
-              },
-            ),
-            ElevatedButton(
-              child: Text(
-                'Excluir',
-                style: TextStyle(color: Colors.white),
-              ),
-              onPressed: () {
-                Navigator.of(dialogContext)
-                    .pop(); // Fecha o diálogo após a ação
-                blocContext
-                    .read<PropertyBloc>()
-                    .add(DeleteProperty(widget.user, property.id));
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-              ),
-            ),
-          ],
-        );
-      },
-    );
+    // Envolver a lista de widgets em um Column
+    return Column(children: widgets);
   }
 }

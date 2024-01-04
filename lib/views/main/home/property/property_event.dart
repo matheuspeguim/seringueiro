@@ -13,7 +13,7 @@ class LoadPropertyDetails extends PropertyEvent {
   LoadPropertyDetails(this.user, this.propertyId);
 
   @override
-  List<Object> get props => [propertyId];
+  List<Object> get props => [user, propertyId];
 }
 
 class DeleteProperty extends PropertyEvent {
@@ -23,12 +23,16 @@ class DeleteProperty extends PropertyEvent {
   DeleteProperty(this.user, this.propertyId);
 
   @override
-  List<Object> get props => [propertyId];
+  List<Object> get props => [user, propertyId];
 }
 
-class FetchUserActivity extends PropertyEvent {
+// Novo evento para buscar o papel do usuário na propriedade
+class GetPropertyUserRole extends PropertyEvent {
   final String userId;
   final String propertyId;
 
-  FetchUserActivity({required this.userId, required this.propertyId});
+  GetPropertyUserRole({required this.userId, required this.propertyId});
+
+  @override
+  List<Object> get props => [userId, propertyId];
 }
