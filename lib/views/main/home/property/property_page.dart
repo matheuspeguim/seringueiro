@@ -59,6 +59,8 @@ class _PropertyPageState extends State<PropertyPage> {
               backgroundColor: Colors.green.shade900,
             ),
             body: _buildBody(context, state),
+            backgroundColor:
+                Colors.green.shade200, // Definindo a cor de fundo aqui
           );
         },
       ),
@@ -66,8 +68,24 @@ class _PropertyPageState extends State<PropertyPage> {
   }
 
   String _getAppBarTitle(PropertyState state) {
-    if (state is PropertyLoaded) {
-      return state.property.nomeDaPropriedade.toUpperCase();
+    if (state is PropertyLoaded ||
+        state is SeringueiroViewState ||
+        state is AgronomoViewState ||
+        state is ProprietarioViewState ||
+        state is AdminViewState ||
+        state is SeringueiroAgronomoViewState ||
+        state is SeringueiroProprietarioViewState ||
+        state is AgronomoProprietarioViewState ||
+        state is SeringueiroAgronomoAdminViewState ||
+        state is SeringueiroProprietarioAdminViewState ||
+        state is AgronomoProprietarioAdminViewState ||
+        state is SeringueiroAdminViewState ||
+        state is AgronomoAdminViewState ||
+        state is ProprietarioAdminViewState ||
+        state is TodosViewState ||
+        state is TodosViewStateAdmin) {
+      Property property = (state as dynamic).property;
+      return property.nomeDaPropriedade.toUpperCase();
     }
     return 'Detalhes da Propriedade';
   }
@@ -75,20 +93,32 @@ class _PropertyPageState extends State<PropertyPage> {
   Widget _buildBody(BuildContext context, PropertyState state) {
     if (state is PropertyLoading) {
       return Center(child: CircularProgressIndicator());
-    } else if (state is PropertyLoaded) {
-      return _buildPropertyContent(context, state.property);
-    } else if (state is SeringueiroViewState) {
-      return _buildPropertyContent(context, state.property);
-    } else if (state is AgronomoViewState) {
-      return _buildPropertyContent(context, state.property);
-    } else if (state is ProprietarioViewState) {
-      return _buildPropertyContent(context, state.property);
-    } else if (state is AdminViewState) {
-      return _buildPropertyContent(context, state.property);
-    }
-    // Inclua outros estados aqui, como SeringueiroAgronomoViewState, etc.
-    else if (state is PropertyError) {
+    } else if (state is PropertyError) {
       return Center(child: Text('Erro ao carregar a propriedade'));
+    } else if (state is PropertyDeleted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.popUntil(context, (route) => route.isFirst);
+      });
+      return Center(child: CircularProgressIndicator());
+    } else if (state is PropertyLoaded ||
+        state is SeringueiroViewState ||
+        state is AgronomoViewState ||
+        state is ProprietarioViewState ||
+        state is AdminViewState ||
+        state is SeringueiroAgronomoViewState ||
+        state is SeringueiroProprietarioViewState ||
+        state is AgronomoProprietarioViewState ||
+        state is TodosViewState ||
+        state is AdminViewState ||
+        state is SeringueiroAgronomoAdminViewState ||
+        state is SeringueiroProprietarioAdminViewState ||
+        state is AgronomoProprietarioAdminViewState ||
+        state is SeringueiroAdminViewState ||
+        state is AgronomoAdminViewState ||
+        state is ProprietarioAdminViewState ||
+        state is TodosViewStateAdmin) {
+      // Para todos os estados de carregamento bem-sucedido, chame a função de construção de conteúdo
+      return _buildPropertyContent(context, state.property);
     } else {
       // Caso padrão para estados não reconhecidos
       return Center(child: Text('Estado não reconhecido!'));
@@ -97,91 +127,70 @@ class _PropertyPageState extends State<PropertyPage> {
 
   Widget _buildPropertyContent(BuildContext context, Property property) {
     return SingleChildScrollView(
-      child: Column(
+      child: Wrap(
+        spacing: 10.0, // Espaçamento horizontal
+        runSpacing: 10.0, // Espaçamento vertical
         children: [
+          // Adiciona os widgets comuns e específicos de função com espaçamento
           ...CommonWidgets.buildCommonWidgets(property),
-          buildRoleSpecificWidgets(context, property),
+          ...buildRoleSpecificWidgets(context, property),
         ],
       ),
     );
   }
 
-  Widget buildRoleSpecificWidgets(BuildContext context, Property state) {
+  // Método para construir widgets baseados no papel do usuário
+  List<Widget> buildRoleSpecificWidgets(
+      BuildContext context, Property property) {
+    final currentState = context.read<PropertyBloc>().state;
     List<Widget> widgets = [];
-    Property? property;
 
-    // Extrair o objeto Property dos diferentes estados
-    if (state is PropertyLoaded) {
-    } else if (state is SeringueiroViewState) {
-    } else if (state is AgronomoViewState) {
-    } else if (state is ProprietarioViewState) {
-    } else if (state is AdminViewState) {
-    } else if (state is SeringueiroAgronomoViewState ||
-        state is SeringueiroProprietarioViewState ||
-        state is AgronomoProprietarioViewState ||
-        state is TodosViewState ||
-        state is SeringueiroAgronomoAdminViewState ||
-        state is SeringueiroProprietarioAdminViewState ||
-        state is AgronomoProprietarioAdminViewState ||
-        state is SeringueiroAdminViewState ||
-        state is AgronomoAdminViewState ||
-        state is ProprietarioAdminViewState ||
-        state is TodosViewStateAdmin) {}
-
-    // Adicionar widgets específicos com base na propriedade e no papel do usuário
-    if (property != null) {
-      widgets.addAll(CommonWidgets.buildCommonWidgets(property));
-
-      if (state is SeringueiroViewState ||
-          state is SeringueiroAgronomoViewState ||
-          state is SeringueiroProprietarioViewState ||
-          state is SeringueiroAgronomoAdminViewState ||
-          state is SeringueiroProprietarioAdminViewState ||
-          state is SeringueiroAdminViewState ||
-          state is TodosViewState ||
-          state is TodosViewStateAdmin) {
-        widgets.addAll(SeringueiroWidgets.buildSeringueiroWidgets(
-            context, widget.user, property, sangriaManager));
-      }
-      if (state is AgronomoViewState ||
-          state is SeringueiroAgronomoViewState ||
-          state is AgronomoProprietarioViewState ||
-          state is SeringueiroAgronomoAdminViewState ||
-          state is AgronomoProprietarioAdminViewState ||
-          state is AgronomoAdminViewState ||
-          state is TodosViewState ||
-          state is TodosViewStateAdmin) {
-        widgets.addAll(AgronomoWidgets.buildAgronomoWidgets(property));
-      }
-      if (state is ProprietarioViewState ||
-          state is SeringueiroProprietarioViewState ||
-          state is AgronomoProprietarioViewState ||
-          state is SeringueiroProprietarioAdminViewState ||
-          state is AgronomoProprietarioAdminViewState ||
-          state is ProprietarioAdminViewState ||
-          state is TodosViewState ||
-          state is TodosViewStateAdmin) {
-        widgets.addAll(ProprietarioWidgets.buildProprietarioWidgets(property));
-      }
-      if (state is AdminViewState ||
-          state is SeringueiroAgronomoAdminViewState ||
-          state is SeringueiroProprietarioAdminViewState ||
-          state is AgronomoProprietarioAdminViewState ||
-          state is SeringueiroAdminViewState ||
-          state is AgronomoAdminViewState ||
-          state is ProprietarioAdminViewState ||
-          state is TodosViewStateAdmin) {
-        widgets.addAll(AdminWidgets.buildAdminWidgets(context, property));
-      }
+    // Lógica para adicionar widgets com base no estado específico
+    if (currentState is SeringueiroViewState ||
+        currentState is SeringueiroAgronomoViewState ||
+        currentState is SeringueiroProprietarioViewState ||
+        currentState is SeringueiroAgronomoAdminViewState ||
+        currentState is SeringueiroProprietarioAdminViewState ||
+        currentState is SeringueiroAdminViewState ||
+        currentState is TodosViewState ||
+        currentState is TodosViewStateAdmin) {
+      widgets.addAll(SeringueiroWidgets.buildSeringueiroWidgets(
+          context, widget.user, property, sangriaManager));
     }
 
-    // Caso padrão ou se nenhum papel específico for encontrado
-    if (widgets.isEmpty) {
-      widgets.add(
-          Center(child: Text('Nenhuma visualização específica disponível')));
+    if (currentState is AgronomoViewState ||
+        currentState is SeringueiroAgronomoViewState ||
+        currentState is AgronomoProprietarioViewState ||
+        currentState is SeringueiroAgronomoAdminViewState ||
+        currentState is AgronomoProprietarioAdminViewState ||
+        currentState is AgronomoAdminViewState ||
+        currentState is TodosViewState ||
+        currentState is TodosViewStateAdmin) {
+      widgets.addAll(AgronomoWidgets.buildAgronomoWidgets(property));
     }
 
-    // Envolver a lista de widgets em um Column
-    return Column(children: widgets);
+    if (currentState is ProprietarioViewState ||
+        currentState is SeringueiroProprietarioViewState ||
+        currentState is AgronomoProprietarioViewState ||
+        currentState is SeringueiroProprietarioAdminViewState ||
+        currentState is AgronomoProprietarioAdminViewState ||
+        currentState is ProprietarioAdminViewState ||
+        currentState is TodosViewState ||
+        currentState is TodosViewStateAdmin) {
+      widgets.addAll(ProprietarioWidgets.buildProprietarioWidgets(property));
+    }
+
+    if (currentState is AdminViewState ||
+        currentState is SeringueiroAgronomoAdminViewState ||
+        currentState is SeringueiroProprietarioAdminViewState ||
+        currentState is AgronomoProprietarioAdminViewState ||
+        currentState is SeringueiroAdminViewState ||
+        currentState is AgronomoAdminViewState ||
+        currentState is ProprietarioAdminViewState ||
+        currentState is TodosViewStateAdmin) {
+      widgets.addAll(AdminWidgets.buildAdminWidgets(context, property));
+    }
+
+    return widgets;
   }
 }
