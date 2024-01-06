@@ -28,7 +28,7 @@ class HomePage extends StatelessWidget {
         return bloc;
       },
       child: Scaffold(
-        backgroundColor: Colors.green.shade200,
+        backgroundColor: Colors.green.shade100,
         body: _buildPropertiesList(context),
       ),
     );

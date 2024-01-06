@@ -19,6 +19,21 @@ class PersonalInfoValidator {
     return null;
   }
 
+  static String? validarIdPersonalizado(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Por favor, insira um ID personalizado';
+    }
+    if (value.length < 5 || value.length > 15) {
+      return 'O ID personalizado deve ter entre 5 e 15 caracteres';
+    }
+    // Regex para verificar se o ID contém apenas letras e números
+    RegExp regex = RegExp(r'^[a-zA-Z0-9]+$');
+    if (!regex.hasMatch(value)) {
+      return 'O ID personalizado deve conter apenas letras e números, sem espaços ou caracteres especiais';
+    }
+    return null;
+  }
+
   static String? validarNascimento(String? valor) {
     if (valor == null || valor.isEmpty) {
       return 'O campo de data de nascimento é obrigatório';

@@ -59,8 +59,7 @@ class _PropertyPageState extends State<PropertyPage> {
               backgroundColor: Colors.green.shade900,
             ),
             body: _buildBody(context, state),
-            backgroundColor:
-                Colors.green.shade200, // Definindo a cor de fundo aqui
+            backgroundColor: Colors.green.shade100,
           );
         },
       ),

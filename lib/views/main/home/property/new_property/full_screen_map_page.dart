@@ -16,6 +16,12 @@ class _FullScreenMapPageState extends State<FullScreenMapPage> {
   LatLng? currentMapPosition;
 
   @override
+  void initState() {
+    super.initState();
+    currentMapPosition = widget.initialPosition;
+  }
+
+  @override
   void dispose() {
     mapController.dispose();
     super.dispose();
@@ -25,11 +31,25 @@ class _FullScreenMapPageState extends State<FullScreenMapPage> {
     mapController = controller;
   }
 
+  void _selectLocation() {
+    if (currentMapPosition != null) {
+      Navigator.of(context).pop(currentMapPosition);
+    } else {
+      // Caso currentMapPosition seja null, mostrar um aviso
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content:
+                Text('Por favor, mova o mapa para selecionar uma localização')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Mapa em Tela Cheia'),
+        // Estilização adicional do AppBar, se necessário
       ),
       body: Stack(
         children: [
@@ -50,12 +70,9 @@ class _FullScreenMapPageState extends State<FullScreenMapPage> {
           ),
           Positioned(
             bottom: 20,
+            right: 20, // Posicionamento do botão
             child: ElevatedButton(
-              onPressed: () {
-                if (currentMapPosition != null) {
-                  Navigator.of(context).pop(currentMapPosition);
-                }
-              },
+              onPressed: _selectLocation,
               child: Text('Selecionar local'),
             ),
           ),

@@ -32,6 +32,7 @@ class _NewPropertyPageState extends State<NewPropertyPage> {
   final _nomeDaPropriedadeFocus = FocusNode();
   final _quantidadeDeArvoresFocus = FocusNode();
   final _areaEmHectaresFocus = FocusNode();
+  PageController _pageController = PageController();
 
   @override
   void dispose() {
@@ -42,11 +43,8 @@ class _NewPropertyPageState extends State<NewPropertyPage> {
     _nomeDaPropriedadeFocus.dispose();
     _quantidadeDeArvoresFocus.dispose();
     _areaEmHectaresFocus.dispose();
+    _pageController.dispose();
     super.dispose();
-  }
-
-  bool _validateProfessionSelected() {
-    return isSeringueiro || isAgronomo || isProprietario;
   }
 
   Future<LatLng> _determinePosition() async {
@@ -80,274 +78,296 @@ class _NewPropertyPageState extends State<NewPropertyPage> {
     return LatLng(position.latitude, position.longitude);
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        backgroundColor: Colors.green.shade900,
-        appBar: AppBar(
-          title:
-              Text('Nova Propriedade', style: TextStyle(color: Colors.white)),
-          centerTitle: true,
-          backgroundColor: Colors.green.shade900,
-        ),
-        body: BlocListener<NewPropertyBloc, NewPropertyState>(
-          listener: (context, state) {
-            // Lógica para tratar os estados do bloc
-            if (state is PropertySubmissionSuccess) {
-              // Aqui você pode redirecionar o usuário para a HomePage ou mostrar uma mensagem de sucesso.
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => MainPage(user: widget.user)),
-              );
-            } else if (state is PropertySubmissionFailed) {
-              // Aqui você pode mostrar uma mensagem de erro.
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                    content:
-                        Text('Erro ao submeter a propriedade: ${state.error}')),
-              );
-            }
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: SingleChildScrollView(
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    FutureBuilder<LatLng>(
-                      future: _determinePosition(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return Center(child: CircularProgressIndicator());
-                        }
-                        if (snapshot.hasError) {
-                          return Center(
-                              child: Text('Erro ao obter a localização'));
-                        }
-                        if (!snapshot.hasData) {
-                          return Center(
-                              child:
-                                  Text('Dados de localização não disponíveis'));
-                        }
+  bool _validateProfessionSelected() {
+    return isSeringueiro || isAgronomo || isProprietario;
+  }
 
-                        return Column(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                'Abra o mapa abaixo e selecione o local exato da propriedade',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                            SizedBox(
-                              height: 300,
-                              width: double.infinity,
-                              child: GestureDetector(
-                                onTap: () async {
-                                  if (currentMapPosition != null) {
-                                    final selectedLocation =
-                                        await Navigator.of(context)
-                                            .push<LatLng>(
-                                      MaterialPageRoute(
-                                        builder: (context) => FullScreenMapPage(
-                                            initialPosition:
-                                                currentMapPosition!),
-                                      ),
-                                    );
+  Widget _buildMapPage() {
+    return FutureBuilder<LatLng>(
+      future: _determinePosition(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text('Erro ao obter a localização'));
+        }
+        if (!snapshot.hasData) {
+          return Center(child: Text('Dados de localização não disponíveis'));
+        }
 
-                                    if (selectedLocation != null) {
-                                      setState(() {
-                                        currentMapPosition = selectedLocation;
-                                      });
-                                      if (currentMapPosition != null) {
-                                        BlocProvider.of<NewPropertyBloc>(
-                                                context)
-                                            .add(ConfirmLocation(
-                                                currentMapPosition!));
-                                      }
-                                    }
-                                  }
-                                },
-                                child: Card(
-                                  margin: const EdgeInsets.all(8.0),
-                                  clipBehavior: Clip.antiAlias,
-                                  child: Stack(
-                                    children: [
-                                      GoogleMap(
-                                        mapType: MapType.satellite,
-                                        initialCameraPosition: CameraPosition(
-                                          target: currentMapPosition ??
-                                              snapshot.data!,
-                                          zoom: 16.0,
-                                        ),
-                                        myLocationEnabled: true,
-                                        myLocationButtonEnabled: false,
-                                        onMapCreated: (controller) =>
-                                            mapController = controller,
-                                        onCameraMove: (position) =>
-                                            currentMapPosition =
-                                                position.target,
-                                        zoomControlsEnabled: false,
-                                      ),
-                                      Center(
-                                        child: Icon(Icons.location_pin,
-                                            size: 50, color: Colors.red),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        );
-                      },
+        // Apenas atualizar currentMapPosition se ainda não estiver definido
+        if (currentMapPosition == null) {
+          currentMapPosition = snapshot.data;
+        }
+
+        return Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                'Abra o mapa abaixo centralize o seringal da propriedade',
+                style: TextStyle(fontSize: 18, color: Colors.white),
+              ),
+            ),
+            SizedBox(
+              height: 300,
+              width: double.infinity,
+              child: GestureDetector(
+                onTap: () async {
+                  final selectedLocation =
+                      await Navigator.of(context).push<LatLng>(
+                    MaterialPageRoute(
+                      builder: (context) => FullScreenMapPage(
+                          initialPosition: currentMapPosition ??
+                              LatLng(0,
+                                  0)), // Substitua LatLng(0, 0) pela sua localização padrão
                     ),
-                    TextFormField(
-                      controller: _nomeDaPropriedadeController,
-                      focusNode: _nomeDaPropriedadeFocus,
-                      validator: PropertyInfoValidator.validarNomeDaPropriedade,
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      decoration: InputDecoration(
-                        labelText: 'Nome da propriedade',
-                        labelStyle: TextStyle(color: Colors.white),
+                  );
+
+                  if (selectedLocation != null) {
+                    setState(() {
+                      currentMapPosition = selectedLocation;
+                    });
+                  }
+                },
+                child: Card(
+                  margin: const EdgeInsets.all(8.0),
+                  clipBehavior: Clip.antiAlias,
+                  child: Stack(
+                    children: [
+                      GoogleMap(
+                        mapType: MapType.satellite,
+                        initialCameraPosition: CameraPosition(
+                          target: currentMapPosition!,
+                          zoom: 16.0,
+                        ),
+                        myLocationEnabled: true,
+                        myLocationButtonEnabled: false,
+                        onMapCreated: (controller) =>
+                            mapController = controller,
+                        onCameraMove: (position) =>
+                            currentMapPosition = position.target,
+                        zoomControlsEnabled: false,
                       ),
-                      style: TextStyle(color: Colors.white, fontSize: 18.0),
-                      keyboardType: TextInputType.name,
-                      onFieldSubmitted: (_) {
-                        FocusScope.of(context)
-                            .requestFocus(_areaEmHectaresFocus);
-                      },
-                    ),
-                    SizedBox(height: 16.0),
-                    TextFormField(
-                      controller: _areaEmHectaresController,
-                      focusNode: _areaEmHectaresFocus,
-                      validator: PropertyInfoValidator.validarAreasEmHectares,
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      decoration: InputDecoration(
-                        labelText: 'Área em hectares (ha)',
-                        labelStyle: TextStyle(color: Colors.white),
+                      Center(
+                        child: Icon(Icons.location_pin,
+                            size: 50, color: Colors.red),
                       ),
-                      style: TextStyle(color: Colors.white, fontSize: 18.0),
-                      keyboardType: TextInputType.number,
-                      onFieldSubmitted: (_) {
-                        FocusScope.of(context)
-                            .requestFocus(_quantidadeDeArvoresFocus);
-                      },
-                    ),
-                    SizedBox(height: 16.0),
-                    TextFormField(
-                      controller: _quantidadeDeArvoresController,
-                      focusNode: _quantidadeDeArvoresFocus,
-                      validator:
-                          PropertyInfoValidator.validarQuantidadeDeArvores,
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      decoration: InputDecoration(
-                        labelText: 'Quantidade de árvores ativas',
-                        labelStyle: TextStyle(color: Colors.white),
-                      ),
-                      style: TextStyle(color: Colors.white, fontSize: 18.0),
-                      keyboardType: TextInputType.number,
-                    ),
-                    SizedBox(height: 16.0),
-
-                    // Checkbox para Seringueiro
-                    CheckboxListTile(
-                      title: Text('Seringueiro'),
-                      value: isSeringueiro,
-                      onChanged: (bool? value) {
-                        setState(() {
-                          isSeringueiro = value!;
-                        });
-                      },
-                    ),
-                    SizedBox(height: 16.0),
-
-                    // Checkbox para Agrônomo
-                    CheckboxListTile(
-                      title: Text('Agrônomo'),
-                      value: isAgronomo,
-                      onChanged: (bool? value) {
-                        setState(() {
-                          isAgronomo = value!;
-                        });
-                      },
-                    ),
-                    SizedBox(height: 16.0),
-
-                    // Checkbox para Proprietário
-                    CheckboxListTile(
-                      title: Text('Proprietário'),
-                      value: isProprietario,
-                      onChanged: (bool? value) {
-                        setState(() {
-                          isProprietario = value!;
-                        });
-                      },
-                    ),
-                    SizedBox(height: 16.0),
-                    CheckboxListTile(
-                      enabled: false,
-                      title: Text('Administrador'),
-                      value: isAdmin,
-                      onChanged: (bool? value) {
-                        setState(() {
-                          isAdmin = value!;
-                        });
-                      },
-                    ),
-                    SizedBox(height: 16.0),
-                    ElevatedButton(
-                      onPressed: () {
-                        final String nomeDaPropriedade =
-                            _nomeDaPropriedadeController.text;
-                        final int areaEmHectares =
-                            int.tryParse(_areaEmHectaresController.text) ?? 0;
-                        final int quantidadeDeArvores =
-                            int.tryParse(_quantidadeDeArvoresController.text) ??
-                                0;
-
-                        // Garantir que pelo menos uma profissão seja selecionada
-                        if (isSeringueiro || isAgronomo || isProprietario) {
-                          BlocProvider.of<NewPropertyBloc>(context).add(
-                            SubmitPropertyData(
-                              user: widget.user,
-                              nomeDaPropriedade: nomeDaPropriedade,
-                              areaEmHectares: areaEmHectares,
-                              quantidadeDeArvores: quantidadeDeArvores,
-                              // Novos parâmetros passados como um Map
-                              atividadesSelecionadas: {
-                                'seringueiro': isSeringueiro,
-                                'agronomo': isAgronomo,
-                                'proprietario': isProprietario,
-                                'admin': isAdmin,
-                              },
-                              localizacao: currentMapPosition!,
-                            ),
-                          );
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                  'Por favor, selecione pelo menos uma profissão'),
-                            ),
-                          );
-                        }
-                      },
-                      child: Text('Cadastrar'),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
+            ElevatedButton(
+              onPressed: () => _pageController.nextPage(
+                duration: Duration(milliseconds: 500),
+                curve: Curves.ease,
+              ),
+              child: Text('Confirmar Localização e Continuar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildFormPage() {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Campo para o Nome da Propriedade
+          TextFormField(
+            controller: _nomeDaPropriedadeController,
+            focusNode: _nomeDaPropriedadeFocus,
+            validator: PropertyInfoValidator.validarNomeDaPropriedade,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            decoration: InputDecoration(
+              labelText: 'Nome da propriedade',
+              labelStyle: TextStyle(color: Colors.white),
+            ),
+            style: TextStyle(color: Colors.white, fontSize: 18.0),
+            keyboardType: TextInputType.name,
+            onFieldSubmitted: (_) {
+              FocusScope.of(context).requestFocus(_areaEmHectaresFocus);
+            },
           ),
-        ));
+          SizedBox(height: 16.0),
+
+          // Campo para a Área em Hectares
+          TextFormField(
+            controller: _areaEmHectaresController,
+            focusNode: _areaEmHectaresFocus,
+            validator: PropertyInfoValidator.validarAreasEmHectares,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            decoration: InputDecoration(
+              labelText: 'Área em hectares (ha)',
+              labelStyle: TextStyle(color: Colors.white),
+            ),
+            style: TextStyle(color: Colors.white, fontSize: 18.0),
+            keyboardType: TextInputType.number,
+            onFieldSubmitted: (_) {
+              FocusScope.of(context).requestFocus(_quantidadeDeArvoresFocus);
+            },
+          ),
+          SizedBox(height: 16.0),
+
+          // Campo para a Quantidade de Árvores
+          TextFormField(
+            controller: _quantidadeDeArvoresController,
+            focusNode: _quantidadeDeArvoresFocus,
+            validator: PropertyInfoValidator.validarQuantidadeDeArvores,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            decoration: InputDecoration(
+              labelText: 'Quantidade de árvores ativas',
+              labelStyle: TextStyle(color: Colors.white),
+            ),
+            style: TextStyle(color: Colors.white, fontSize: 18.0),
+            keyboardType: TextInputType.number,
+          ),
+          SizedBox(height: 16.0),
+
+          // Checkboxes para as Profissões
+          _buildProfessionCheckbox('Seringueiro', isSeringueiro),
+          _buildProfessionCheckbox('Agrônomo', isAgronomo),
+          _buildProfessionCheckbox('Proprietário', isProprietario),
+          _buildProfessionCheckbox('Administrador', isAdmin, enabled: false),
+
+          // Botão para Submeter o Formulário
+          ElevatedButton(
+            onPressed: _submitForm,
+            child: Text('Cadastrar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProfessionCheckbox(String title, bool value,
+      {bool enabled = true}) {
+    return CheckboxListTile(
+      title: Text(title),
+      value: value,
+      onChanged: enabled
+          ? (bool? newValue) {
+              setState(() {
+                switch (title) {
+                  case 'Seringueiro':
+                    isSeringueiro = newValue!;
+                    break;
+                  case 'Agrônomo':
+                    isAgronomo = newValue!;
+                    break;
+                  case 'Proprietário':
+                    isProprietario = newValue!;
+                    break;
+                  // O 'Administrador' não muda
+                }
+              });
+            }
+          : null,
+    );
+  }
+
+  void _submitForm() {
+    // Verificar se o formulário é válido
+    if (!_formKey.currentState!.validate()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Por favor, corrija os erros no formulário')),
+      );
+      return;
+    }
+
+    // Verificar se a localização foi selecionada
+    if (currentMapPosition == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Por favor, selecione uma localização no mapa')),
+      );
+      return;
+    }
+
+    // Verificar se pelo menos uma profissão foi selecionada
+    if (!_validateProfessionSelected()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('Por favor, selecione pelo menos uma profissão')),
+      );
+      return;
+    }
+
+    // Preparar os dados para envio
+    final String nomeDaPropriedade = _nomeDaPropriedadeController.text;
+    final int areaEmHectares =
+        int.tryParse(_areaEmHectaresController.text) ?? 0;
+    final int quantidadeDeArvores =
+        int.tryParse(_quantidadeDeArvoresController.text) ?? 0;
+
+    // Enviar os dados usando o Bloc
+    BlocProvider.of<NewPropertyBloc>(context).add(
+      SubmitPropertyData(
+        user: widget.user,
+        nomeDaPropriedade: nomeDaPropriedade,
+        areaEmHectares: areaEmHectares,
+        quantidadeDeArvores: quantidadeDeArvores,
+        atividadesSelecionadas: {
+          'seringueiro': isSeringueiro,
+          'agronomo': isAgronomo,
+          'proprietario': isProprietario,
+          'admin': isAdmin,
+        },
+        localizacao: currentMapPosition!,
+      ),
+    );
+
+    // Feedback para o usuário (opcional)
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Propriedade submetida com sucesso!')),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.green.shade900,
+      appBar: AppBar(
+        title: Text('Nova Propriedade', style: TextStyle(color: Colors.white)),
+        centerTitle: true,
+        backgroundColor: Colors.green.shade900,
+      ),
+      body: BlocListener<NewPropertyBloc, NewPropertyState>(
+        listener: (context, state) {
+          if (state is PropertySubmissionSuccess) {
+            // Se a propriedade foi submetida com sucesso
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Propriedade cadastrada com sucesso!')),
+            );
+            // Navegar para outra página, se necessário
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => MainPage(user: widget.user)),
+            );
+          } else if (state is PropertySubmissionFailed) {
+            // Se houve falha na submissão da propriedade
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                  content:
+                      Text('Erro ao submeter a propriedade: ${state.error}')),
+            );
+          }
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: PageView(
+            controller: _pageController,
+            children: [
+              _buildMapPage(),
+              _buildFormPage(),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

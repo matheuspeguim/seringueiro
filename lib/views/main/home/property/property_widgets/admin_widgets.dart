@@ -11,6 +11,8 @@ class AdminWidgets {
     ];
   }
 
+  
+
   static Widget buildDeleteButton(BuildContext context, Property property) {
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
@@ -60,5 +62,4 @@ class AdminWidgets {
     );
   }
 
-  // Outros métodos específicos para administradores
 }

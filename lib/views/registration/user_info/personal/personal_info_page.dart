@@ -1,5 +1,7 @@
 // views/registration/personal_info_page.dart
 
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,6 +13,7 @@ import 'package:flutter_seringueiro/views/registration/user_info/adress/adress_i
 import 'package:flutter_seringueiro/views/registration/user_info/personal/personal_bloc.dart';
 import 'package:flutter_seringueiro/views/registration/user_info/personal/personal_event.dart';
 import 'package:flutter_seringueiro/views/registration/user_info/personal/personal_state.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 class PersonalInfoPage extends StatefulWidget {
@@ -24,9 +27,13 @@ class PersonalInfoPage extends StatefulWidget {
 
 class _PersonalInfoPageState extends State<PersonalInfoPage> {
   final nomeController = TextEditingController();
+  final idPersonalizadoController = TextEditingController();
   final nascimentoController = MaskedTextController(mask: '00/00/0000');
   final cpfController = MaskedTextController(mask: '000.000.000-00');
   final rgController = TextEditingController();
+
+  XFile? _imageFile;
+  final ImagePicker _picker = ImagePicker();
 
   User? currentUser;
 
@@ -34,6 +41,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
 
   //Focus
   final nomeFocus = FocusNode();
+  final idPersonalizadoFocus = FocusNode();
   final nascimentoFocus = FocusNode();
   final cpfFocus = FocusNode();
   final rgFocus = FocusNode();
@@ -42,6 +50,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
   void dispose() {
     // É importante sempre descartar os controladores e os focus nodes
     nomeController.dispose();
+    idPersonalizadoController.dispose();
     nascimentoController.dispose();
     cpfController.dispose();
     rgController.dispose();
@@ -100,6 +109,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
+                  _buildProfileImage(),
                   TextFormField(
                     controller: nomeController,
                     focusNode: nomeFocus,
@@ -114,6 +124,16 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                     onFieldSubmitted: (_) {
                       FocusScope.of(context).requestFocus(nascimentoFocus);
                     },
+                  ),
+                  SizedBox(height: 16.0),
+                  TextFormField(
+                    controller: idPersonalizadoController,
+                    decoration: InputDecoration(
+                      labelText: 'ID Personalizado',
+                      labelStyle: TextStyle(color: Colors.white),
+                    ),
+                    style: TextStyle(color: Colors.white, fontSize: 18.0),
+                    validator: PersonalInfoValidator.validarIdPersonalizado,
                   ),
                   SizedBox(height: 16.0),
                   TextFormField(
@@ -174,6 +194,34 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
     );
   }
 
+  Widget _buildProfileImage() {
+    return InkWell(
+      onTap: _pickImage,
+      child: CircleAvatar(
+        radius: 60, // Tamanho do avatar
+        backgroundColor: Colors.grey.shade300,
+        backgroundImage:
+            _imageFile != null ? FileImage(File(_imageFile!.path)) : null,
+        child: _imageFile == null
+            ? Icon(Icons.person, size: 60) // Ícone padrão se não houver imagem
+            : null,
+      ),
+    );
+  }
+
+  Future<void> _pickImage() async {
+    try {
+      final pickedFile = await _picker.pickImage(
+        source: ImageSource.gallery, // ou ImageSource.camera
+      );
+      setState(() {
+        _imageFile = pickedFile;
+      });
+    } catch (e) {
+      // Tratar erro
+    }
+  }
+
   void _onSubmitForm() {
     // Verifica se todos os campos do formulário são válidos.
     bool isFormValid = _formKey.currentState?.validate() ?? false;
@@ -187,9 +235,11 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
           PersonalInfoSubmitted(
             user: widget.user,
             nome: nomeController.text,
+            idPersonalizado: idPersonalizadoController.text,
             dataDeNascimento: dataDeNascimento,
             cpf: cpfController.text,
             rg: rgController.text,
+            imageFile: _imageFile,
           ),
         );
       } on FormatException {

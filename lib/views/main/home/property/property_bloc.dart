@@ -28,7 +28,6 @@ class PropertyBloc extends Bloc<PropertyEvent, PropertyState> {
         _loadedProperty = Property.fromFirestore(
             propertyDoc); // Armazenar a propriedade carregada
         emit(PropertyLoaded(property));
-        print('Propriedade carregada');
         // Disparar o evento GetPropertyUserRole após carregar a propriedade
         add(GetPropertyUserRole(
             userId: event.user.uid, propertyId: property.id));
