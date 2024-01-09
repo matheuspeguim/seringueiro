@@ -4,12 +4,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_seringueiro/services/utilidade_service.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property.dart';
+import 'package:flutter_seringueiro/views/main/home/property/sangria/flutter_kotlin_communication.dart';
 import 'package:flutter_seringueiro/views/main/home/property/sangria/sangria.dart';
 import 'package:flutter_seringueiro/services/local_storage_service.dart';
 import 'package:flutter_seringueiro/services/weather_api_service.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 // CLASSE RESPONSÁVEL POR GERENCIAR A ATIVIDADE DE SANGRIA.
 
@@ -34,7 +34,8 @@ class SangriaManager {
     if (_isSangriaIniciada) {
       String? tabelaSelecionada = await _escolherTabela(context);
       if (tabelaSelecionada != null) {
-        sangriaAtual = await iniciarSangria(property, user, tabelaSelecionada);
+        sangriaAtual =
+            await iniciarSangria(context, property, user, tabelaSelecionada);
         if (sangriaAtual == null) {
           _isSangriaIniciada = false;
           onSangriaStateChanged?.call(_isSangriaIniciada);
@@ -59,7 +60,7 @@ class SangriaManager {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Escolha uma Tabela'),
+          title: Text('Seleciona a tabela de sangria'),
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
@@ -81,9 +82,9 @@ class SangriaManager {
     return tabelaSelecionada;
   }
 
-  Future<Sangria?> iniciarSangria(
-      Property property, User user, String tabelaSelecionada) async {
-    if (!await _verificarEObterPermissaoLocalizacao()) {
+  Future<Sangria?> iniciarSangria(BuildContext context, Property property,
+      User user, String tabelaSelecionada) async {
+    if (!await UtilidadeService.verificarEObterPermissaoLocalizacao(context)) {
       return null;
     }
 
@@ -111,12 +112,11 @@ class SangriaManager {
       pontos: [],
     );
 
-    //Salva a sangria vazia localmente
+    // Salva a sangria vazia localmente
     await LocalStorageService().saveSangria(sangria);
 
-    //Solicita ao kotlin para iniciar o registro de pontos
-    await _platform
-        .invokeMethod('iniciarRegistroPontos', {'sangriaId': sangria.id});
+    // Solicita ao Kotlin para iniciar o registro de pontos
+    await FlutterKotlinCommunication.IniciarRegistroPontos(sangria.id);
 
     return sangria;
   }
@@ -140,8 +140,8 @@ class SangriaManager {
 
   Future<void> _recuperarPontosDeSangria(Sangria sangria) async {
     try {
-      final pontosMapList = await _platform
-          .invokeMethod('finalizarRegistroPontos', {'sangriaId': sangria.id});
+      final pontosMapList =
+          await FlutterKotlinCommunication.finalizarRegistroPontos(sangria.id);
       if (pontosMapList != null) {
         final pontosDeSangria = pontosMapList
             .map<PontoDeSangria>(
@@ -154,76 +154,12 @@ class SangriaManager {
     }
   }
 
-  Future<void> cancelarSangria(Sangria sangria) async {
-    // Comunicar com o Kotlin para parar qualquer processo de sangria
-    try {
-      await _platform.invokeMethod('pararRegistroPontos');
-
-      //Remove a sangria do armazenamento local
-      await LocalStorageService().deleteSangria(sangria.id);
-    } catch (e) {
-      print("Erro ao parar a sangria no lado do Kotlin: $e");
-    }
-  }
-
-  Future<bool> _verificarEObterPermissaoLocalizacao() async {
-    var status = await Permission.location.status;
-    if (!status.isGranted) {
-      status = await Permission.location.request();
-    }
-    return status.isGranted;
-  }
-
-  Future<void> mostrarDialogoPermissaoLocalizacao(BuildContext context) async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible:
-          false, // O usuário deve tocar em um botão para fechar o diálogo
-      builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          title: Text('Permissão de Localização Necessária'),
-          content: const SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text(
-                    'O processo de sangria não pode ser iniciado sem a permissão de localização.'),
-                Text(
-                    'Por favor, habilite a permissão de localização nas configurações do sistema.'),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Cancelar Sangria'),
-              onPressed: () {
-                Navigator.of(dialogContext).pop(); // Fecha o diálogo
-                // Adicione aqui qualquer lógica adicional necessária para cancelar a sangria
-              },
-            ),
-            TextButton(
-              child: Text('Abrir Configurações'),
-              onPressed: () async {
-                // Abre as configurações do aplicativo
-                var url = Uri.parse('app-settings:');
-                if (await canLaunchUrl(url)) {
-                  await launchUrl(url);
-                } else {
-                  throw 'Não foi possível abrir as configurações do aplicativo.';
-                }
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   Future<Map<String, dynamic>> _obterCondicoesClimaticas(
       GeoPoint localizacao) async {
     WeatherApiService weatherService =
         WeatherApiService(apiKey: dotenv.env['OPENWEATHER_API_KEY']!);
     try {
-      return await weatherService.getCurrentWeatherSnapshot(
+      return await weatherService.climaParaSangria(
           localizacao.latitude, localizacao.longitude);
     } catch (e) {
       return {/* Dados climáticos padrão ou vazios */};

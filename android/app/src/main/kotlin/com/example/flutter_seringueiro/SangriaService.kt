@@ -6,18 +6,15 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Icon
 import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
-import android.hardware.SensorManager
 import android.location.Location
 import android.location.LocationListener
-import android.location.LocationManager
 import android.os.Build
 import android.os.IBinder
 import android.os.Looper
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
+import android.os.Handler
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -31,9 +28,7 @@ import android.util.Log
 import com.example.flutter_seringueiro.R
 
 
-class SangriaService(private val messenger: BinaryMessenger? = null) : Service(), SensorEventListener, LocationListener {
-    private lateinit var sensorManager: SensorManager
-    private lateinit var locationManager: LocationManager
+class SangriaService(private val messenger: BinaryMessenger? = null) : Service() {
     private var sangriaId: String? = null
     private val pontosDeSangria = mutableListOf<PontoDeSangria>()
     private var fimParada: Long? = null
@@ -47,13 +42,13 @@ class SangriaService(private val messenger: BinaryMessenger? = null) : Service()
     private var estaEmMovimento = false
     private var ultimaVezEmMovimento: Long? = null
     private var inicioParada: Long? = null
+    private val handler = Handler(Looper.getMainLooper())
+    private val intervalo = 5 * 60 * 1000L // 5 minutos em milissegundos, convertido para Long
 
     override fun onCreate() {
         super.onCreate()
         Log.d("SangriaService", "Serviço criado.")
         createNotificationChannel()
-        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         messenger?.let {
             channel = MethodChannel(it, "com.example.flutter_seringueiro/sangria")
@@ -72,8 +67,8 @@ class SangriaService(private val messenger: BinaryMessenger? = null) : Service()
         val notification = createNotification()
         startForeground(notificationId, notification)
     
-        // Inicia o monitoramento do acelerômetro quando o serviço começa
-        iniciarMonitoramentoAcelerometro()
+        // Inicia o cronômetro para monitoramento periódico
+        handler.post(runnable)
     
         when (intent.action) {
             ACTION_CANCEL -> cancelMonitoring()
@@ -90,7 +85,6 @@ class SangriaService(private val messenger: BinaryMessenger? = null) : Service()
     }
 
     private fun finishMonitoring() {
-        sensorManager.unregisterListener(this)
         finalizarSangria()
         stopSelf()
         Log.d("SangriaService", "Monitoramento finalizado.")
@@ -152,41 +146,11 @@ class SangriaService(private val messenger: BinaryMessenger? = null) : Service()
         notificationManager.cancel(notificationId)
     }
 
-    private fun iniciarMonitoramentoAcelerometro() {
-        val acelerometro = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-        if (acelerometro != null) {
-            // 1.000.000 microssegundos = 1 segundo
-            sensorManager.registerListener(this, acelerometro, 2000000)
-        }
-    }
-
-    override fun onSensorChanged(event: SensorEvent?) {
-        event?.let {
-            val magnitude = sqrt(it.values[0].pow(2) + it.values[1].pow(2) + it.values[2].pow(2))
-            Log.d("SangriaService", "Mudança detectada no sensor. Magnitude: $magnitude")
-
-            val LIMITE_MOVIMENTO = 10.5
-            val TEMPO_MINIMO_PARADA = 1000
-
-            if (magnitude < LIMITE_MOVIMENTO) {
-                if (estaEmMovimento) {
-                    // O usuário acabou de parar
-                    inicioParada = System.currentTimeMillis()
-                    estaEmMovimento = false
-                } else if (inicioParada != null && System.currentTimeMillis() - inicioParada!! > TEMPO_MINIMO_PARADA) {
-                    // Usuário parou por tempo suficiente, registrar parada
-                    iniciarMonitoramentoGPS()
-                    registrarNovoPontoDeSangria()
-                    inicioParada = null
-                }
-            } else {
-                if (!estaEmMovimento && (ultimaVezEmMovimento == null || System.currentTimeMillis() - ultimaVezEmMovimento!! > TEMPO_MINIMO_PARADA)) {
-                    // O usuário começou a se mover
-                    estaEmMovimento = true
-                    ultimaVezEmMovimento = System.currentTimeMillis()
-                }
-                inicioParada = null // Usuário se moveu, resetar o contador de parada
-            }
+    private val runnable = object : Runnable {
+        override fun run() {
+            iniciarMonitoramentoGPS()
+            registrarNovoPontoDeSangria()
+            handler.postDelayed(this, intervalo)
         }
     }
 
@@ -259,22 +223,10 @@ class SangriaService(private val messenger: BinaryMessenger? = null) : Service()
             vibrator.vibrate(500)
         }
     }
-    
-    
-
-
-
-    override fun onLocationChanged(location: Location) {
-        ultimaLocalizacao = location
-        // Processar localização e desativar GPS
-        locationManager.removeUpdates(this)
-    }
 
     fun cancelarSangria() {
         Log.d("SangriaService", "Cancelando sangria.")
         // 1. Interromper a leitura dos sensores
-        sensorManager.unregisterListener(this)
-        locationManager.removeUpdates(this)
         fusedLocationClient.removeLocationUpdates(locationCallback)
     
         // 2. Excluir os pontos de sangria salvos associados ao ID da sangria cancelada
@@ -306,7 +258,8 @@ class SangriaService(private val messenger: BinaryMessenger? = null) : Service()
         return null
     }
 
-    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-        // Implementação opcional...
+    override fun onDestroy() {
+        super.onDestroy()
+        handler.removeCallbacks(runnable)
     }
 }

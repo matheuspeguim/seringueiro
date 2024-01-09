@@ -73,6 +73,13 @@ class MyApp extends StatelessWidget {
       ],
       title: 'Flutter Demo',
       theme: ThemeData(
+        dividerTheme: DividerThemeData(
+          color: Colors.grey,
+          space: 50,
+          indent: 20,
+          endIndent: 20,
+          thickness: 0.5,
+        ),
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
         useMaterial3: true,
       ),

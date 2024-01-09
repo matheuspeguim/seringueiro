@@ -98,7 +98,7 @@ class _NewPropertyPageState extends State<NewPropertyPage> {
 
         // Apenas atualizar currentMapPosition se ainda não estiver definido
         if (currentMapPosition == null) {
-          currentMapPosition = snapshot.data;
+          currentMapPosition = snapshot.data ?? LatLng(0, 0);
         }
 
         return Column(
@@ -271,23 +271,17 @@ class _NewPropertyPageState extends State<NewPropertyPage> {
   }
 
   void _submitForm() {
-    // Verificar se o formulário é válido
-    if (!_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Por favor, corrija os erros no formulário')),
-      );
-      return;
-    }
-
-    // Verificar se a localização foi selecionada
-    if (currentMapPosition == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Por favor, selecione uma localização no mapa')),
-      );
-      return;
-    }
+    // Imprimindo os dados para diagnóstico
+    print('Dados do formulário:');
+    print('Nome da Propriedade: ${_nomeDaPropriedadeController.text}');
+    print('Área em Hectares: ${_areaEmHectaresController.text}');
+    print('Quantidade de Árvores: ${_quantidadeDeArvoresController.text}');
+    print('Localização Atual: $currentMapPosition');
+    print(
+        'Profissões Selecionadas: Seringueiro: $isSeringueiro, Agrônomo: $isAgronomo, Proprietário: $isProprietario, Admin: $isAdmin');
 
     // Verificar se pelo menos uma profissão foi selecionada
+    print('Verificando se há profissões selecionadas');
     if (!_validateProfessionSelected()) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -297,6 +291,7 @@ class _NewPropertyPageState extends State<NewPropertyPage> {
     }
 
     // Preparar os dados para envio
+    print('Preparando dados para enviar');
     final String nomeDaPropriedade = _nomeDaPropriedadeController.text;
     final int areaEmHectares =
         int.tryParse(_areaEmHectaresController.text) ?? 0;
@@ -304,6 +299,7 @@ class _NewPropertyPageState extends State<NewPropertyPage> {
         int.tryParse(_quantidadeDeArvoresController.text) ?? 0;
 
     // Enviar os dados usando o Bloc
+    print('Enviando dados pelo Bloc');
     BlocProvider.of<NewPropertyBloc>(context).add(
       SubmitPropertyData(
         user: widget.user,
@@ -339,6 +335,7 @@ class _NewPropertyPageState extends State<NewPropertyPage> {
         listener: (context, state) {
           if (state is PropertySubmissionSuccess) {
             // Se a propriedade foi submetida com sucesso
+            print('Estado é PropertySubmissionSucess');
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('Propriedade cadastrada com sucesso!')),
             );

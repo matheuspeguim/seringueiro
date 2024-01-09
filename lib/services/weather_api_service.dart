@@ -86,7 +86,7 @@ class WeatherApiService {
     }
   }
 
-  Future<Map<String, dynamic>> getCurrentWeatherSnapshot(
+  Future<Map<String, dynamic>> climaParaSangria(
       double latitude, double longitude) async {
     _cleanUpCache();
 

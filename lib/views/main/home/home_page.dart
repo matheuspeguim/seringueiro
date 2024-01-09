@@ -134,7 +134,11 @@ class HomePage extends StatelessWidget {
     return Center(
         child: Padding(
       padding: const EdgeInsets.all(16.0),
-      child: ElevatedButton(
+      child: ElevatedButton.icon(
+        icon: Icon(
+          Icons.add,
+          color: Colors.white,
+        ),
         onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute(builder: (context) {
@@ -145,7 +149,13 @@ class HomePage extends StatelessWidget {
             }),
           );
         },
-        child: Text('Novo local de trabalho'),
+        label: Text('Adicionar propriedade',
+            style: TextStyle(color: Colors.white)),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.green.shade400,
+          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          textStyle: TextStyle(fontSize: 16),
+        ),
       ),
     ));
   }

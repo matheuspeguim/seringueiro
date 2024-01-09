@@ -7,7 +7,7 @@ class CommonWidgets {
   static List<Widget> buildCommonWidgets(Property property) {
     return [
       buildWeatherAndDetails(property),
-      buildSangriaPainel(property),
+      buildPainelDeAtividades(property),
       // Aqui você pode adicionar mais chamadas a métodos que retornam outros widgets comuns
       // Exemplo: OutroWidgetComum(property),
     ];
@@ -23,14 +23,14 @@ class CommonWidgets {
     );
   }
 
-  static Widget buildSangriaPainel(Property property) {
+  static Widget buildPainelDeAtividades(Property property) {
     return SingleChildScrollView(
       child: Card(
-        elevation: 5.0,
+        elevation: 1,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(15.0),
         ),
-        color: Colors.green.shade200,
+        color: Colors.green.shade100,
         margin: EdgeInsets.all(8.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -40,14 +40,14 @@ class CommonWidgets {
             Container(
               padding: EdgeInsets.symmetric(vertical: 10.0),
               decoration: BoxDecoration(
-                color: Colors.green.shade800,
+                color: Colors.green.shade200,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(15.0)),
               ),
               child: Text(
-                "Painel de sangria",
+                "Painel de atividades",
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Colors.white,
+                  color: Colors.green.shade900,
                   fontSize: 18.0,
                   fontWeight: FontWeight.bold,
                 ),

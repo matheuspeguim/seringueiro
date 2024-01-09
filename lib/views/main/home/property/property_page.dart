@@ -125,15 +125,22 @@ class _PropertyPageState extends State<PropertyPage> {
   }
 
   Widget _buildPropertyContent(BuildContext context, Property property) {
+    final commonWidgets = CommonWidgets.buildCommonWidgets(property);
+    final roleSpecificWidgets = buildRoleSpecificWidgets(context, property);
+
+    final allWidgets = <Widget>[];
+
+    if (commonWidgets.isNotEmpty) {
+      allWidgets.addAll(commonWidgets);
+    }
+
+    if (roleSpecificWidgets.isNotEmpty) {
+      allWidgets.addAll(roleSpecificWidgets);
+    }
+
     return SingleChildScrollView(
-      child: Wrap(
-        spacing: 10.0, // Espaçamento horizontal
-        runSpacing: 10.0, // Espaçamento vertical
-        children: [
-          // Adiciona os widgets comuns e específicos de função com espaçamento
-          ...CommonWidgets.buildCommonWidgets(property),
-          ...buildRoleSpecificWidgets(context, property),
-        ],
+      child: Column(
+        children: allWidgets,
       ),
     );
   }
@@ -165,7 +172,8 @@ class _PropertyPageState extends State<PropertyPage> {
         currentState is AgronomoAdminViewState ||
         currentState is TodosViewState ||
         currentState is TodosViewStateAdmin) {
-      widgets.addAll(AgronomoWidgets.buildAgronomoWidgets(property));
+      widgets.addAll(
+          AgronomoWidgets.buildAgronomoWidgets(context, widget.user, property));
     }
 
     if (currentState is ProprietarioViewState ||

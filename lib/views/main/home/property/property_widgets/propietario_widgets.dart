@@ -5,15 +5,13 @@ class ProprietarioWidgets {
   static List<Widget> buildProprietarioWidgets(Property property) {
     // Aqui, o método retorna uma lista de widgets.
     return [
-      // Você pode adicionar mais widgets à lista conforme necessário
-      Column(
-        children: [
-          Text(
-            "Proprietário widgets",
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          ),
-          // Adicione aqui outros widgets específicos
-        ],
+      Divider(),
+      Align(
+        alignment: Alignment(-0.85, -1.00), // Define o alinhamento à esquerda
+        child: Text(
+          'Proprietário',
+          style: TextStyle(fontSize: 12.0, color: Colors.green),
+        ),
       ),
     ];
   }

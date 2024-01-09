@@ -29,6 +29,7 @@ class NewPropertyBloc extends Bloc<NewPropertyEvent, NewPropertyState> {
 
   void _onSubmitPropertyData(
       SubmitPropertyData event, Emitter<NewPropertyState> emit) async {
+    print('Evento SubmitPropertyData acionado!');
     try {
       emit(PropertySubmissionInProgress());
       final FirebaseFirestore firestore = FirebaseFirestore.instance;

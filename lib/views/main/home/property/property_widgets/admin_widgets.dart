@@ -6,12 +6,73 @@ class AdminWidgets {
   static List<Widget> buildAdminWidgets(
       BuildContext context, Property property) {
     return [
+      Divider(),
+      Align(
+        alignment: Alignment(-0.85, -1.00), // Define o alinhamento à esquerda
+        child: Text(
+          'Administrador',
+          style: TextStyle(fontSize: 12.0, color: Colors.green),
+        ),
+      ),
+      buildUsersPainel(property),
+      SizedBox(height: 8),
       buildDeleteButton(context, property),
-      // Aqui você pode adicionar mais widgets específicos para administradores
     ];
   }
 
-  
+  static Widget buildUsersPainel(Property property) {
+    return SingleChildScrollView(
+      child: Card(
+        elevation: 1.0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15.0),
+        ),
+        color: Colors.green.shade100,
+        margin: EdgeInsets.all(8.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Cabeçalho
+            Container(
+              padding: EdgeInsets.symmetric(vertical: 10.0),
+              decoration: BoxDecoration(
+                color: Colors.green.shade200,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(15.0)),
+              ),
+              child: Text(
+                "Usuários",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.green.shade900,
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+
+            // Corpo
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    '',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 10),
+                  // Adicione mais Widgets aqui para exibir os detalhes da propriedade
+                ],
+              ),
+            ),
+
+            // Rodapé (se necessário, adicione funcionalidades similares ao _buildPropertyCard)
+          ],
+        ),
+      ),
+    );
+  }
 
   static Widget buildDeleteButton(BuildContext context, Property property) {
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -49,7 +110,8 @@ class AdminWidgets {
                   .collection('properties')
                   .doc(property.id)
                   .delete();
-              // Adicionar lógica adicional após a exclusão bem-sucedida, se necessário
+              // Navegar de volta após a exclusão bem-sucedida
+              Navigator.of(context).pop(); // Volta para a tela anterior
             } catch (e) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('Erro ao excluir propriedade: $e')),
@@ -61,5 +123,4 @@ class AdminWidgets {
       ),
     );
   }
-
 }
