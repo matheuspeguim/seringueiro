@@ -17,22 +17,10 @@ class LoadPropertyDetails extends PropertyEvent {
 }
 
 class DeleteProperty extends PropertyEvent {
-  final User user;
   final String propertyId;
 
-  DeleteProperty(this.user, this.propertyId);
+  DeleteProperty(this.propertyId);
 
   @override
-  List<Object> get props => [user, propertyId];
-}
-
-// Novo evento para buscar o papel do usuário na propriedade
-class GetPropertyUserRole extends PropertyEvent {
-  final String userId;
-  final String propertyId;
-
-  GetPropertyUserRole({required this.userId, required this.propertyId});
-
-  @override
-  List<Object> get props => [userId, propertyId];
+  List<Object> get props => [propertyId];
 }

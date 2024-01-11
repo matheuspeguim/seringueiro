@@ -1,125 +1,71 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property.dart';
-import 'package:flutter_seringueiro/views/main/home/property/sangria/sangria_manager.dart';
+import 'package:flutter_seringueiro/views/main/home/property/field_activity/field_activity_manager.dart';
 import 'package:flutter_seringueiro/views/main/home/property/rain/rain_dialog_content.dart';
+import 'package:flutter_seringueiro/widgets/custom_button.dart';
 
 class SeringueiroWidgets {
   static List<Widget> buildSeringueiroWidgets(BuildContext context, User user,
-      Property property, SangriaManager sangriaManager) {
-    return [
-      Divider(),
-      Align(
-        alignment: Alignment(-0.85, -1.00),
-        child: Text(
-          'Seringueiro',
-          style: TextStyle(fontSize: 12.0, color: Colors.green),
-        ),
-      ),
-      SizedBox(height: 8),
-      Wrap(
-        alignment: WrapAlignment.start,
-        spacing: 8, // Espaçamento horizontal entre os widgets
-        runSpacing: 16, // Espaçamento vertical entre as linhas
-        children: [
-          buildSangriaButton(context, user, property, sangriaManager),
-          buildPluviometroButton(context, user, property),
-          buildEstimulacaoButton(user, property),
-          buildTratamentoButton(user, property),
-          // Adicione aqui outros widgets específicos para seringueiro
-        ],
-      )
-    ];
+      Property property, FieldActivityManager activityManager) {
+    List<Widget> widgets = [];
+
+    widgets.add(buildSangriaButton(context, user, property, activityManager));
+    widgets.add(buildPluviometroButton(context, user, property));
+    widgets
+        .add(buildEstimulacaoButton(context, user, property, activityManager));
+    widgets
+        .add(buildTratamentoButton(context, user, property, activityManager));
+
+    return widgets;
   }
 
-  static Widget buildSangriaButton(BuildContext context, User user,
-      Property property, SangriaManager sangriaManager) {
-    return ElevatedButton.icon(
-      onPressed: () => sangriaManager.toggleSangria(context, user, property),
-      icon: Icon(
-        sangriaManager.isSangriaIniciada ? Icons.stop : Icons.add,
-        color: Colors.white,
-      ),
-      label: Text(
-        sangriaManager.isSangriaIniciada ? 'Finalizar Sangria' : 'Sangria',
-        style: TextStyle(color: Colors.white),
-      ),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: sangriaManager.isSangriaIniciada
-            ? Colors.red.shade700
-            : Colors.green.shade700,
-        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        textStyle: TextStyle(fontSize: 16),
-      ),
+  static Widget buildSangriaButton(context, user, property, activityManager) {
+    return CustomButton(
+      label: 'Sangria',
+      icon: Icons.add,
+      onPressed: () => activityManager.toggleActivity(context, user, property),
+      backgroundColor: Colors.green,
     );
   }
 
-  static Widget buildPluviometroButton(
-      BuildContext context, User user, Property property) {
-    return ElevatedButton.icon(
+  static Widget buildPluviometroButton(context, user, property) {
+    return CustomButton(
+      label: 'Chuva',
+      icon: Icons.add,
       onPressed: () {
-        _showRainBottomSheet(
-            context); // Chama a função para exibir o menu inferior
+        _showRainBottomSheet(context);
       },
-      icon: Icon(
-        Icons.add,
-        color: Colors.white,
-      ),
-      label: Text(
-        'Chuva',
-        style: TextStyle(color: Colors.white),
-      ),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.blue.shade700,
-        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        textStyle: TextStyle(fontSize: 16),
-      ),
+      backgroundColor: Colors.blue,
     );
   }
 
-  static Widget buildEstimulacaoButton(user, property) {
-    return ElevatedButton.icon(
-      onPressed: () => {},
-      icon: Icon(
-        Icons.add,
-        color: Colors.white,
-      ),
-      label: Text(
-        'Estimulação',
-        style: TextStyle(color: Colors.white),
-      ),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.red.shade700,
-        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        textStyle: TextStyle(fontSize: 16),
-      ),
+  static Widget buildEstimulacaoButton(
+      context, user, property, activityManager) {
+    return CustomButton(
+      label: 'Estimulação',
+      icon: Icons.add,
+      onPressed: () {},
+      backgroundColor: Colors.red,
     );
   }
 
-  static Widget buildTratamentoButton(user, property) {
-    return ElevatedButton.icon(
-      onPressed: () => {},
-      icon: Icon(
-        Icons.add,
-        color: Colors.white,
-      ),
-      label: Text(
-        'Tratamento',
-        style: TextStyle(color: Colors.white),
-      ),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.blueGrey.shade700,
-        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        textStyle: TextStyle(fontSize: 16),
-      ),
+  static Widget buildTratamentoButton(
+      context, user, property, activityManager) {
+    return CustomButton(
+      label: "Tratamento",
+      icon: Icons.add,
+      onPressed: () {},
+      backgroundColor: Colors.yellow.shade700,
     );
   }
-
   // Outros widgets para seringueiro
 
   // Métodos complementares
 
-  static void _showRainBottomSheet(BuildContext context) {
+  static void _showRainBottomSheet(
+    BuildContext context,
+  ) {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
@@ -137,7 +83,7 @@ class SeringueiroWidgets {
               RainDialogContent(), // Conteúdo do menu
               SizedBox(height: 16.0),
               Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: <Widget>[
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(),

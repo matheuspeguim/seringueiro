@@ -40,6 +40,7 @@ dependencies:
   flutter_launcher_icons: ^0.13.1
   image_picker: ^1.0.6
   firebase_storage: ^11.6.0
+  fl_chart: ^0.66.0
 
 dev_dependencies:
   flutter_test:

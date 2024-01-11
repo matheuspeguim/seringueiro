@@ -48,13 +48,12 @@ class _MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        iconTheme: const IconThemeData(color: Colors.white),
         centerTitle: true,
-        backgroundColor: Colors.green.shade900,
-        elevation: 5.0,
-        shadowColor: Colors.grey.shade900,
-        title:
-            Text('Olá, $userName', style: const TextStyle(color: Colors.white)),
+        backgroundColor: Colors.green.shade100,
+        elevation: 50,
+        title: Text(
+          'Olá, $userName',
+        ),
       ),
       drawer: CustomDrawer(),
       body: PageView(
@@ -79,7 +78,7 @@ class _MainPageState extends State<MainPage> {
   NavigationBar _buildNavigationBar() {
     return NavigationBar(
       backgroundColor: Colors.green.shade100,
-      elevation: 5.0,
+      elevation: 50,
       shadowColor: Colors.grey.shade900,
       selectedIndex: _currentIndex,
       onDestinationSelected: (index) => _onDestinationSelected(index),

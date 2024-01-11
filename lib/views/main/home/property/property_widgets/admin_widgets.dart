@@ -1,76 +1,36 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property.dart';
+import 'package:flutter_seringueiro/views/main/home/property/users/property_users_page.dart';
+import 'package:flutter_seringueiro/widgets/custom_button.dart';
 
 class AdminWidgets {
   static List<Widget> buildAdminWidgets(
       BuildContext context, Property property) {
-    return [
-      Divider(),
-      Align(
-        alignment: Alignment(-0.85, -1.00), // Define o alinhamento à esquerda
-        child: Text(
-          'Administrador',
-          style: TextStyle(fontSize: 12.0, color: Colors.green),
-        ),
-      ),
-      buildUsersPainel(property),
-      SizedBox(height: 8),
-      buildDeleteButton(context, property),
-    ];
+    List<Widget> widgets = [];
+
+    // Adicionar todos os widgets relacionados ao administrador
+    widgets.add(buildUsersManager(context, property));
+    widgets.add(buildDeleteButton(context, property));
+
+    // Adicionar mais widgets conforme necessário
+
+    return widgets;
   }
 
-  static Widget buildUsersPainel(Property property) {
-    return SingleChildScrollView(
-      child: Card(
-        elevation: 1.0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15.0),
-        ),
-        color: Colors.green.shade100,
-        margin: EdgeInsets.all(8.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Cabeçalho
-            Container(
-              padding: EdgeInsets.symmetric(vertical: 10.0),
-              decoration: BoxDecoration(
-                color: Colors.green.shade200,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(15.0)),
-              ),
-              child: Text(
-                "Usuários",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.green.shade900,
-                  fontSize: 18.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-
-            // Corpo
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    '',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 10),
-                  // Adicione mais Widgets aqui para exibir os detalhes da propriedade
-                ],
-              ),
-            ),
-
-            // Rodapé (se necessário, adicione funcionalidades similares ao _buildPropertyCard)
-          ],
-        ),
-      ),
+  static Widget buildUsersManager(context, property) {
+    return CustomButton(
+      label: 'Gerenciar usuários',
+      icon: Icons.work_outline,
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PropertyUsersPage(propertyId: property.id),
+          ),
+        );
+      },
+      backgroundColor: Colors.blue, // Cor personalizada
     );
   }
 

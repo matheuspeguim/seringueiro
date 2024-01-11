@@ -1,19 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_seringueiro/services/local_storage_service.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_bloc.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_event.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_state.dart';
-import 'package:flutter_seringueiro/views/main/home/property/property_widgets/admin_widgets.dart';
-import 'package:flutter_seringueiro/views/main/home/property/property_widgets/agronomo_widgets.dart';
-import 'package:flutter_seringueiro/views/main/home/property/property_widgets/comum_widgets.dart';
-import 'package:flutter_seringueiro/views/main/home/property/property_widgets/propietario_widgets.dart';
-import 'package:flutter_seringueiro/views/main/home/property/property_widgets/seringueiro_widgets.dart';
-import 'package:flutter_seringueiro/views/main/home/property/sangria/sangria.dart';
-import 'package:flutter_seringueiro/views/main/home/property/sangria/sangria_manager.dart';
-import 'package:flutter_seringueiro/views/main/main_page.dart';
+import 'package:flutter_seringueiro/views/main/home/property/property_widgets/property_buttons_widget/property_buttons_widget.dart';
+import 'package:flutter_seringueiro/views/main/home/weather/weather_page.dart';
 
 class PropertyPage extends StatefulWidget {
   final User user;
@@ -27,39 +20,46 @@ class PropertyPage extends StatefulWidget {
 }
 
 class _PropertyPageState extends State<PropertyPage> {
-  final SangriaManager sangriaManager = SangriaManager();
-  Sangria? sangriaAtual;
-
-  final LocalStorageService localStorageService = LocalStorageService();
-
   @override
   Widget build(BuildContext context) {
     final user = widget.user;
     final propertyId = widget.propertyId;
+
+    void _showPropertyButtons() {
+      showModalBottomSheet(
+        backgroundColor: Colors.green.shade900,
+        context: context,
+        builder: (BuildContext context) {
+          return PropertyButtonsWidget(
+              user: widget.user, propertyId: widget.propertyId);
+        },
+      );
+    }
 
     return BlocProvider(
       create: (context) =>
           PropertyBloc()..add(LoadPropertyDetails(user, propertyId)),
       child: BlocConsumer<PropertyBloc, PropertyState>(
         listener: (context, state) {
-          if (state is PropertyDeleted) {
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (context) => MainPage(user: user)),
-              (Route<dynamic> route) => false,
-            );
-          }
+          // Listener logic here
         },
         builder: (context, state) {
           return Scaffold(
             appBar: AppBar(
               centerTitle: true,
               title: Text(_getAppBarTitle(state)),
-              titleTextStyle: TextStyle(color: Colors.white, fontSize: 23.0),
-              backgroundColor: Colors.green.shade900,
+              backgroundColor: Colors.green.shade100,
+              elevation: 50,
             ),
             body: _buildBody(context, state),
             backgroundColor: Colors.green.shade100,
+            floatingActionButton: FloatingActionButton(
+              onPressed: _showPropertyButtons,
+              child: Icon(Icons.add, color: Colors.white),
+              backgroundColor: Colors.green, // Cor do botão
+              elevation: 50,
+              // Você pode adicionar mais personalizações aqui se necessário
+            ),
           );
         },
       ),
@@ -67,24 +67,8 @@ class _PropertyPageState extends State<PropertyPage> {
   }
 
   String _getAppBarTitle(PropertyState state) {
-    if (state is PropertyLoaded ||
-        state is SeringueiroViewState ||
-        state is AgronomoViewState ||
-        state is ProprietarioViewState ||
-        state is AdminViewState ||
-        state is SeringueiroAgronomoViewState ||
-        state is SeringueiroProprietarioViewState ||
-        state is AgronomoProprietarioViewState ||
-        state is SeringueiroAgronomoAdminViewState ||
-        state is SeringueiroProprietarioAdminViewState ||
-        state is AgronomoProprietarioAdminViewState ||
-        state is SeringueiroAdminViewState ||
-        state is AgronomoAdminViewState ||
-        state is ProprietarioAdminViewState ||
-        state is TodosViewState ||
-        state is TodosViewStateAdmin) {
-      Property property = (state as dynamic).property;
-      return property.nomeDaPropriedade.toUpperCase();
+    if (state is PropertyLoaded) {
+      return state.property.nomeDaPropriedade.toUpperCase();
     }
     return 'Detalhes da Propriedade';
   }
@@ -93,111 +77,65 @@ class _PropertyPageState extends State<PropertyPage> {
     if (state is PropertyLoading) {
       return Center(child: CircularProgressIndicator());
     } else if (state is PropertyError) {
-      return Center(child: Text('Erro ao carregar a propriedade'));
-    } else if (state is PropertyDeleted) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Navigator.popUntil(context, (route) => route.isFirst);
-      });
-      return Center(child: CircularProgressIndicator());
-    } else if (state is PropertyLoaded ||
-        state is SeringueiroViewState ||
-        state is AgronomoViewState ||
-        state is ProprietarioViewState ||
-        state is AdminViewState ||
-        state is SeringueiroAgronomoViewState ||
-        state is SeringueiroProprietarioViewState ||
-        state is AgronomoProprietarioViewState ||
-        state is TodosViewState ||
-        state is AdminViewState ||
-        state is SeringueiroAgronomoAdminViewState ||
-        state is SeringueiroProprietarioAdminViewState ||
-        state is AgronomoProprietarioAdminViewState ||
-        state is SeringueiroAdminViewState ||
-        state is AgronomoAdminViewState ||
-        state is ProprietarioAdminViewState ||
-        state is TodosViewStateAdmin) {
-      // Para todos os estados de carregamento bem-sucedido, chame a função de construção de conteúdo
-      return _buildPropertyContent(context, state.property);
+      return Center(child: Text(state.message));
+    } else if (state is PropertyLoaded) {
+      return SingleChildScrollView(
+        child: Column(
+          children: [
+            HourlyWeatherWidget(location: state.property.localizacao),
+            _buildPainelDeAtividades(state.property),
+            // Outros componentes relacionados à propriedade podem ser adicionados aqui
+          ],
+        ),
+      );
     } else {
-      // Caso padrão para estados não reconhecidos
       return Center(child: Text('Estado não reconhecido!'));
     }
   }
 
-  Widget _buildPropertyContent(BuildContext context, Property property) {
-    final commonWidgets = CommonWidgets.buildCommonWidgets(property);
-    final roleSpecificWidgets = buildRoleSpecificWidgets(context, property);
-
-    final allWidgets = <Widget>[];
-
-    if (commonWidgets.isNotEmpty) {
-      allWidgets.addAll(commonWidgets);
-    }
-
-    if (roleSpecificWidgets.isNotEmpty) {
-      allWidgets.addAll(roleSpecificWidgets);
-    }
-
-    return SingleChildScrollView(
+  Widget _buildPainelDeAtividades(Property property) {
+    // Conteúdo do Painel de Atividades aqui
+    return Card(
+      elevation: 1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15.0),
+      ),
+      color: Colors.green.shade100,
+      margin: EdgeInsets.all(8.0),
       child: Column(
-        children: allWidgets,
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Cabeçalho
+          Container(
+            padding: EdgeInsets.symmetric(vertical: 10.0),
+            decoration: BoxDecoration(
+              color: Colors.green.shade200,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(15.0)),
+            ),
+            child: Text(
+              "Painel de atividades",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.green.shade900,
+                fontSize: 18.0,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          // Corpo do Painel de Atividades
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                // Aqui você pode adicionar os detalhes específicos do Painel de Atividades
+              ],
+            ),
+          ),
+          // Rodapé, se necessário
+        ],
       ),
     );
-  }
-
-  // Método para construir widgets baseados no papel do usuário
-  List<Widget> buildRoleSpecificWidgets(
-      BuildContext context, Property property) {
-    final currentState = context.read<PropertyBloc>().state;
-    List<Widget> widgets = [];
-
-    // Lógica para adicionar widgets com base no estado específico
-    if (currentState is SeringueiroViewState ||
-        currentState is SeringueiroAgronomoViewState ||
-        currentState is SeringueiroProprietarioViewState ||
-        currentState is SeringueiroAgronomoAdminViewState ||
-        currentState is SeringueiroProprietarioAdminViewState ||
-        currentState is SeringueiroAdminViewState ||
-        currentState is TodosViewState ||
-        currentState is TodosViewStateAdmin) {
-      widgets.addAll(SeringueiroWidgets.buildSeringueiroWidgets(
-          context, widget.user, property, sangriaManager));
-    }
-
-    if (currentState is AgronomoViewState ||
-        currentState is SeringueiroAgronomoViewState ||
-        currentState is AgronomoProprietarioViewState ||
-        currentState is SeringueiroAgronomoAdminViewState ||
-        currentState is AgronomoProprietarioAdminViewState ||
-        currentState is AgronomoAdminViewState ||
-        currentState is TodosViewState ||
-        currentState is TodosViewStateAdmin) {
-      widgets.addAll(
-          AgronomoWidgets.buildAgronomoWidgets(context, widget.user, property));
-    }
-
-    if (currentState is ProprietarioViewState ||
-        currentState is SeringueiroProprietarioViewState ||
-        currentState is AgronomoProprietarioViewState ||
-        currentState is SeringueiroProprietarioAdminViewState ||
-        currentState is AgronomoProprietarioAdminViewState ||
-        currentState is ProprietarioAdminViewState ||
-        currentState is TodosViewState ||
-        currentState is TodosViewStateAdmin) {
-      widgets.addAll(ProprietarioWidgets.buildProprietarioWidgets(property));
-    }
-
-    if (currentState is AdminViewState ||
-        currentState is SeringueiroAgronomoAdminViewState ||
-        currentState is SeringueiroProprietarioAdminViewState ||
-        currentState is AgronomoProprietarioAdminViewState ||
-        currentState is SeringueiroAdminViewState ||
-        currentState is AgronomoAdminViewState ||
-        currentState is ProprietarioAdminViewState ||
-        currentState is TodosViewStateAdmin) {
-      widgets.addAll(AdminWidgets.buildAdminWidgets(context, property));
-    }
-
-    return widgets;
   }
 }

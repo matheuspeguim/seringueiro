@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_seringueiro/services/local_storage_service.dart';
+import 'package:flutter_seringueiro/services/storage_service/local_storage_service.dart';
 import 'package:flutter_seringueiro/views/login/login_bloc.dart';
 import 'package:flutter_seringueiro/views/login/login_page_wrapper.dart';
 import 'package:intl/intl.dart' as intl;
@@ -30,8 +30,8 @@ Future<void> main() async {
   Hive
     ..registerAdapter(TimestampAdapter())
     ..registerAdapter(DurationAdapter())
-    ..registerAdapter(SangriaAdapter())
-    ..registerAdapter(PontoDeSangriaAdapter())
+    ..registerAdapter(FieldActivityAdapter())
+    ..registerAdapter(ActivityPointAdapter())
     ..registerAdapter(WeatherDataAdapter())
     ..registerAdapter(GeoPointAdapter());
 
@@ -83,7 +83,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
         useMaterial3: true,
       ),
-      home: LoginPageWrapper(), // ou outra página inicial conforme necessário
+      home: LoginPageWrapper(),
     );
   }
 }

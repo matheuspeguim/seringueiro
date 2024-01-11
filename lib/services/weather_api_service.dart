@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:hive/hive.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -86,7 +88,7 @@ class WeatherApiService {
     }
   }
 
-  Future<Map<String, dynamic>> climaParaSangria(
+  Future<Map<String, dynamic>> weatherToFieldActivity(
       double latitude, double longitude) async {
     _cleanUpCache();
 
@@ -113,5 +115,39 @@ class WeatherApiService {
       print('Erro ao fazer a chamada da API: $e');
       rethrow; // Relançar a exceção capturada
     }
+  }
+}
+
+class PrecipitationChart extends StatelessWidget {
+  final List<double> hourlyPrecipitation;
+
+  const PrecipitationChart({Key? key, required this.hourlyPrecipitation})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    List<FlSpot> spots = [];
+    for (int i = 0; i < hourlyPrecipitation.length; i++) {
+      spots.add(FlSpot(i.toDouble(), hourlyPrecipitation[i]));
+    }
+
+    return LineChart(
+      LineChartData(
+        gridData: FlGridData(show: false),
+        titlesData: FlTitlesData(show: false),
+        borderData: FlBorderData(show: false),
+        lineBarsData: [
+          LineChartBarData(
+            spots: spots,
+            isCurved: true,
+            color: Colors.blueAccent,
+            barWidth: 5,
+            isStrokeCapRound: true,
+            dotData: FlDotData(show: false),
+            belowBarData: BarAreaData(show: false),
+          ),
+        ],
+      ),
+    );
   }
 }

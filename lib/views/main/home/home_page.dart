@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -13,6 +15,7 @@ import 'package:flutter_seringueiro/views/main/home/property/property_page.dart'
 import 'package:flutter_seringueiro/views/main/home/property/searcher/search_property_bloc.dart';
 import 'package:flutter_seringueiro/views/main/home/property/searcher/search_property_page.dart';
 import 'package:flutter_seringueiro/views/main/home/weather/weather_page.dart';
+import 'package:flutter_seringueiro/widgets/custom_button.dart';
 
 class HomePage extends StatelessWidget {
   final User user;
@@ -51,7 +54,7 @@ class HomePage extends StatelessWidget {
 
   Widget _buildPropertyCard(BuildContext context, Property property) {
     return Card(
-      elevation: 5.0,
+      elevation: 50,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15.0),
       ),
@@ -133,31 +136,21 @@ class HomePage extends StatelessWidget {
   Widget _buildNewPropertyButton(BuildContext context) {
     return Center(
         child: Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: ElevatedButton.icon(
-        icon: Icon(
-          Icons.add,
-          color: Colors.white,
-        ),
-        onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) {
-              return BlocProvider<SearchPropertyBloc>(
-                create: (context) => SearchPropertyBloc(),
-                child: SearchPropertyPage(user: user),
-              );
-            }),
-          );
-        },
-        label: Text('Adicionar propriedade',
-            style: TextStyle(color: Colors.white)),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.green.shade400,
-          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          textStyle: TextStyle(fontSize: 16),
-        ),
-      ),
-    ));
+            padding: const EdgeInsets.all(16.0),
+            child: CustomButton(
+              label: 'Adicionar propriedade',
+              icon: Icons.add,
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) {
+                    return BlocProvider<SearchPropertyBloc>(
+                      create: (context) => SearchPropertyBloc(),
+                      child: SearchPropertyPage(user: user),
+                    );
+                  }),
+                );
+              },
+            )));
   }
 
   Widget _loadingWidget() {
@@ -191,20 +184,23 @@ class HomePage extends StatelessWidget {
   }
 
   Widget _propertiesListWidget(BuildContext context, PropertiesLoaded state) {
-    if (state.properties.isEmpty) {
-      return _buildNewPropertyButton(context);
-    }
+    // Ajuste o itemCount para ser sempre o número de propriedades + 1 (para o botão)
+    int itemCount = state.properties.length + 1;
+
     return RefreshIndicator(
       onRefresh: () async {
         context.read<HomePageBloc>().add(FetchPropertiesEvent(user: user));
       },
       child: ListView.builder(
-        itemCount: state.properties.length + 1,
+        itemCount: itemCount,
         itemBuilder: (context, index) {
-          if (index < state.properties.length) {
-            return _buildPropertyCard(context, state.properties[index]);
+          // Se o índice for o último, mostre o botão "Nova Propriedade"
+          if (index == state.properties.length) {
+            return _buildNewPropertyButton(context);
           }
-          return _buildNewPropertyButton(context);
+
+          // Caso contrário, construa o card da propriedade
+          return _buildPropertyCard(context, state.properties[index]);
         },
       ),
     );
