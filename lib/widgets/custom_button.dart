@@ -4,9 +4,9 @@ class CustomButton extends StatelessWidget {
   final String label;
   final IconData icon;
   final VoidCallback onPressed;
-  final Color? backgroundColor; // Tornando opcional com um valor padrão nulo
-  final TextStyle? textStyle; // Tornando opcional com um valor padrão nulo
-  final EdgeInsets? padding; // Tornando opcional com um valor padrão nulo
+  final Color? backgroundColor;
+  final TextStyle? textStyle;
+  final EdgeInsets? padding;
 
   const CustomButton({
     Key? key,
@@ -20,24 +20,21 @@ class CustomButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding:
-            padding ?? const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        child: ElevatedButton.icon(
-          icon: Icon(icon, color: textStyle?.color ?? Colors.white),
-          label: Text(label,
-              style: textStyle ??
-                  const TextStyle(fontSize: 16, color: Colors.white)),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: backgroundColor ??
-                Colors.green, // Usando valor padrão se nenhum for fornecido
-            elevation: 50,
-            padding: padding ??
-                const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          ),
-          onPressed: onPressed,
+    return Padding(
+      padding:
+          padding ?? const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      child: ElevatedButton.icon(
+        icon: Icon(icon, color: textStyle?.color ?? Colors.white),
+        label: Text(label,
+            style: textStyle ??
+                const TextStyle(fontSize: 16, color: Colors.white)),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: backgroundColor ?? Colors.green,
+          elevation: 50,
+          padding: padding ??
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         ),
+        onPressed: onPressed,
       ),
     );
   }

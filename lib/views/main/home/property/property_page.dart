@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -6,7 +7,10 @@ import 'package:flutter_seringueiro/views/main/home/property/property_bloc.dart'
 import 'package:flutter_seringueiro/views/main/home/property/property_event.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_state.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_widgets/property_buttons_widget/property_buttons_widget.dart';
+import 'package:flutter_seringueiro/views/main/home/property/rain/rain_bloc.dart';
+import 'package:flutter_seringueiro/views/main/home/property/rain/rain_widgets.dart';
 import 'package:flutter_seringueiro/views/main/home/weather/weather_page.dart';
+import 'package:flutter_seringueiro/widgets/custom_card.dart';
 
 class PropertyPage extends StatefulWidget {
   final User user;
@@ -25,17 +29,6 @@ class _PropertyPageState extends State<PropertyPage> {
     final user = widget.user;
     final propertyId = widget.propertyId;
 
-    void _showPropertyButtons() {
-      showModalBottomSheet(
-        backgroundColor: Colors.green.shade900,
-        context: context,
-        builder: (BuildContext context) {
-          return PropertyButtonsWidget(
-              user: widget.user, propertyId: widget.propertyId);
-        },
-      );
-    }
-
     return BlocProvider(
       create: (context) =>
           PropertyBloc()..add(LoadPropertyDetails(user, propertyId)),
@@ -46,9 +39,13 @@ class _PropertyPageState extends State<PropertyPage> {
         builder: (context, state) {
           return Scaffold(
             appBar: AppBar(
+              iconTheme: IconThemeData(color: Colors.white),
               centerTitle: true,
-              title: Text(_getAppBarTitle(state)),
-              backgroundColor: Colors.green.shade100,
+              title: Text(
+                _getAppBarTitle(state),
+                style: TextStyle(color: Colors.white),
+              ),
+              backgroundColor: Colors.green.shade800,
               elevation: 50,
             ),
             body: _buildBody(context, state),
@@ -57,7 +54,8 @@ class _PropertyPageState extends State<PropertyPage> {
               onPressed: _showPropertyButtons,
               child: Icon(Icons.add, color: Colors.white),
               backgroundColor: Colors.green, // Cor do botão
-              elevation: 50,
+              elevation: 10,
+
               // Você pode adicionar mais personalizações aqui se necessário
             ),
           );
@@ -73,6 +71,17 @@ class _PropertyPageState extends State<PropertyPage> {
     return 'Detalhes da Propriedade';
   }
 
+  void _showPropertyButtons() {
+    showModalBottomSheet(
+      backgroundColor: Colors.grey.shade200,
+      context: context,
+      builder: (BuildContext context) {
+        return PropertyButtonsWidget(
+            user: widget.user, propertyId: widget.propertyId);
+      },
+    );
+  }
+
   Widget _buildBody(BuildContext context, PropertyState state) {
     if (state is PropertyLoading) {
       return Center(child: CircularProgressIndicator());
@@ -82,7 +91,28 @@ class _PropertyPageState extends State<PropertyPage> {
       return SingleChildScrollView(
         child: Column(
           children: [
-            HourlyWeatherWidget(location: state.property.localizacao),
+            SizedBox(height: 32),
+            CustomCard(
+              title: "Previsão do tempo",
+              onButtonPressed: () => {},
+              colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.teal),
+              body: HourlyWeatherWidget(location: state.property.localizacao),
+            ),
+            SizedBox(height: 32),
+            CustomCard(
+              title: "Chuvas por mês",
+              onButtonPressed: () => {},
+              colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue),
+              body: Container(
+                height: 300,
+                child: BlocProvider<RainBloc>(
+                  create: (context) =>
+                      RainBloc(firestore: FirebaseFirestore.instance),
+                  child: RainChartWidget(propertyId: state.property.id),
+                ),
+              ),
+            ),
+            SizedBox(height: 32),
             _buildPainelDeAtividades(state.property),
             // Outros componentes relacionados à propriedade podem ser adicionados aqui
           ],
@@ -95,47 +125,12 @@ class _PropertyPageState extends State<PropertyPage> {
 
   Widget _buildPainelDeAtividades(Property property) {
     // Conteúdo do Painel de Atividades aqui
-    return Card(
-      elevation: 1,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15.0),
-      ),
-      color: Colors.green.shade100,
-      margin: EdgeInsets.all(8.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Cabeçalho
-          Container(
-            padding: EdgeInsets.symmetric(vertical: 10.0),
-            decoration: BoxDecoration(
-              color: Colors.green.shade200,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(15.0)),
-            ),
-            child: Text(
-              "Painel de atividades",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.green.shade900,
-                fontSize: 18.0,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          // Corpo do Painel de Atividades
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                // Aqui você pode adicionar os detalhes específicos do Painel de Atividades
-              ],
-            ),
-          ),
-          // Rodapé, se necessário
-        ],
-      ),
+    return CustomCard(
+      title: 'Painel de atividades',
+      body: Column(),
+      onButtonPressed: () {
+        // Ação do botão
+      },
     );
   }
 }

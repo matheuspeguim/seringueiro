@@ -8,7 +8,6 @@ import 'package:flutter_seringueiro/views/main/home/property/property_widgets/ad
 import 'package:flutter_seringueiro/views/main/home/property/property_widgets/agronomo_widgets.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_widgets/property_buttons_widget/property_button_event.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_widgets/property_buttons_widget/property_buttons_state.dart';
-import 'package:flutter_seringueiro/views/main/home/property/property_widgets/propietario_widgets.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_widgets/seringueiro_widgets.dart';
 
 class PropertyButtonsBloc

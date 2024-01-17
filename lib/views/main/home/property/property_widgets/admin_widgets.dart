@@ -20,7 +20,7 @@ class AdminWidgets {
 
   static Widget buildUsersManager(context, property) {
     return CustomButton(
-      label: 'Gerenciar usuários',
+      label: 'Gerenciar',
       icon: Icons.work_outline,
       onPressed: () {
         Navigator.push(
@@ -30,7 +30,6 @@ class AdminWidgets {
           ),
         );
       },
-      backgroundColor: Colors.blue, // Cor personalizada
     );
   }
 

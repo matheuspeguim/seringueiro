@@ -24,13 +24,17 @@ class PropertyButtonsWidget extends StatelessWidget {
       child: BlocBuilder<PropertyButtonsBloc, PropertyButtonsState>(
         builder: (context, state) {
           if (state is PropertyButtonsLoading) {
-            return CircularProgressIndicator(); // ou algum outro widget de carregamento
+            return LinearProgressIndicator(); // ou algum outro widget de carregamento
           } else if (state is PropertyButtonsLoaded) {
-            return Align(
-              alignment: Alignment.bottomLeft,
+            return SingleChildScrollView(
               child: Wrap(
-                children: state.buttons,
-                // Outras configurações do Wrap se necessário
+                direction:
+                    Axis.horizontal, // Organiza os filhos horizontalmente
+                spacing: 4.0, // Espaço horizontal entre os botões
+                runSpacing: 4.0, // Espaço vertical entre as linhas
+                alignment: WrapAlignment
+                    .center, // Alinha os botões ao início do eixo principal
+                children: state.buttons, // Os botões carregados
               ),
             );
           } else if (state is PropertyButtonsError) {

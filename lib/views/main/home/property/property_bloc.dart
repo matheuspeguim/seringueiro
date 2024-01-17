@@ -6,7 +6,6 @@ import 'property_state.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property.dart';
 
 class PropertyBloc extends Bloc<PropertyEvent, PropertyState> {
-  Property? _loadedProperty;
   Timer? _timer;
 
   PropertyBloc() : super(PropertyInitial()) {
@@ -25,7 +24,6 @@ class PropertyBloc extends Bloc<PropertyEvent, PropertyState> {
 
       if (propertyDoc.exists) {
         Property property = Property.fromFirestore(propertyDoc);
-        _loadedProperty = property;
         emit(PropertyLoaded(property));
       } else {
         emit(PropertyError("Propriedade não encontrada."));

@@ -16,6 +16,7 @@ import 'package:flutter_seringueiro/views/main/home/property/searcher/search_pro
 import 'package:flutter_seringueiro/views/main/home/property/searcher/search_property_page.dart';
 import 'package:flutter_seringueiro/views/main/home/weather/weather_page.dart';
 import 'package:flutter_seringueiro/widgets/custom_button.dart';
+import 'package:flutter_seringueiro/widgets/custom_card.dart';
 
 class HomePage extends StatelessWidget {
   final User user;
@@ -53,83 +54,26 @@ class HomePage extends StatelessWidget {
   }
 
   Widget _buildPropertyCard(BuildContext context, Property property) {
-    return Card(
-      elevation: 50,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15.0),
-      ),
-      color: Colors.green.shade200,
-      margin: EdgeInsets.all(8.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+    return CustomCard(
+      title: property.nomeDaPropriedade,
+      body: Column(
         children: [
-          // Cabeçalho
-          Container(
-            padding: EdgeInsets.symmetric(vertical: 10.0),
-            decoration: BoxDecoration(
-              color: Colors.green.shade800,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(15.0)),
-            ),
-            child: Text(
-              property.nomeDaPropriedade.toUpperCase(),
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18.0,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-
-          // Corpo
-          Container(
-            child: Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  DailyWeatherWidget(location: property.localizacao),
-                  // Outras informações da propriedade aqui
-                ],
-              ),
-            ),
-          ),
-
-          // Rodapé com botão
-          Container(
-            padding: EdgeInsets.symmetric(vertical: 1.0),
-            decoration: BoxDecoration(
-              color: Colors.green.shade300,
-              borderRadius:
-                  BorderRadius.vertical(bottom: Radius.circular(15.0)),
-            ),
-            child: TextButton(
-              style: TextButton.styleFrom(),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => BlocProvider(
-                      create: (context) => PropertyBloc()
-                        ..add(LoadPropertyDetails(user, property.id)),
-                      child: PropertyPage(user: user, propertyId: property.id),
-                    ),
-                  ),
-                );
-              },
-              child: Text(
-                "Mais informações",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.green.shade900,
-                  fontSize: 13.0,
-                ),
-              ),
-            ),
-          ),
+          DailyWeatherWidget(location: property.localizacao),
+          // Outras informações da propriedade aqui
         ],
       ),
+      onButtonPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => BlocProvider(
+              create: (context) =>
+                  PropertyBloc()..add(LoadPropertyDetails(user, property.id)),
+              child: PropertyPage(user: user, propertyId: property.id),
+            ),
+          ),
+        );
+      },
     );
   }
 

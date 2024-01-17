@@ -73,7 +73,7 @@ class HourlyForecastCard extends StatelessWidget {
         children: [
           Text(
             displayTime,
-            style: TextStyle(fontWeight: FontWeight.bold),
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
           Image.network(
             'http://openweathermap.org/img/wn/${forecast.weatherIcon}.png',
@@ -85,7 +85,7 @@ class HourlyForecastCard extends StatelessWidget {
               Icon(Icons.thermostat, size: 16, color: Colors.orange),
               SizedBox(width: 4),
               Text('${forecast.temperature.toStringAsFixed(1)}°C',
-                  style: (TextStyle(fontSize: 12))),
+                  style: (TextStyle(color: Colors.white, fontSize: 12))),
             ],
           ),
           if (forecast.precipitation > 0) // Exibir se houver precipitação
@@ -98,7 +98,7 @@ class HourlyForecastCard extends StatelessWidget {
                 ),
                 SizedBox(width: 4),
                 Text('${forecast.precipitation.toStringAsFixed(1)}mm',
-                    style: TextStyle(fontSize: 12)),
+                    style: TextStyle(color: Colors.white, fontSize: 12)),
               ],
             ),
         ],
@@ -212,7 +212,7 @@ class DailyForecastCard extends StatelessWidget {
         children: [
           Text(
             displayDate,
-            style: TextStyle(fontWeight: FontWeight.bold),
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
           Container(
             child: Column(
@@ -231,7 +231,7 @@ class DailyForecastCard extends StatelessWidget {
                       SizedBox(width: 4),
                       Text(
                         '${forecast.rain.toStringAsFixed(1)}mm', // Mostrando a quantidade de chuva com uma casa decimal
-                        style: TextStyle(fontSize: 12),
+                        style: TextStyle(color: Colors.white, fontSize: 12),
                       ),
                     ],
                   ),
