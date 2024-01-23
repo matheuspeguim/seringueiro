@@ -47,7 +47,7 @@ class _RainDialogContentState extends State<RainDialogContent> {
             Text("Registrar Chuva",
                 style: TextStyle(color: Colors.white, fontSize: 24)),
             SizedBox(height: 16.0),
-            Text("Selecione a data e a quantidade de chuva em mm",
+            Text("Selecione a data e a quantidade de chuva",
                 style: TextStyle(color: Colors.white, fontSize: 18)),
             SizedBox(height: 16.0),
             buildDatePicker(),

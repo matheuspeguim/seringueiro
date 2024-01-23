@@ -2,7 +2,7 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_seringueiro/views/main/home/property/property.dart';
+import 'package:flutter_seringueiro/models/property.dart';
 import 'home_page_event.dart';
 import 'home_page_state.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';

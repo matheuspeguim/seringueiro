@@ -34,3 +34,21 @@ class LoadRainData extends RainEvent {
   @override
   List<Object?> get props => [propertyId];
 }
+
+class LoadRainHistoryFromApi extends RainEvent {
+  final double latitude;
+  final double longitude;
+  final int startTimestamp;
+  final int endTimestamp;
+
+  LoadRainHistoryFromApi({
+    required this.latitude,
+    required this.longitude,
+    required this.startTimestamp,
+    required this.endTimestamp,
+  });
+
+  @override
+  List<Object?> get props =>
+      [latitude, longitude, startTimestamp, endTimestamp];
+}

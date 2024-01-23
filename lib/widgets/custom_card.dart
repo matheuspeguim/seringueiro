@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 class CustomCard extends StatelessWidget {
   final String title;
+  final String? subtitle;
   final Widget body;
   final VoidCallback onButtonPressed;
   final String buttonText;
@@ -10,6 +11,7 @@ class CustomCard extends StatelessWidget {
   CustomCard({
     Key? key,
     required this.title,
+    this.subtitle,
     required this.body,
     required this.onButtonPressed,
     this.buttonText = "Mais informações",
@@ -50,6 +52,19 @@ class CustomCard extends StatelessWidget {
               ),
             ),
           ),
+          if (subtitle != null) // Verifica se o subtítulo foi fornecido
+            Padding(
+              padding: EdgeInsets.only(bottom: 8.0),
+              child: Text(
+                subtitle!, // Exibe o subtítulo
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: colors.onPrimary,
+                  fontSize:
+                      14.0, // Ajuste o tamanho da fonte conforme necessário
+                ),
+              ),
+            ),
 
           // Corpo
           Container(

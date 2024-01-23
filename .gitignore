@@ -45,3 +45,6 @@ app.*.map.json
 
 # Variáveis restritas
 .env
+
+**/key.properties
+**/keystores/

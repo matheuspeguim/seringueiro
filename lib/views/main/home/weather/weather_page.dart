@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_seringueiro/widgets/custom_Circular_Progress_indicator.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_seringueiro/services/weather_api_service.dart';
@@ -178,17 +179,21 @@ class DailyWeatherForecast {
 List<DailyWeatherForecast> parseDailyWeatherData(
     Map<String, dynamic> weatherData) {
   var dailyForecasts = weatherData['daily'] as List;
-  return dailyForecasts.map((dailyData) {
-    final date = DateTime.fromMillisecondsSinceEpoch(dailyData['dt'] * 1000);
-    final weatherIcon = dailyData['weather'][0]['icon'];
-    final rain = dailyData['rain']?.toDouble() ?? 0.0;
+  return dailyForecasts
+      .map((dailyData) {
+        final date =
+            DateTime.fromMillisecondsSinceEpoch(dailyData['dt'] * 1000);
+        final weatherIcon = dailyData['weather'][0]['icon'];
+        final rain = dailyData['rain']?.toDouble() ?? 0.0;
 
-    return DailyWeatherForecast(
-      date: date,
-      weatherIcon: weatherIcon,
-      rain: rain,
-    );
-  }).toList();
+        return DailyWeatherForecast(
+          date: date,
+          weatherIcon: weatherIcon,
+          rain: rain,
+        );
+      })
+      .take(5)
+      .toList();
 }
 
 class DailyForecastCard extends StatelessWidget {
@@ -203,7 +208,13 @@ class DailyForecastCard extends StatelessWidget {
     if (now.day == forecast.date.day &&
         now.month == forecast.date.month &&
         now.year == forecast.date.year) {
-      displayDate = "Hoje";
+      displayDate = "hoje";
+    }
+
+    if (now.day + 1 == forecast.date.day &&
+        now.month == forecast.date.month &&
+        now.year == forecast.date.year) {
+      displayDate = "amanhã";
     }
 
     return Container(
@@ -223,18 +234,17 @@ class DailyForecastCard extends StatelessWidget {
                   width: 50,
                   height: 50,
                 ),
-                if (forecast.rain > 0) // Exibir se houver precipitação
-                  Row(
-                    children: [
-                      Icon(Icons.water_drop,
-                          size: 12, color: Colors.blue), // Ícone de chuva
-                      SizedBox(width: 4),
-                      Text(
-                        '${forecast.rain.toStringAsFixed(1)}mm', // Mostrando a quantidade de chuva com uma casa decimal
-                        style: TextStyle(color: Colors.white, fontSize: 12),
-                      ),
-                    ],
-                  ),
+                Row(
+                  children: [
+                    Icon(Icons.water_drop,
+                        size: 12, color: Colors.blue), // Ícone de chuva
+                    SizedBox(width: 4),
+                    Text(
+                      '${forecast.rain.toStringAsFixed(1)}mm', // Mostrando a quantidade de chuva com uma casa decimal
+                      style: TextStyle(color: Colors.white, fontSize: 12),
+                    ),
+                  ],
+                ),
               ],
             ),
           )
@@ -283,7 +293,7 @@ class DailyWeatherWidget extends StatelessWidget {
       child: BlocBuilder<WeatherBloc, WeatherState>(
         builder: (context, state) {
           if (state is WeatherLoadInProgress) {
-            return Center(child: CircularProgressIndicator());
+            return CustomCircularProgressIndicator();
           } else if (state is WeatherLoadSuccess) {
             final forecastList = parseDailyWeatherData(state.weatherData);
             return DailyWeatherRow(forecastList: forecastList);

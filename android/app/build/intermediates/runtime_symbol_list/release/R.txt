@@ -138,7 +138,7 @@ int drawable ic_notification 0x7f04001c
 int drawable ic_pause 0x7f04001d
 int drawable ic_play 0x7f04001e
 int drawable ic_stop 0x7f04001f
-int drawable icon 0x7f040020
+int drawable icon_sem_fundo 0x7f040020
 int drawable launch_background 0x7f040021
 int drawable notification_action_background 0x7f040022
 int drawable notification_bg 0x7f040023

@@ -5,11 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_seringueiro/services/utilidade_service.dart';
 import 'package:flutter_seringueiro/views/main/home/property/field_activity/activity_point.dart';
-import 'package:flutter_seringueiro/views/main/home/property/property.dart';
+import 'package:flutter_seringueiro/models/property.dart';
 import 'package:flutter_seringueiro/views/main/home/property/field_activity/flutter_kotlin_communication.dart';
 import 'package:flutter_seringueiro/views/main/home/property/field_activity/field_activity.dart';
 import 'package:flutter_seringueiro/services/storage_service/local_storage_service.dart';
-import 'package:flutter_seringueiro/services/weather_api_service.dart';
+import 'package:flutter_seringueiro/services/open_weather_api_service.dart';
 
 // CLASSE RESPONSÁVEL POR GERENCIAR A ATIVIDADE DE SANGRIA.
 

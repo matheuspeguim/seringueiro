@@ -139,7 +139,7 @@ drawable ic_notification
 drawable ic_pause
 drawable ic_play
 drawable ic_stop
-drawable icon
+drawable icon_sem_fundo
 drawable launch_background
 drawable notification_action_background
 drawable notification_bg

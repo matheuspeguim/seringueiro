@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_seringueiro/services/weather_api_service.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_bloc.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_event.dart';
@@ -10,6 +12,7 @@ import 'package:flutter_seringueiro/views/main/home/property/property_widgets/pr
 import 'package:flutter_seringueiro/views/main/home/property/rain/rain_bloc.dart';
 import 'package:flutter_seringueiro/views/main/home/property/rain/rain_widgets.dart';
 import 'package:flutter_seringueiro/views/main/home/weather/weather_page.dart';
+import 'package:flutter_seringueiro/widgets/custom_Circular_Progress_indicator.dart';
 import 'package:flutter_seringueiro/widgets/custom_card.dart';
 
 class PropertyPage extends StatefulWidget {
@@ -84,38 +87,63 @@ class _PropertyPageState extends State<PropertyPage> {
 
   Widget _buildBody(BuildContext context, PropertyState state) {
     if (state is PropertyLoading) {
-      return Center(child: CircularProgressIndicator());
+      return Center(child: CustomCircularProgressIndicator());
     } else if (state is PropertyError) {
       return Center(child: Text(state.message));
     } else if (state is PropertyLoaded) {
-      return SingleChildScrollView(
-        child: Column(
-          children: [
-            SizedBox(height: 32),
-            CustomCard(
-              title: "Previsão do tempo",
-              onButtonPressed: () => {},
-              colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.teal),
-              body: HourlyWeatherWidget(location: state.property.localizacao),
-            ),
-            SizedBox(height: 32),
-            CustomCard(
-              title: "Chuvas por mês",
-              onButtonPressed: () => {},
-              colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue),
-              body: Container(
-                height: 300,
-                child: BlocProvider<RainBloc>(
-                  create: (context) =>
-                      RainBloc(firestore: FirebaseFirestore.instance),
-                  child: RainChartWidget(propertyId: state.property.id),
+      bool _useManualData = false;
+      return RefreshIndicator(
+        onRefresh: () async {
+          context
+              .read<PropertyBloc>()
+              .add(LoadPropertyDetails(widget.user, widget.propertyId));
+        },
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              SizedBox(height: 8),
+              CustomCard(
+                title: "Previsão do tempo",
+                onButtonPressed: () => {},
+                colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.teal),
+                body: HourlyWeatherWidget(location: state.property.localizacao),
+              ),
+              SizedBox(height: 8),
+              _buildPainelDeAtividades(state.property),
+              SizedBox(height: 8),
+              CustomCard(
+                title: "Histórico de Chuvas",
+                onButtonPressed: () => {},
+                colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue),
+                body: Column(
+                  children: [
+                    SwitchListTile(
+                      title: Text('Usar Dados Próprios'),
+                      value:
+                          _useManualData, // Esta é uma variável de estado do widget
+                      onChanged: (bool value) {
+                        setState(() {
+                          _useManualData = value;
+                          // Aqui, dependendo do estado, dispare o evento apropriado no RainBloc
+                        });
+                      },
+                    ),
+                    Expanded(
+                      child: BlocProvider<RainBloc>(
+                        create: (context) => RainBloc(
+                            firestore: FirebaseFirestore.instance,
+                            weatherApiService: WeatherApiService(
+                                apiKey: dotenv.env['OPENWEATHER_API_KEY']!)),
+                        child: RainChartWidget(propertyId: state.property.id),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-            SizedBox(height: 32),
-            _buildPainelDeAtividades(state.property),
-            // Outros componentes relacionados à propriedade podem ser adicionados aqui
-          ],
+
+              // Outros componentes relacionados à propriedade podem ser adicionados aqui
+            ],
+          ),
         ),
       );
     } else {

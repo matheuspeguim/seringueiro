@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_seringueiro/views/main/home/property/field_activity/activity_point.dart';
 import 'package:flutter_seringueiro/views/main/home/property/field_activity/field_activity.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 class LocalStorageService {

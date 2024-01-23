@@ -2,7 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_seringueiro/views/main/home/property/property.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_seringueiro/services/open_weather_api_service.dart';
+import 'package:flutter_seringueiro/models/property.dart';
 import 'package:flutter_seringueiro/views/main/home/property/field_activity/field_activity_manager.dart';
 import 'package:flutter_seringueiro/views/main/home/property/rain/rain_bloc.dart';
 import 'package:flutter_seringueiro/views/main/home/property/rain/rain_dialog_content.dart';
@@ -65,7 +67,10 @@ class SeringueiroWidgets {
       context: context,
       builder: (BuildContext context) {
         return BlocProvider<RainBloc>(
-          create: (_) => RainBloc(firestore: FirebaseFirestore.instance),
+          create: (_) => RainBloc(
+              firestore: FirebaseFirestore.instance,
+              weatherApiService: WeatherApiService(
+                  apiKey: dotenv.env['OPENWEATHER_API_KEY']!)),
           child: RainDialogContent(
             property: property,
             user: user,

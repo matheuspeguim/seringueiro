@@ -2,7 +2,7 @@ import 'package:flutter/services.dart';
 
 class FlutterKotlinCommunication {
   static const MethodChannel _channel =
-      MethodChannel('com.example.flutter_seringueiro/sangria');
+      MethodChannel('com.peguim.seringueiro/sangria');
 
   static Future<void> IniciarRegistroPontos(String sangriaId) async {
     await _channel

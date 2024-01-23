@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_seringueiro/views/main/home/property/property.dart';
+import 'package:flutter_seringueiro/models/property.dart';
 
 class ProprietarioWidgets {
   static List<Widget> buildProprietarioWidgets(Property property) {

@@ -1,15 +1,19 @@
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_seringueiro/services/weather_api_service.dart';
 import 'package:flutter_seringueiro/views/main/home/property/rain/rain_event.dart';
 import 'package:flutter_seringueiro/views/main/home/property/rain/rain_state.dart';
 
 class RainBloc extends Bloc<RainEvent, RainState> {
   final FirebaseFirestore firestore;
+  final WeatherApiService weatherApiService;
 
-  RainBloc({required this.firestore}) : super(RainInitial()) {
+  RainBloc({required this.weatherApiService, required this.firestore})
+      : super(RainInitial()) {
     on<StartRainRecording>(_onStartRainRecording);
     on<SaveRainRecord>(_onSaveRainRecord);
     on<LoadRainData>(_onLoadRainData);
+    on<LoadRainHistoryFromApi>(_onLoadRainHistoryFromApi);
   }
 
   Future<void> _onStartRainRecording(
@@ -19,6 +23,7 @@ class RainBloc extends Bloc<RainEvent, RainState> {
 
   Future<void> _onSaveRainRecord(
       SaveRainRecord event, Emitter<RainState> emit) async {
+    emit(RainLoading());
     try {
       await firestore
           .collection('properties')
@@ -59,6 +64,20 @@ class RainBloc extends Bloc<RainEvent, RainState> {
       emit(RainChartDataLoaded(chartData: chartData));
     } catch (e) {
       emit(RainRecordSaveError('Erro ao carregar dados de chuva: $e'));
+    }
+  }
+
+  Future<void> _onLoadRainHistoryFromApi(
+      LoadRainHistoryFromApi event, Emitter<RainState> emit) async {
+    try {
+      emit(RainLoading());
+      var rainData = await weatherApiService.fetchRainHistory(event.latitude,
+          event.longitude, event.startTimestamp, event.endTimestamp);
+      // Converta rainData para o formato necessário
+      // Emita um estado com os dados convertidos
+    } catch (e) {
+      emit(RainRecordSaveError(
+          'Erro ao carregar dados históricos de chuva: $e'));
     }
   }
 }

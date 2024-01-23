@@ -1,20 +1,19 @@
-import 'dart:math';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_seringueiro/models/property.dart';
 import 'package:flutter_seringueiro/views/main/home/home_page_bloc.dart';
 import 'package:flutter_seringueiro/views/main/home/home_page_event.dart';
 import 'package:flutter_seringueiro/views/main/home/home_page_state.dart';
 import 'package:flutter_seringueiro/views/main/home/property/new_property/new_property_bloc.dart';
 import 'package:flutter_seringueiro/views/main/home/property/new_property/new_property_page.dart';
-import 'package:flutter_seringueiro/views/main/home/property/property.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_bloc.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_event.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_page.dart';
 import 'package:flutter_seringueiro/views/main/home/property/searcher/search_property_bloc.dart';
 import 'package:flutter_seringueiro/views/main/home/property/searcher/search_property_page.dart';
 import 'package:flutter_seringueiro/views/main/home/weather/weather_page.dart';
+import 'package:flutter_seringueiro/widgets/custom_Circular_Progress_indicator.dart';
 import 'package:flutter_seringueiro/widgets/custom_button.dart';
 import 'package:flutter_seringueiro/widgets/custom_card.dart';
 
@@ -98,7 +97,7 @@ class HomePage extends StatelessWidget {
   }
 
   Widget _loadingWidget() {
-    return Center(child: CircularProgressIndicator());
+    return CustomCircularProgressIndicator();
   }
 
   Widget _errorWidget(String message, BuildContext context) {

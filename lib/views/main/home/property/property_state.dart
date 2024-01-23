@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter_seringueiro/views/main/home/property/property.dart';
+import 'package:flutter_seringueiro/models/property.dart';
 
 abstract class PropertyState extends Equatable {
   @override

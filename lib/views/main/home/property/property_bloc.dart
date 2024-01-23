@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_seringueiro/models/property.dart';
 import 'property_event.dart';
 import 'property_state.dart';
-import 'package:flutter_seringueiro/views/main/home/property/property.dart';
 
 class PropertyBloc extends Bloc<PropertyEvent, PropertyState> {
   Timer? _timer;
