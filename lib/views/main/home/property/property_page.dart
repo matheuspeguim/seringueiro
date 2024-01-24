@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_seringueiro/services/weather_api_service.dart';
-import 'package:flutter_seringueiro/views/main/home/property/property.dart';
+import 'package:flutter_seringueiro/services/open_weather_api_service.dart';
+import 'package:flutter_seringueiro/models/property.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_bloc.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_event.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_state.dart';
@@ -36,9 +36,7 @@ class _PropertyPageState extends State<PropertyPage> {
       create: (context) =>
           PropertyBloc()..add(LoadPropertyDetails(user, propertyId)),
       child: BlocConsumer<PropertyBloc, PropertyState>(
-        listener: (context, state) {
-          // Listener logic here
-        },
+        listener: (context, state) {},
         builder: (context, state) {
           return Scaffold(
             appBar: AppBar(
@@ -132,7 +130,7 @@ class _PropertyPageState extends State<PropertyPage> {
                       child: BlocProvider<RainBloc>(
                         create: (context) => RainBloc(
                             firestore: FirebaseFirestore.instance,
-                            weatherApiService: WeatherApiService(
+                            weatherApiService: OpenWeatherApiService(
                                 apiKey: dotenv.env['OPENWEATHER_API_KEY']!)),
                         child: RainChartWidget(propertyId: state.property.id),
                       ),

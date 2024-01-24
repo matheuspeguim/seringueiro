@@ -1,4 +1,4 @@
-import 'package:flutter_seringueiro/views/main/home/property/property.dart';
+import 'package:flutter_seringueiro/models/property.dart';
 
 abstract class SearchPropertyState {}
 

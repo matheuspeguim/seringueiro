@@ -21,7 +21,7 @@ class AdminWidgets {
   static Widget buildUsersManager(context, property) {
     return CustomButton(
       label: 'Gerenciar',
-      icon: Icons.work_outline,
+      icon: Icons.add,
       onPressed: () {
         Navigator.push(
           context,

@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_seringueiro/widgets/custom_Circular_Progress_indicator.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_seringueiro/services/weather_api_service.dart';
+import 'package:flutter_seringueiro/services/open_weather_api_service.dart';
 import 'package:flutter_seringueiro/views/main/home/weather/weather_bloc.dart';
 import 'package:flutter_seringueiro/views/main/home/weather/weather_event.dart';
 import 'package:flutter_seringueiro/views/main/home/weather/weather_state.dart';
@@ -142,7 +142,7 @@ class HourlyWeatherWidget extends StatelessWidget {
     return BlocProvider<WeatherBloc>(
       create: (context) => WeatherBloc(
           weatherApiService:
-              WeatherApiService(apiKey: dotenv.env['OPENWEATHER_API_KEY']!))
+              OpenWeatherApiService(apiKey: dotenv.env['OPENWEATHER_API_KEY']!))
         ..add(WeatherRequested(latitude, longitude)),
       child: BlocBuilder<WeatherBloc, WeatherState>(
         builder: (context, state) {
@@ -288,7 +288,7 @@ class DailyWeatherWidget extends StatelessWidget {
     return BlocProvider<WeatherBloc>(
       create: (context) => WeatherBloc(
           weatherApiService:
-              WeatherApiService(apiKey: dotenv.env['OPENWEATHER_API_KEY']!))
+              OpenWeatherApiService(apiKey: dotenv.env['OPENWEATHER_API_KEY']!))
         ..add(WeatherRequested(latitude, longitude)),
       child: BlocBuilder<WeatherBloc, WeatherState>(
         builder: (context, state) {

@@ -1,17 +1,14 @@
 import 'dart:convert';
-import 'package:fl_chart/fl_chart.dart';
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:hive/hive.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:intl/intl.dart';
 
-class WeatherApiService {
+class OpenWeatherApiService {
   final String apiKey;
   late Box _cacheBox;
   bool _isCacheInitialized = false;
 
-  WeatherApiService({required this.apiKey}) {
+  OpenWeatherApiService({required this.apiKey}) {
     _initCache();
   }
 
@@ -136,49 +133,5 @@ class WeatherApiService {
       print('Erro ao fazer a chamada da API: $e');
       rethrow;
     }
-  }
-}
-
-class PrecipitationChart extends StatelessWidget {
-  final List<double> hourlyPrecipitation;
-  final DateTime lastUpdated;
-
-  const PrecipitationChart(
-      {Key? key, required this.hourlyPrecipitation, required this.lastUpdated})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    List<FlSpot> spots = [];
-    for (int i = 0; i < hourlyPrecipitation.length; i++) {
-      spots.add(FlSpot(i.toDouble(), hourlyPrecipitation[i]));
-    }
-
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(
-        'Última atualização: ${DateFormat('dd/MM/yyyy HH:mm').format(lastUpdated)}',
-        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-      ),
-      SizedBox(height: 10),
-      Expanded(
-          child: LineChart(
-        LineChartData(
-          gridData: FlGridData(show: false),
-          titlesData: FlTitlesData(show: false),
-          borderData: FlBorderData(show: false),
-          lineBarsData: [
-            LineChartBarData(
-              spots: spots,
-              isCurved: true,
-              color: Colors.blueAccent,
-              barWidth: 5,
-              isStrokeCapRound: true,
-              dotData: FlDotData(show: false),
-              belowBarData: BarAreaData(show: false),
-            ),
-          ],
-        ),
-      ))
-    ]);
   }
 }

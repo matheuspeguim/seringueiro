@@ -1,10 +1,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_seringueiro/services/weather_api_service.dart';
+import 'package:flutter_seringueiro/services/open_weather_api_service.dart';
 import 'package:flutter_seringueiro/views/main/home/weather/weather_event.dart';
 import 'package:flutter_seringueiro/views/main/home/weather/weather_state.dart';
 
 class WeatherBloc extends Bloc<WeatherEvent, WeatherState> {
-  final WeatherApiService weatherApiService;
+  final OpenWeatherApiService weatherApiService;
 
   WeatherBloc({required this.weatherApiService}) : super(WeatherInitial()) {
     on<WeatherRequested>(_onWeatherRequested);

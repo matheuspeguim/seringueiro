@@ -69,7 +69,7 @@ class SeringueiroWidgets {
         return BlocProvider<RainBloc>(
           create: (_) => RainBloc(
               firestore: FirebaseFirestore.instance,
-              weatherApiService: WeatherApiService(
+              weatherApiService: OpenWeatherApiService(
                   apiKey: dotenv.env['OPENWEATHER_API_KEY']!)),
           child: RainDialogContent(
             property: property,

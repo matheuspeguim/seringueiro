@@ -2,9 +2,11 @@
 
 abstract class LoginEvent {}
 
-class LoginSubmitted extends LoginEvent {
+class LoginWithEmailSubmitted extends LoginEvent {
   final String email;
   final String senha;
 
-  LoginSubmitted({required this.email, required this.senha});
+  LoginWithEmailSubmitted({required this.email, required this.senha});
 }
+
+class LoginWithGoogleSubmitted extends LoginEvent {}

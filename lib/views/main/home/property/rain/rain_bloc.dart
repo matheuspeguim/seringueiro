@@ -1,12 +1,12 @@
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_seringueiro/services/weather_api_service.dart';
+import 'package:flutter_seringueiro/services/open_weather_api_service.dart';
 import 'package:flutter_seringueiro/views/main/home/property/rain/rain_event.dart';
 import 'package:flutter_seringueiro/views/main/home/property/rain/rain_state.dart';
 
 class RainBloc extends Bloc<RainEvent, RainState> {
   final FirebaseFirestore firestore;
-  final WeatherApiService weatherApiService;
+  final OpenWeatherApiService weatherApiService;
 
   RainBloc({required this.weatherApiService, required this.firestore})
       : super(RainInitial()) {

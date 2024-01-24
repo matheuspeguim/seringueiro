@@ -157,8 +157,8 @@ class FieldActivityManager {
 
   Future<Map<String, dynamic>> _obterCondicoesClimaticas(
       GeoPoint localizacao) async {
-    WeatherApiService weatherService =
-        WeatherApiService(apiKey: dotenv.env['OPENWEATHER_API_KEY']!);
+    OpenWeatherApiService weatherService =
+        OpenWeatherApiService(apiKey: dotenv.env['OPENWEATHER_API_KEY']!);
     try {
       return await weatherService.weatherToFieldActivity(
           localizacao.latitude, localizacao.longitude);

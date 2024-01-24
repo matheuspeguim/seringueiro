@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_seringueiro/services/weather_api_service.dart';
+import 'package:flutter_seringueiro/services/open_weather_api_service.dart';
 import 'package:flutter_seringueiro/views/main/home/property/rain/rain_bloc.dart';
 import 'package:flutter_seringueiro/views/main/home/property/rain/rain_event.dart';
 import 'package:flutter_seringueiro/views/main/home/property/rain/rain_state.dart';
@@ -19,7 +19,7 @@ class RainDropIcon extends StatelessWidget {
       create: (context) => RainBloc(
           firestore: FirebaseFirestore.instance,
           weatherApiService:
-              WeatherApiService(apiKey: dotenv.env['OPENWEATHER_API_KEY']!))
+              OpenWeatherApiService(apiKey: dotenv.env['OPENWEATHER_API_KEY']!))
         ..add(LoadRainData(propertyId: propertyId)),
       child: BlocBuilder<RainBloc, RainState>(
         builder: (context, state) {

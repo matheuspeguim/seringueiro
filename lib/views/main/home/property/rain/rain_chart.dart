@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 class RainChart {
-
   Widget buildChart(List<FlSpot> rainData, seringueiraMonths) {
     // Encontrar o maior valor de Y
     final maxYValue = rainData.fold<double>(

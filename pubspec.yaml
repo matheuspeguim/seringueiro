@@ -34,7 +34,7 @@ dependencies:
   build_runner:
   hive_generator:
   permission_handler:
-  url_launcher:
+  url_launcher: ^6.2.4
   flutter_keyboard_visibility:
   flutter_launcher_icons:
   image_picker:

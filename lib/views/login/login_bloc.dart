@@ -8,11 +8,11 @@ import 'login_state.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
   LoginBloc() : super(LoginInitial()) {
-    on<LoginSubmitted>(_onLoginSubmitted);
+    on<LoginWithEmailSubmitted>(_onLoginSubmitted);
   }
 
   Future<void> _onLoginSubmitted(
-    LoginSubmitted event,
+    LoginWithEmailSubmitted event,
     Emitter<LoginState> emit,
   ) async {
     emit(LoginLoading());

@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_seringueiro/views/main/home/property/field_activity/field_activity_manager.dart';
-import 'package:flutter_seringueiro/views/main/home/property/property.dart';
+import 'package:flutter_seringueiro/models/property.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_widgets/admin_widgets.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_widgets/agronomo_widgets.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_widgets/property_buttons_widget/property_button_event.dart';

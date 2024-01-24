@@ -1,5 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_seringueiro/views/main/home/property/property.dart';
+import 'package:flutter_seringueiro/models/property.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 abstract class NewPropertyState {}

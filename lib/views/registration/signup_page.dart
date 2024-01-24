@@ -1,8 +1,11 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_seringueiro/validators/contact_info_validator.dart';
 import 'package:flutter_seringueiro/views/registration/user_info/personal/personal_bloc.dart';
 import 'package:flutter_seringueiro/views/registration/user_info/personal/personal_info_page.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SignUpPage extends StatefulWidget {
   @override
@@ -21,6 +24,9 @@ class _SignUpPageState extends State<SignUpPage> {
   final _senhaFocus = FocusNode();
   final _confirmarSenhaFocus = FocusNode();
   bool _isLoading = false;
+  bool _privacyPolicyAccept = false;
+  bool _termsOfUseAccepted = false;
+  bool _lgpdAgreementAccepted = false;
 
   @override
   void dispose() {
@@ -33,43 +39,6 @@ class _SignUpPageState extends State<SignUpPage> {
     _senhaFocus.dispose();
     _confirmarSenhaFocus.dispose();
     super.dispose();
-  }
-
-  //VALIDATOR DE EMAIL
-  String? validarEmail(String? valor) {
-    if (valor == null || valor.isEmpty) {
-      return 'Por favor, insira seu e-mail';
-    }
-
-    // Expressão regular para validar o e-mail
-    RegExp regex = RegExp(
-        r'^[a-zA-Z0-9.a-zA-Z0-9.!#$%&’*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+');
-
-    if (!regex.hasMatch(valor)) {
-      return 'Por favor, insira um e-mail válido';
-    }
-
-    return null; // E-mail válido
-  }
-
-  //VALIDATOR DE CELULAR
-  String? validarCelular(String? valor) {
-    if (valor == null || valor.isEmpty) {
-      return 'Por favor, insira seu número de celular';
-    }
-
-    // Remove espaços, traços e parênteses
-    String celular = valor.replaceAll(RegExp(r'[^\d]'), '');
-
-    if (celular.length != 11) {
-      return 'O celular deve ter 11 dígitos';
-    }
-
-    if (!celular.startsWith('9', 2)) {
-      return 'O número deve começar com 9 após o DDD';
-    }
-
-    return null; // Número de celular válido
   }
 
   //VALIDATOR DE SENHA
@@ -108,8 +77,10 @@ class _SignUpPageState extends State<SignUpPage> {
 
   bool _validateForm() {
     // Validação do formulário inteiro
-    String? emailError = validarEmail(_emailController.text);
-    String? celularError = validarCelular(_celularController.text);
+    String? emailError =
+        ContactInfoValidator.validarEmail(_emailController.text);
+    String? celularError =
+        ContactInfoValidator.validarCelular(_celularController.text);
     String? passwordError = validarSenha(_senhaController.text);
     String? confirmPasswordError =
         validarConfirmaSenha(_confirmarSenhaController.text);
@@ -176,7 +147,7 @@ class _SignUpPageState extends State<SignUpPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.green.shade900,
+      backgroundColor: Colors.green.shade100,
       appBar: AppBar(
         title: Text(
           'Criar conta',
@@ -197,36 +168,17 @@ class _SignUpPageState extends State<SignUpPage> {
                     TextFormField(
                       controller: _emailController,
                       focusNode: _emailFocus,
-                      validator: validarEmail,
+                      validator: ContactInfoValidator.validarEmail,
                       autovalidateMode: AutovalidateMode.onUserInteraction,
                       keyboardType: TextInputType.emailAddress,
                       decoration: InputDecoration(
                           labelText: 'E-mail',
                           labelStyle: TextStyle(
-                            color: Colors.white,
                             fontSize: 18.0,
                           )),
-                      style: TextStyle(color: Colors.white, fontSize: 18.0),
+                      style: TextStyle(fontSize: 18.0),
                       onFieldSubmitted: (value) {
                         FocusScope.of(context).requestFocus(_celularFocus);
-                      },
-                    ),
-                    SizedBox(height: 32.0),
-                    TextFormField(
-                      controller: _celularController,
-                      focusNode: _celularFocus,
-                      validator: validarCelular,
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                          labelText: 'Celular',
-                          labelStyle: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18.0,
-                          )),
-                      style: TextStyle(color: Colors.white, fontSize: 18.0),
-                      onFieldSubmitted: (value) {
-                        FocusScope.of(context).requestFocus(_senhaFocus);
                       },
                     ),
                     SizedBox(height: 32.0),
@@ -239,10 +191,9 @@ class _SignUpPageState extends State<SignUpPage> {
                       decoration: InputDecoration(
                           labelText: 'Senha',
                           labelStyle: TextStyle(
-                            color: Colors.white,
                             fontSize: 18.0,
                           )),
-                      style: TextStyle(color: Colors.white, fontSize: 18.0),
+                      style: TextStyle(fontSize: 18.0),
                       onChanged: (valor) {
                         setState(() {});
                       },
@@ -262,10 +213,9 @@ class _SignUpPageState extends State<SignUpPage> {
                       decoration: InputDecoration(
                           labelText: 'Confirmar senha',
                           labelStyle: TextStyle(
-                            color: Colors.white,
                             fontSize: 18.0,
                           )),
-                      style: TextStyle(color: Colors.white, fontSize: 18.0),
+                      style: TextStyle(fontSize: 18.0),
                       onChanged: (valor) {
                         setState(() {});
                       },
@@ -282,6 +232,154 @@ class _SignUpPageState extends State<SignUpPage> {
                       obscureText: true,
                     ),
                     SizedBox(height: 32.0),
+                    Row(
+                      children: <Widget>[
+                        Checkbox(
+                          value: _privacyPolicyAccept,
+                          onChanged: (bool? newValue) {
+                            setState(() {
+                              _privacyPolicyAccept = newValue ?? false;
+                            });
+                          },
+                        ),
+                        SizedBox(
+                          width: 8,
+                        ),
+                        Expanded(
+                          child: RichText(
+                            text: TextSpan(
+                              style: TextStyle(
+                                fontSize: 16,
+                              ),
+                              children: <TextSpan>[
+                                TextSpan(
+                                    text: 'Declaro que li e concordo com a ',
+                                    style: TextStyle(color: Colors.black)),
+                                TextSpan(
+                                  text: 'Política de privacidade',
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold,
+                                      decoration: TextDecoration.underline),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () async {
+                                      final Uri url = Uri.parse(
+                                          'https://www.seringueiro.com/politicadeprivacidade');
+                                      if (await canLaunchUrl(url)) {
+                                        await launchUrl(url);
+                                      } else {
+                                        throw 'Não foi possível abrir $url';
+                                      }
+                                    },
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                    SizedBox(height: 32.0),
+                    Row(
+                      children: <Widget>[
+                        Checkbox(
+                          value: _termsOfUseAccepted,
+                          onChanged: (bool? newValue) {
+                            setState(() {
+                              _termsOfUseAccepted = newValue ?? false;
+                            });
+                          },
+                        ),
+                        SizedBox(
+                          width: 8,
+                        ),
+                        Expanded(
+                          child: RichText(
+                            text: TextSpan(
+                              style: TextStyle(
+                                fontSize: 16,
+                              ),
+                              children: <TextSpan>[
+                                TextSpan(
+                                    text: 'Declaro que li e concordo com os ',
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                    )),
+                                TextSpan(
+                                  text: 'Termos de uso',
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold,
+                                      decoration: TextDecoration.underline),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () async {
+                                      final Uri url = Uri.parse(
+                                          'https://www.seringueiro.com/termosdeuso');
+                                      if (await canLaunchUrl(url)) {
+                                        await launchUrl(url);
+                                      } else {
+                                        throw 'Não foi possível abrir $url';
+                                      }
+                                    },
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                    Divider(),
+                    Row(
+                      children: <Widget>[
+                        Checkbox(
+                          value: _lgpdAgreementAccepted,
+                          onChanged: (bool? newValue) {
+                            setState(() {
+                              _lgpdAgreementAccepted = newValue ?? false;
+                            });
+                          },
+                        ),
+                        SizedBox(
+                          width: 8,
+                        ),
+                        Expanded(
+                          child: RichText(
+                            text: TextSpan(
+                              style: TextStyle(
+                                fontSize: 16,
+                              ),
+                              children: <TextSpan>[
+                                TextSpan(
+                                    text:
+                                        'Estou ciente e de acordo com a maneira que meus dados são tratados, de acordo com a  ',
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                    )),
+                                TextSpan(
+                                  text: 'Lei Geral de Proteção de Dados (LGPD)',
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold,
+                                      decoration: TextDecoration.underline),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () async {
+                                      final Uri url = Uri.parse(
+                                          'https://www.seringueiro.com/termosdeuso');
+                                      if (await canLaunchUrl(url)) {
+                                        await launchUrl(url);
+                                      } else {
+                                        throw 'Não foi possível abrir $url';
+                                      }
+                                    },
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                    SizedBox(
+                      height: 32,
+                    ),
                     ElevatedButton(
                       child: Text('Próximo'),
                       onPressed: () {

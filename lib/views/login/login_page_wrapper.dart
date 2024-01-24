@@ -1,5 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_seringueiro/views/login/login_bloc.dart';
 import 'package:flutter_seringueiro/views/main/main_page.dart';
 import 'login_page.dart'; // Ajuste o caminho conforme necessário
 
@@ -13,7 +15,11 @@ class LoginPageWrapper extends StatelessWidget {
           if (snapshot.hasData) {
             return MainPage(user: snapshot.data!);
           }
-          return LoginPage();
+          // Envolver LoginPage com BlocProvider de LoginBloc
+          return BlocProvider(
+            create: (context) => LoginBloc(),
+            child: LoginPage(),
+          );
         }
         return CircularProgressIndicator(); // Tela de carregamento
       },

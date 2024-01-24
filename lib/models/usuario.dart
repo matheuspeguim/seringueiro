@@ -1,4 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_seringueiro/views/user/account_management_page.dart';
 import 'package:flutter_seringueiro/views/user/profile_page.dart';
 
 class Usuario {
@@ -26,6 +28,18 @@ class Usuario {
       nome: data['nome'],
       profilePictureUrl: data['profilePictureUrl'],
       rg: data['rg'],
+    );
+  }
+
+  factory Usuario.fromFirebaseUser(
+      User user, Map<String, dynamic> firestoreData) {
+    return Usuario(
+      cpf: firestoreData['cpf'],
+      dataDeNascimento: DateTime.parse(firestoreData['dataDeNascimento']),
+      idPersonalizado: firestoreData['idPersonalizado'],
+      nome: firestoreData['nome'],
+      profilePictureUrl: firestoreData['profilePictureUrl'],
+      rg: firestoreData['rg'],
     );
   }
 }
@@ -98,6 +112,38 @@ class UsuarioIcon extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class UsuarioDrawerHeader extends StatelessWidget {
+  final Usuario usuario;
+
+  UsuarioDrawerHeader({Key? key, required this.usuario}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return DrawerHeader(
+      child: Row(children: <Widget>[
+        CircleAvatar(
+          radius: 25,
+          backgroundImage: NetworkImage(
+            usuario.profilePictureUrl.isNotEmpty
+                ? usuario.profilePictureUrl
+                : 'URL_DE_IMAGEM_PADRÃO',
+          ),
+        ),
+        SizedBox(
+          width: 8,
+        ),
+        Text(
+          usuario.nome,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ]),
     );
   }
 }

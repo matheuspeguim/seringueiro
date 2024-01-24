@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_seringueiro/models/usuario.dart';
 import 'package:flutter_seringueiro/views/main/seringuia/seringuia_bloc.dart';
 import 'package:flutter_seringueiro/views/main/seringuia/seringuia_page.dart';
 import 'package:flutter_seringueiro/views/main/home/home_page.dart';
@@ -24,6 +25,7 @@ class _MainPageState extends State<MainPage> {
   int _currentIndex = 0;
   final PageController _pageController = PageController();
   String userName = "";
+  Usuario? _currentUser;
 
   @override
   void initState() {
@@ -37,15 +39,21 @@ class _MainPageState extends State<MainPage> {
         .doc(widget.user.uid)
         .get();
     if (userDoc.exists) {
+      var userData = userDoc.data() as Map<String, dynamic>;
+      Usuario usuario = Usuario.fromFirebaseUser(widget.user, userData);
       setState(() {
-        userName =
-            (userDoc.data() as Map<String, dynamic>)['nome'].split(" ").first;
+        userName = usuario.nome.split(" ").first;
+        // Salve o objeto Usuario para uso posterior
+        _currentUser = usuario;
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_currentUser == null) {
+      return Center(child: CircularProgressIndicator());
+    }
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -55,7 +63,7 @@ class _MainPageState extends State<MainPage> {
           'Olá, $userName',
         ),
       ),
-      drawer: CustomDrawer(),
+      drawer: CustomDrawer(usuario: _currentUser!),
       body: PageView(
         controller: _pageController,
         onPageChanged: (index) => setState(() => _currentIndex = index),

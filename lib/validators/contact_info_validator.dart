@@ -1,18 +1,45 @@
 class ContactInfoValidator {
-  static String? validarCelular(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'O número do celular é obrigatório';
+  //VALIDATOR DE EMAIL
+  static String? validarEmail(String? valor) {
+    if (valor == null || valor.isEmpty) {
+      return 'Por favor, insira seu e-mail';
     }
 
-    // Expressão regular para validar números de celular brasileiros com DDD
-    // e 9 dígitos, permitindo parênteses, espaços e hífen
-    var regex = RegExp(r'^\(\d{2}\)\s?\d{4,5}-?\d{4}$');
+    // Expressão regular para validar o e-mail
+    RegExp regex = RegExp(
+        r'^[a-zA-Z0-9.a-zA-Z0-9.!#$%&’*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+');
 
-    if (!regex.hasMatch(value)) {
+    if (!regex.hasMatch(valor)) {
+      return 'Por favor, insira um e-mail válido';
+    }
+
+    return null; // E-mail válido
+  }
+
+  static String? validarCelular(String? valor) {
+    if (valor == null || valor.isEmpty) {
+      return 'Por favor, insira seu número de celular';
+    }
+
+    // Remove caracteres não numéricos
+    String celular = valor.replaceAll(RegExp(r'[^\d]'), '');
+
+    // Verifica se tem 11 dígitos
+    if (celular.length != 11) {
+      return 'O celular deve ter 11 dígitos';
+    }
+
+    // Verifica se o número começa com 9 após o DDD
+    if (!celular.startsWith('9', 2)) {
+      return 'O número deve começar com 9 após o DDD';
+    }
+
+    // Verifica se o formato do número é válido
+    var regex = RegExp(r'^\d{2}9\d{8}$');
+    if (!regex.hasMatch(celular)) {
       return 'Insira um número de celular válido';
     }
 
-    // Se passar na validação, retornamos null, que significa que não há erro
-    return null;
+    return null; // Número de celular válido
   }
 }
