@@ -1,21 +1,20 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_seringueiro/views/user/account_management_page.dart';
 import 'package:flutter_seringueiro/views/user/profile_page.dart';
 
 class Usuario {
+  final String nome;
   final String cpf;
   final DateTime dataDeNascimento;
   final String idPersonalizado;
-  final String nome;
   final String profilePictureUrl;
   final String rg;
 
   Usuario({
+    required this.nome,
     required this.cpf,
     required this.dataDeNascimento,
     required this.idPersonalizado,
-    required this.nome,
     required this.profilePictureUrl,
     required this.rg,
   });
@@ -123,27 +122,38 @@ class UsuarioDrawerHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DrawerHeader(
-      child: Row(children: <Widget>[
-        CircleAvatar(
-          radius: 25,
-          backgroundImage: NetworkImage(
-            usuario.profilePictureUrl.isNotEmpty
-                ? usuario.profilePictureUrl
-                : 'URL_DE_IMAGEM_PADRÃO',
+    return InkWell(
+      onTap: () {
+        // Navegue para a página de perfil do usuário.
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ProfilePage(usuario: usuario),
           ),
-        ),
-        SizedBox(
-          width: 8,
-        ),
-        Text(
-          usuario.nome,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
+        );
+      },
+      child: DrawerHeader(
+        child: Row(children: <Widget>[
+          CircleAvatar(
+            radius: 25,
+            backgroundImage: NetworkImage(
+              usuario.profilePictureUrl.isNotEmpty
+                  ? usuario.profilePictureUrl
+                  : 'URL_DE_IMAGEM_PADRÃO',
+            ),
           ),
-        ),
-      ]),
+          SizedBox(
+            width: 8,
+          ),
+          Text(
+            usuario.nome,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ]),
+      ),
     );
   }
 }

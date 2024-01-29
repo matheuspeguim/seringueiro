@@ -11,7 +11,7 @@ import 'package:flutter_seringueiro/views/main/home/property/property_state.dart
 import 'package:flutter_seringueiro/views/main/home/property/property_widgets/property_buttons_widget/property_buttons_widget.dart';
 import 'package:flutter_seringueiro/views/main/home/property/rain/rain_bloc.dart';
 import 'package:flutter_seringueiro/views/main/home/property/rain/rain_widgets.dart';
-import 'package:flutter_seringueiro/views/main/home/weather/weather_page.dart';
+import 'package:flutter_seringueiro/views/main/home/weather/hourly_weather_widget.dart';
 import 'package:flutter_seringueiro/widgets/custom_Circular_Progress_indicator.dart';
 import 'package:flutter_seringueiro/widgets/custom_card.dart';
 

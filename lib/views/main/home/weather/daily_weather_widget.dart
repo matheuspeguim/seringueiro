@@ -51,13 +51,13 @@ class DailyForecastCard extends StatelessWidget {
     if (now.day == forecast.date.day &&
         now.month == forecast.date.month &&
         now.year == forecast.date.year) {
-      displayDate = "Hoje";
+      displayDate = "hoje";
     }
 
     if (now.day + 1 == forecast.date.day &&
         now.month == forecast.date.month &&
         now.year == forecast.date.year) {
-      displayDate = "Hoje";
+      displayDate = "amanhã";
     }
 
     return Container(
@@ -128,7 +128,7 @@ class DailyWeatherWidget extends StatelessWidget {
     final double latitude = location.latitude;
     final double longitude = location.longitude;
 
-    return BlocProvider<WeatherBloc>(
+    return BlocProvider(
       create: (context) => WeatherBloc(
           weatherApiService:
               OpenWeatherApiService(apiKey: dotenv.env['OPENWEATHER_API_KEY']!))

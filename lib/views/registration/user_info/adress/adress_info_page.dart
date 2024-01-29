@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
-import 'package:flutter_seringueiro/validators/adress_info_validator.dart';
+import 'package:flutter_seringueiro/validators/form_validators.dart';
 import 'package:flutter_seringueiro/views/main/main_page.dart';
 import 'package:flutter_seringueiro/views/registration/user_info/adress/adress_bloc.dart';
 import 'package:flutter_seringueiro/views/registration/user_info/adress/adress_event.dart';
@@ -117,7 +117,7 @@ class _AdressInfoPageState extends State<AdressInfoPage> {
                         labelStyle: TextStyle(color: Colors.white),
                       ),
                       style: TextStyle(color: Colors.white, fontSize: 18.0),
-                      validator: AdressInfoValidator.validarCEP,
+                      validator: FormValidators.validarCEP,
                       autovalidateMode: AutovalidateMode.onUserInteraction,
                       onFieldSubmitted: (_) {
                         _submitCep();
@@ -139,7 +139,7 @@ class _AdressInfoPageState extends State<AdressInfoPage> {
                             ),
                             style:
                                 TextStyle(color: Colors.white, fontSize: 18.0),
-                            validator: AdressInfoValidator.validarRuaOuSitio,
+                            validator: FormValidators.validarRuaOuSitio,
                             autovalidateMode:
                                 AutovalidateMode.onUserInteraction,
                             onFieldSubmitted: (_) {
@@ -160,7 +160,7 @@ class _AdressInfoPageState extends State<AdressInfoPage> {
                             ),
                             style:
                                 TextStyle(color: Colors.white, fontSize: 18.0),
-                            validator: AdressInfoValidator.validarNumero,
+                            validator: FormValidators.validarNumero,
                             autovalidateMode:
                                 AutovalidateMode.onUserInteraction,
                             onFieldSubmitted: (_) {
@@ -180,7 +180,7 @@ class _AdressInfoPageState extends State<AdressInfoPage> {
                         labelStyle: TextStyle(color: Colors.white),
                       ),
                       style: TextStyle(color: Colors.white, fontSize: 18.0),
-                      validator: AdressInfoValidator.validarBairro,
+                      validator: FormValidators.validarBairro,
                       autovalidateMode: AutovalidateMode.onUserInteraction,
                       onFieldSubmitted: (_) {
                         if (_cidadeEEstadoEnabled == false) {
@@ -205,7 +205,7 @@ class _AdressInfoPageState extends State<AdressInfoPage> {
                             ),
                             style:
                                 TextStyle(color: Colors.white, fontSize: 18.0),
-                            validator: AdressInfoValidator.validarCidade,
+                            validator: FormValidators.validarCidade,
                             autovalidateMode:
                                 AutovalidateMode.onUserInteraction,
                             onFieldSubmitted: (_) {
@@ -227,7 +227,7 @@ class _AdressInfoPageState extends State<AdressInfoPage> {
                             ),
                             style:
                                 TextStyle(color: Colors.white, fontSize: 18.0),
-                            validator: AdressInfoValidator.validarEstado,
+                            validator: FormValidators.validarEstado,
                             autovalidateMode:
                                 AutovalidateMode.onUserInteraction,
                             onFieldSubmitted: (_) {

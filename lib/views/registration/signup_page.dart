@@ -1,11 +1,16 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_seringueiro/validators/contact_info_validator.dart';
-import 'package:flutter_seringueiro/views/registration/user_info/personal/personal_bloc.dart';
-import 'package:flutter_seringueiro/views/registration/user_info/personal/personal_info_page.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_masked_text2/flutter_masked_text2.dart';
+import 'package:flutter_seringueiro/views/registration/signup_bloc.dart';
+import 'package:flutter_seringueiro/views/registration/signup_event.dart';
+import 'package:flutter_seringueiro/views/registration/signup_state.dart';
+import 'package:flutter_seringueiro/views/registration/signup_user_views/celular_view.dart';
+import 'package:flutter_seringueiro/views/registration/signup_user_views/confirmar_celular_view.dart';
+import 'package:flutter_seringueiro/views/registration/signup_user_views/confirmar_email_view.dart';
+import 'package:flutter_seringueiro/views/registration/signup_user_views/endereco_view.dart';
+import 'package:flutter_seringueiro/views/registration/signup_user_views/nome_view.dart';
+import 'package:flutter_seringueiro/views/registration/signup_user_views/pessoal_view.dart';
+import 'package:flutter_seringueiro/views/registration/signup_user_views/signup_view.dart';
 
 class SignUpPage extends StatefulWidget {
   @override
@@ -13,390 +18,266 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
-  final _auth = FirebaseAuth.instance;
+  final GlobalKey<FormState> _formKeySignUp = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKeyConfirmarEmail = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKeyNome = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKeyPessoal = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKeyCelular = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKeyConfirmarCelular = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKeyEndereco = GlobalKey<FormState>();
+  bool _isNextButtonEnabled = false;
+  final _pageController = PageController();
+  int _currentPage = 0;
   final _emailController = TextEditingController();
-  final _celularController = TextEditingController();
   final _senhaController = TextEditingController();
   final _confirmarSenhaController = TextEditingController();
+  final _nomeController = TextEditingController();
+  final _idPersonalizadoController = TextEditingController();
+  final _nascimentoController = MaskedTextController(mask: '00/00/0000');
+  final _cpfController = MaskedTextController(mask: '000.000.000-00');
+  final _rgController = TextEditingController();
+  final _celularController = MaskedTextController(mask: '(00)00000-0000');
+  final _codigoConfirmarCelularController = TextEditingController();
+  final _cepController = MaskedTextController(mask: '00000-000');
+  final _ruaOuSitioController = TextEditingController();
+  final _complementoController = TextEditingController();
+  final _bairroController = TextEditingController();
+  final _numeroController = TextEditingController();
+  final _cidadeController = TextEditingController();
+  final _estadoController = TextEditingController();
 
-  final _emailFocus = FocusNode();
-  final _celularFocus = FocusNode();
-  final _senhaFocus = FocusNode();
-  final _confirmarSenhaFocus = FocusNode();
-  bool _isLoading = false;
-  bool _privacyPolicyAccept = false;
-  bool _termsOfUseAccepted = false;
-  bool _lgpdAgreementAccepted = false;
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _celularController.dispose();
-    _senhaController.dispose();
-    _confirmarSenhaController.dispose();
-    _emailFocus.dispose();
-    _celularFocus.dispose();
-    _senhaFocus.dispose();
-    _confirmarSenhaFocus.dispose();
-    super.dispose();
+  bool _validateCurrentForm() {
+    switch (_currentPage) {
+      case 0:
+        return _formKeySignUp.currentState?.validate() ?? false;
+      case 1:
+        return _formKeyConfirmarEmail.currentState?.validate() ?? false;
+      case 2:
+        return _formKeyNome.currentState?.validate() ?? false;
+      case 3:
+        return _formKeyPessoal.currentState?.validate() ?? false;
+      case 4:
+        return _formKeyCelular.currentState?.validate() ?? false;
+      case 5:
+        return _formKeyConfirmarCelular.currentState?.validate() ?? false;
+      case 6:
+        return _formKeyEndereco.currentState?.validate() ?? false;
+      // Adicione mais casos para outras páginas
+      default:
+        return false;
+    }
   }
 
-  //VALIDATOR DE SENHA
-  String? validarSenha(String? valor) {
-    if (valor == null || valor.isEmpty) {
-      return 'Informe uma senha';
-    }
-    if (valor.length < 8) {
-      return 'A senha deve ter pelo menos 8 caracteres';
-    }
-    if (!RegExp(r'[a-z]').hasMatch(valor)) {
-      return 'A senha deve conter pelo menos uma letra minúscula';
-    }
-    if (!RegExp(r'[A-Z]').hasMatch(valor)) {
-      return 'A senha deve conter pelo menos uma letra maiúscula';
-    }
-    if (!RegExp(r'[0-9]').hasMatch(valor)) {
-      return 'A senha deve conter pelo menos um número';
-    }
-    if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(valor)) {
-      return 'A senha deve conter pelo menos um caractere especial';
-    }
-    return null;
-  }
-
-  //VALIDATOR DE CONFIRMAÇÃO DE SENHA
-  String? validarConfirmaSenha(String? valor) {
-    if (valor == null || valor.isEmpty) {
-      return 'Confirme sua senha';
-    }
-    if (valor != _senhaController.text) {
-      return 'As senhas não correspondem';
-    }
-    return null;
-  }
-
-  bool _validateForm() {
-    // Validação do formulário inteiro
-    String? emailError =
-        ContactInfoValidator.validarEmail(_emailController.text);
-    String? celularError =
-        ContactInfoValidator.validarCelular(_celularController.text);
-    String? passwordError = validarSenha(_senhaController.text);
-    String? confirmPasswordError =
-        validarConfirmaSenha(_confirmarSenhaController.text);
-
-    return emailError == null &&
-        celularError == null &&
-        passwordError == null &&
-        confirmPasswordError == null;
-  }
-
-  Future<void> _registerAccount() async {
-    if (!_validateForm()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Por favor, corrija os erros no formulário.'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
+  void updateNextButtonState() {
+    bool isFormValid = _validateCurrentForm();
     setState(() {
-      _isLoading = true;
+      _isNextButtonEnabled = isFormValid;
     });
-    try {
-      final newUser = await _auth.createUserWithEmailAndPassword(
-        email: _emailController.text,
-        password: _senhaController.text,
-      );
-      if (newUser.user != null) {
-        // Verifica se o widget ainda está montado antes de navegar
-        if (mounted) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => BlocProvider(
-                create: (context) => PersonalBloc(),
-                child: PersonalInfoPage(user: newUser.user!),
-              ),
-            ),
-          );
-        }
-      }
-    } on FirebaseAuthException catch (e) {
-      String message = 'An error occurred';
-      if (e.code == 'weak-password') {
-        message = 'Crie uma senha mais forte';
-      } else if (e.code == 'email-already-in-use') {
-        message = 'Já existe um usuário com este e-mail.';
-      }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          backgroundColor: Colors.red,
-        ),
-      );
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.green.shade100,
-      appBar: AppBar(
-        title: Text(
-          'Criar conta',
-          style: TextStyle(color: Colors.white, fontSize: 33.0),
-        ),
+    return BlocListener<SignUpBloc, SignUpState>(
+      listener: (context, state) {
+        if (state is SignUpLoading) {
+          CircularProgressIndicator();
+        }
+        // Verificação de e-mail enviada
+        if (state is SignUpEmailVerificationSent) {
+          _pageController.nextPage(
+            duration: Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+          );
+        }
+        // Usuário já existe
+        else if (state is SignUpUserAlreadyExists) {
+          _showUserExistsDialog(context);
+        }
+        // E-mail verificado
+        else if (state is SignUpEmailVerified) {
+          _pageController.nextPage(
+            duration: Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+          );
+        }
+        // Informações pessoais salvas
+        else if (state is SignUpPersonalInfoSaved) {
+          _pageController.nextPage(
+            duration: Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+          );
+        }
+        // Celular verificado
+        else if (state is SignUpCelularVerified) {
+          _pageController.nextPage(
+            duration: Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+          );
+        }
+        // Informações de endereço atualizadas
+        else if (state is SignUpSuccess) {
+          // Navegar para a próxima tela ou finalizar o fluxo de cadastro
+        }
+        // Erro durante o processo de cadastro
+        else if (state is SignUpFailure) {
+          _showErrorDialog(context, state.error);
+        }
+        // Caso o tempo de verificação de e-mail expire
+        else if (state is SignUpEmailVerificationTimeout) {
+          // Mostrar botão para tentar novamente ou mensagem
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(backgroundColor: Colors.green.shade900),
         backgroundColor: Colors.green.shade900,
-        centerTitle: true,
+        body: _buildPageView(),
+        bottomNavigationBar: _buildBottomAppBar(),
       ),
-      body: _isLoading
-          ? Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              child: Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    TextFormField(
-                      controller: _emailController,
-                      focusNode: _emailFocus,
-                      validator: ContactInfoValidator.validarEmail,
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: InputDecoration(
-                          labelText: 'E-mail',
-                          labelStyle: TextStyle(
-                            fontSize: 18.0,
-                          )),
-                      style: TextStyle(fontSize: 18.0),
-                      onFieldSubmitted: (value) {
-                        FocusScope.of(context).requestFocus(_celularFocus);
-                      },
-                    ),
-                    SizedBox(height: 32.0),
-                    TextFormField(
-                      controller: _senhaController,
-                      focusNode: _senhaFocus,
-                      validator: validarSenha,
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      keyboardType: TextInputType.text,
-                      decoration: InputDecoration(
-                          labelText: 'Senha',
-                          labelStyle: TextStyle(
-                            fontSize: 18.0,
-                          )),
-                      style: TextStyle(fontSize: 18.0),
-                      onChanged: (valor) {
-                        setState(() {});
-                      },
-                      obscureText: true,
-                      onFieldSubmitted: (value) {
-                        FocusScope.of(context)
-                            .requestFocus(_confirmarSenhaFocus);
-                      },
-                    ),
-                    SizedBox(height: 32.0),
-                    TextFormField(
-                      controller: _confirmarSenhaController,
-                      focusNode: _confirmarSenhaFocus,
-                      validator: validarConfirmaSenha,
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      keyboardType: TextInputType.text,
-                      decoration: InputDecoration(
-                          labelText: 'Confirmar senha',
-                          labelStyle: TextStyle(
-                            fontSize: 18.0,
-                          )),
-                      style: TextStyle(fontSize: 18.0),
-                      onChanged: (valor) {
-                        setState(() {});
-                      },
-                      onFieldSubmitted: (value) {
-                        if (_validateForm()) {
-                          _registerAccount();
-                        } else {
-                          // Exibir mensagem de erro
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                              content: Text(
-                                  'Por favor, preencha o formulário corretamente.')));
-                        }
-                      },
-                      obscureText: true,
-                    ),
-                    SizedBox(height: 32.0),
-                    Row(
-                      children: <Widget>[
-                        Checkbox(
-                          value: _privacyPolicyAccept,
-                          onChanged: (bool? newValue) {
-                            setState(() {
-                              _privacyPolicyAccept = newValue ?? false;
-                            });
-                          },
-                        ),
-                        SizedBox(
-                          width: 8,
-                        ),
-                        Expanded(
-                          child: RichText(
-                            text: TextSpan(
-                              style: TextStyle(
-                                fontSize: 16,
-                              ),
-                              children: <TextSpan>[
-                                TextSpan(
-                                    text: 'Declaro que li e concordo com a ',
-                                    style: TextStyle(color: Colors.black)),
-                                TextSpan(
-                                  text: 'Política de privacidade',
-                                  style: TextStyle(
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.bold,
-                                      decoration: TextDecoration.underline),
-                                  recognizer: TapGestureRecognizer()
-                                    ..onTap = () async {
-                                      final Uri url = Uri.parse(
-                                          'https://www.seringueiro.com/politicadeprivacidade');
-                                      if (await canLaunchUrl(url)) {
-                                        await launchUrl(url);
-                                      } else {
-                                        throw 'Não foi possível abrir $url';
-                                      }
-                                    },
-                                ),
-                              ],
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
-                    SizedBox(height: 32.0),
-                    Row(
-                      children: <Widget>[
-                        Checkbox(
-                          value: _termsOfUseAccepted,
-                          onChanged: (bool? newValue) {
-                            setState(() {
-                              _termsOfUseAccepted = newValue ?? false;
-                            });
-                          },
-                        ),
-                        SizedBox(
-                          width: 8,
-                        ),
-                        Expanded(
-                          child: RichText(
-                            text: TextSpan(
-                              style: TextStyle(
-                                fontSize: 16,
-                              ),
-                              children: <TextSpan>[
-                                TextSpan(
-                                    text: 'Declaro que li e concordo com os ',
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                    )),
-                                TextSpan(
-                                  text: 'Termos de uso',
-                                  style: TextStyle(
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.bold,
-                                      decoration: TextDecoration.underline),
-                                  recognizer: TapGestureRecognizer()
-                                    ..onTap = () async {
-                                      final Uri url = Uri.parse(
-                                          'https://www.seringueiro.com/termosdeuso');
-                                      if (await canLaunchUrl(url)) {
-                                        await launchUrl(url);
-                                      } else {
-                                        throw 'Não foi possível abrir $url';
-                                      }
-                                    },
-                                ),
-                              ],
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
-                    Divider(),
-                    Row(
-                      children: <Widget>[
-                        Checkbox(
-                          value: _lgpdAgreementAccepted,
-                          onChanged: (bool? newValue) {
-                            setState(() {
-                              _lgpdAgreementAccepted = newValue ?? false;
-                            });
-                          },
-                        ),
-                        SizedBox(
-                          width: 8,
-                        ),
-                        Expanded(
-                          child: RichText(
-                            text: TextSpan(
-                              style: TextStyle(
-                                fontSize: 16,
-                              ),
-                              children: <TextSpan>[
-                                TextSpan(
-                                    text:
-                                        'Estou ciente e de acordo com a maneira que meus dados são tratados, de acordo com a  ',
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                    )),
-                                TextSpan(
-                                  text: 'Lei Geral de Proteção de Dados (LGPD)',
-                                  style: TextStyle(
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.bold,
-                                      decoration: TextDecoration.underline),
-                                  recognizer: TapGestureRecognizer()
-                                    ..onTap = () async {
-                                      final Uri url = Uri.parse(
-                                          'https://www.seringueiro.com/termosdeuso');
-                                      if (await canLaunchUrl(url)) {
-                                        await launchUrl(url);
-                                      } else {
-                                        throw 'Não foi possível abrir $url';
-                                      }
-                                    },
-                                ),
-                              ],
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
-                    SizedBox(
-                      height: 32,
-                    ),
-                    ElevatedButton(
-                      child: Text('Próximo'),
-                      onPressed: () {
-                        if (_validateForm()) {
-                          _registerAccount();
-                        } else {
-                          // Exibir mensagem de erro
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                              content: Text(
-                                  'Por favor, preencha o formulário corretamente.')));
-                        }
-                      },
-                    ),
-                  ],
-                ),
-              ),
+    );
+  }
+
+  void _showUserExistsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Usuário Existente'),
+          content: Text('Já existe uma conta com o e-mail fornecido.'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
             ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildPageView() {
+    final state = context.watch<SignUpBloc>().state;
+    bool isLoadin = state is SignUpLoading;
+    return isLoadin
+        ? Center(child: CircularProgressIndicator())
+        : PageView(
+            physics: NeverScrollableScrollPhysics(),
+            controller: _pageController,
+            onPageChanged: (int page) {
+              setState(() {
+                _currentPage = page;
+              });
+            },
+            children: <Widget>[
+              SignUpView(
+                formKey: _formKeySignUp,
+                emailController: _emailController,
+                senhaController: _senhaController,
+                confirmarSenhaController: _confirmarSenhaController,
+              ),
+              ConfirmarEmailView(
+                formKey: _formKeyConfirmarEmail,
+              ),
+              NomeView(
+                formKey: _formKeyNome,
+                nomeController: _nomeController,
+              ),
+              PessoalView(
+                nomeController: _nomeController,
+                cpfController: _cpfController,
+                rgController: _rgController,
+                nascimentoController: _nascimentoController,
+                idPersonalizadoController: _idPersonalizadoController,
+              ),
+              CelularView(
+                formKey: _formKeyCelular,
+                celularController: _celularController,
+              ),
+              ConfirmarCelularView(
+                  formKey: _formKeyConfirmarCelular,
+                  codigoConfirmarCelularController:
+                      _codigoConfirmarCelularController),
+              EnderecoView(
+                cepController: _cepController,
+                ruaOuSitioController: _ruaOuSitioController,
+                complementoController: _complementoController,
+                bairroController: _bairroController,
+                numeroController: _numeroController,
+                cidadeController: _cidadeController,
+                estadoController: _estadoController,
+              ),
+
+              // Adicione mais widgets de formulário conforme necessário
+            ],
+          );
+  }
+
+  Widget _buildBottomAppBar() {
+    final state = context.watch<SignUpBloc>().state;
+    bool isNextButtonEnabled =
+        _isNextButtonEnabled && !(state is SignUpLoading);
+    return BottomAppBar(
+      color: Colors.green.shade900,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          if (_currentPage > 0)
+            ElevatedButton(
+              onPressed: () {
+                _pageController.previousPage(
+                  duration: Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                );
+              },
+              child: Text('Anterior'),
+            ),
+          Spacer(),
+          ElevatedButton(
+            onPressed: _onNextPressed,
+            child: Text('Próximo'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _onNextPressed() {
+    if (_validateCurrentForm()) {
+      if (_currentPage == 0) {
+        BlocProvider.of<SignUpBloc>(context).add(SignUpSubmitted(
+          email: _emailController.text,
+          senha: _senhaController.text,
+        ));
+      } else if (_currentPage < 7 - 1) {
+        _pageController.nextPage(
+          duration: Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      } else {
+        // Lógica final de submissão
+        // Exemplo: Emitir evento para submissão de dados pessoais
+      }
+    }
+  }
+
+  void _showErrorDialog(BuildContext context, String errorMessage) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Erro'),
+          content: Text(errorMessage),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Fecha o diálogo
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

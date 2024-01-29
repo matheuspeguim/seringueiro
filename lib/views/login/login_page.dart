@@ -7,6 +7,7 @@ import 'package:flutter_seringueiro/views/login/login_bloc.dart';
 import 'package:flutter_seringueiro/views/login/login_event.dart';
 import 'package:flutter_seringueiro/views/login/login_state.dart';
 import 'package:flutter_seringueiro/views/main/main_page.dart';
+import 'package:flutter_seringueiro/views/registration/signup_bloc.dart';
 import 'package:flutter_seringueiro/views/registration/user_info/adress/adress_bloc.dart';
 import 'package:flutter_seringueiro/views/registration/user_info/adress/adress_info_page.dart';
 import 'package:flutter_seringueiro/views/registration/user_info/personal/personal_bloc.dart';
@@ -170,7 +171,16 @@ class _LoginPageState extends State<LoginPage> {
                                   ..onTap = () {
                                     Navigator.of(context).push(
                                       MaterialPageRoute(
-                                          builder: (context) => SignUpPage()),
+                                        builder: (context) =>
+                                            BlocProvider<SignUpBloc>(
+                                          create: (context) => SignUpBloc(
+                                            FirebaseAuth.instance,
+                                            ViaCepService(), // Aqui você precisa criar uma instância do ViaCepService
+                                            '', // Aqui você pode inicializar _verificationId com um valor vazio ou adequado
+                                          ),
+                                          child: SignUpPage(),
+                                        ),
+                                      ),
                                     );
                                   },
                               ),
