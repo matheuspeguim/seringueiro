@@ -3,15 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_seringueiro/services/open_weather_api_service.dart';
 import 'package:flutter_seringueiro/models/property.dart';
+import 'package:flutter_seringueiro/services/open_weather_api_service.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_bloc.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_event.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_state.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_widgets/property_buttons_widget/property_buttons_widget.dart';
 import 'package:flutter_seringueiro/views/main/home/property/rain/rain_bloc.dart';
 import 'package:flutter_seringueiro/views/main/home/property/rain/rain_widgets.dart';
-import 'package:flutter_seringueiro/views/main/home/weather/weather_page.dart';
+import 'package:flutter_seringueiro/views/main/home/weather/hourly_weather_widget.dart';
 import 'package:flutter_seringueiro/widgets/custom_Circular_Progress_indicator.dart';
 import 'package:flutter_seringueiro/widgets/custom_card.dart';
 
@@ -36,7 +36,9 @@ class _PropertyPageState extends State<PropertyPage> {
       create: (context) =>
           PropertyBloc()..add(LoadPropertyDetails(user, propertyId)),
       child: BlocConsumer<PropertyBloc, PropertyState>(
-        listener: (context, state) {},
+        listener: (context, state) {
+          // Listener logic here
+        },
         builder: (context, state) {
           return Scaffold(
             appBar: AppBar(
@@ -89,7 +91,6 @@ class _PropertyPageState extends State<PropertyPage> {
     } else if (state is PropertyError) {
       return Center(child: Text(state.message));
     } else if (state is PropertyLoaded) {
-      bool _useManualData = false;
       return RefreshIndicator(
         onRefresh: () async {
           context
@@ -113,36 +114,21 @@ class _PropertyPageState extends State<PropertyPage> {
                 title: "Histórico de Chuvas",
                 onButtonPressed: () => {},
                 colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue),
-                body: Column(
-                  children: [
-                    SwitchListTile(
-                      title: Text('Usar Dados Próprios'),
-                      value:
-                          _useManualData, // Esta é uma variável de estado do widget
-                      onChanged: (bool value) {
-                        setState(() {
-                          _useManualData = value;
-                          // Aqui, dependendo do estado, dispare o evento apropriado no RainBloc
-                        });
-                      },
-                    ),
-                    Expanded(
-                      child: BlocProvider<RainBloc>(
-                        create: (context) => RainBloc(
-                            firestore: FirebaseFirestore.instance,
-                            weatherApiService: OpenWeatherApiService(
-                                apiKey: dotenv.env['OPENWEATHER_API_KEY']!)),
-                        child: RainChartWidget(propertyId: state.property.id),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // Outros componentes relacionados à propriedade podem ser adicionados aqui
+                body: Column(children: [
+                  BlocProvider<RainBloc>(
+                    create: (context) => RainBloc(
+                        firestore: FirebaseFirestore.instance,
+                        weatherApiService: OpenWeatherApiService(
+                            apiKey: dotenv.env['OPENWEATHER_API_KEY']!)),
+                    child: RainChartWidget(propertyId: state.property.id),
+                  ),
+                ]),
+              )
             ],
           ),
         ),
+
+        // Outros componentes relacionados à propriedade podem ser adicionados aqui
       );
     } else {
       return Center(child: Text('Estado não reconhecido!'));

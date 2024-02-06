@@ -12,7 +12,7 @@ import 'package:flutter_seringueiro/views/main/home/property/property_event.dart
 import 'package:flutter_seringueiro/views/main/home/property/property_page.dart';
 import 'package:flutter_seringueiro/views/main/home/property/searcher/search_property_bloc.dart';
 import 'package:flutter_seringueiro/views/main/home/property/searcher/search_property_page.dart';
-import 'package:flutter_seringueiro/views/main/home/weather/weather_page.dart';
+import 'package:flutter_seringueiro/views/main/home/weather/daily_weather_widget.dart';
 import 'package:flutter_seringueiro/widgets/custom_Circular_Progress_indicator.dart';
 import 'package:flutter_seringueiro/widgets/custom_button.dart';
 import 'package:flutter_seringueiro/widgets/custom_card.dart';
@@ -81,7 +81,7 @@ class HomePage extends StatelessWidget {
         child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: CustomButton(
-              label: 'Adicionar propriedade',
+              label: 'Propriedade',
               icon: Icons.add,
               onPressed: () {
                 Navigator.of(context).push(

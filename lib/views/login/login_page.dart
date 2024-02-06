@@ -7,6 +7,7 @@ import 'package:flutter_seringueiro/views/login/login_bloc.dart';
 import 'package:flutter_seringueiro/views/login/login_event.dart';
 import 'package:flutter_seringueiro/views/login/login_state.dart';
 import 'package:flutter_seringueiro/views/main/main_page.dart';
+import 'package:flutter_seringueiro/views/registration/signup_bloc.dart';
 import 'package:flutter_seringueiro/views/registration/user_info/adress/adress_bloc.dart';
 import 'package:flutter_seringueiro/views/registration/user_info/adress/adress_info_page.dart';
 import 'package:flutter_seringueiro/views/registration/user_info/personal/personal_bloc.dart';
@@ -168,10 +169,15 @@ class _LoginPageState extends State<LoginPage> {
                                     decoration: TextDecoration.underline),
                                 recognizer: TapGestureRecognizer()
                                   ..onTap = () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                          builder: (context) => SignUpPage()),
-                                    );
+                                    Navigator.of(context)
+                                        .push(MaterialPageRoute(
+                                      builder: (context) =>
+                                          BlocProvider<SignUpBloc>(
+                                        create: (context) =>
+                                            SignUpBloc(FirebaseAuth.instance),
+                                        child: SignUpPage(),
+                                      ),
+                                    ));
                                   },
                               ),
                             ],

@@ -30,8 +30,8 @@ android {
         applicationId "com.peguim.seringueiro"
         minSdkVersion 20 // Substitua 20 pela versão mínima desejada do SDK do Android
         targetSdkVersion 33 // Substitua 31 pela versão desejada do SDK do Android
-        versionCode 1
-        versionName "1.0"
+        versionCode 3
+        versionName "1.2"
         multiDexEnabled true
     }
 

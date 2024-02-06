@@ -8,6 +8,7 @@ import 'package:flutter_seringueiro/views/main/home/property/property_widgets/ad
 import 'package:flutter_seringueiro/views/main/home/property/property_widgets/agronomo_widgets.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_widgets/property_buttons_widget/property_button_event.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_widgets/property_buttons_widget/property_buttons_state.dart';
+import 'package:flutter_seringueiro/views/main/home/property/property_widgets/propietario_widgets.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_widgets/seringueiro_widgets.dart';
 
 class PropertyButtonsBloc
@@ -52,10 +53,10 @@ class PropertyButtonsBloc
           buttons.addAll(
               AgronomoWidgets.buildAgronomoWidgets(context, user, property));
         }
-        /*if (userRoleData['funcoes']['proprietario'] == true) {
+        if (userRoleData['funcoes']['proprietario'] == true) {
           buttons
               .addAll(ProprietarioWidgets.buildProprietarioWidgets(property));
-        }*/
+        }
         if (userRoleData['funcoes']['seringueiro'] == true) {
           buttons.addAll(SeringueiroWidgets.buildSeringueiroWidgets(
               context, user, property, activityManager));

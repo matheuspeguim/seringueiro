@@ -41,6 +41,7 @@ dependencies:
   firebase_storage:
   fl_chart:
   flutter_svg:
+  shared_preferences: ^2.2.2
 
 dev_dependencies:
   flutter_test:

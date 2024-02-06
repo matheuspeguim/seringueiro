@@ -25,7 +25,7 @@ class DailyWeatherForecast {
 // Função para analisar os dados da API e obter a previsão diária
 List<DailyWeatherForecast> parseDailyWeatherData(
     Map<String, dynamic> weatherData) {
-  var dailyForecasts = weatherData['daily'] as List;
+  var dailyForecasts = weatherData['daily'] as List? ?? [];
   return dailyForecasts.map((dailyData) {
     final date = DateTime.fromMillisecondsSinceEpoch(dailyData['dt'] * 1000);
     final weatherIcon = dailyData['weather'][0]['icon'];

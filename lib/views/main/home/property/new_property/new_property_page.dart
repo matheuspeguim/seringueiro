@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_seringueiro/validators/property_info_validator.dart';
+import 'package:flutter_seringueiro/validators/validators.dart';
 import 'package:flutter_seringueiro/views/main/home/property/new_property/full_screen_map_page.dart';
 import 'package:flutter_seringueiro/views/main/home/property/new_property/new_property_bloc.dart';
 import 'package:flutter_seringueiro/views/main/home/property/new_property/new_property_event.dart';
@@ -181,7 +181,7 @@ class _NewPropertyPageState extends State<NewPropertyPage> {
           TextFormField(
             controller: _nomeDaPropriedadeController,
             focusNode: _nomeDaPropriedadeFocus,
-            validator: PropertyInfoValidator.validarNomeDaPropriedade,
+            validator: Validators.validarNomeDaPropriedade,
             autovalidateMode: AutovalidateMode.onUserInteraction,
             decoration: InputDecoration(
               labelText: 'Nome da propriedade',
@@ -199,7 +199,7 @@ class _NewPropertyPageState extends State<NewPropertyPage> {
           TextFormField(
             controller: _areaEmHectaresController,
             focusNode: _areaEmHectaresFocus,
-            validator: PropertyInfoValidator.validarAreasEmHectares,
+            validator: Validators.validarAreasEmHectares,
             autovalidateMode: AutovalidateMode.onUserInteraction,
             decoration: InputDecoration(
               labelText: 'Área em hectares (ha)',
@@ -217,7 +217,7 @@ class _NewPropertyPageState extends State<NewPropertyPage> {
           TextFormField(
             controller: _quantidadeDeArvoresController,
             focusNode: _quantidadeDeArvoresFocus,
-            validator: PropertyInfoValidator.validarQuantidadeDeArvores,
+            validator: Validators.validarQuantidadeDeArvores,
             autovalidateMode: AutovalidateMode.onUserInteraction,
             decoration: InputDecoration(
               labelText: 'Quantidade de árvores ativas',
@@ -334,11 +334,6 @@ class _NewPropertyPageState extends State<NewPropertyPage> {
       body: BlocListener<NewPropertyBloc, NewPropertyState>(
         listener: (context, state) {
           if (state is PropertySubmissionSuccess) {
-            // Se a propriedade foi submetida com sucesso
-            print('Estado é PropertySubmissionSucess');
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Propriedade cadastrada com sucesso!')),
-            );
             // Navegar para outra página, se necessário
             Navigator.pushReplacement(
               context,

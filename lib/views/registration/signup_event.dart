@@ -1,19 +1,12 @@
-// signup_event.dart
 abstract class SignUpEvent {}
 
 class SignUpSubmitted extends SignUpEvent {
   final String email;
-  final String celular;
   final String senha;
-  final String confirmarSenha;
 
-  SignUpSubmitted(this.email, this.celular, this.senha, this.confirmarSenha);
+  SignUpSubmitted({required this.email, required this.senha});
 }
 
-class SignUpEmailChanged extends SignUpEvent {
-  final String email;
+class EmailVerificationSent extends SignUpEvent {}
 
-  SignUpEmailChanged(this.email);
-}
-
-// Adicione mais eventos conforme necessário...
+class CheckEmailVerification extends SignUpEvent {}

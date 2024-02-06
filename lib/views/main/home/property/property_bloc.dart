@@ -37,13 +37,40 @@ class PropertyBloc extends Bloc<PropertyEvent, PropertyState> {
       DeleteProperty event, Emitter<PropertyState> emit) async {
     emit(PropertyLoading());
     try {
+      // Lista de nomes de subcoleções a serem excluídas
+      final subcollectionsToDelete = [
+        'property_users',
+        'rain_records',
+        //'outra_subcolecao'
+      ];
+
+      // Iterar e excluir cada subcoleção
+      for (final subcollectionName in subcollectionsToDelete) {
+        await _deleteSubcollection(event.propertyId, subcollectionName);
+      }
+
       await FirebaseFirestore.instance
           .collection('properties')
           .doc(event.propertyId)
           .delete();
+
       emit(PropertyDeleted());
     } catch (e) {
       emit(PropertyError("Erro ao excluir propriedade: $e"));
+    }
+  }
+
+  Future<void> _deleteSubcollection(
+      String propertyId, String subcollectionName) async {
+    final subcollectionRef = FirebaseFirestore.instance
+        .collection('properties')
+        .doc(propertyId)
+        .collection(subcollectionName);
+
+    final documents = await subcollectionRef.get();
+
+    for (final doc in documents.docs) {
+      await doc.reference.delete();
     }
   }
 

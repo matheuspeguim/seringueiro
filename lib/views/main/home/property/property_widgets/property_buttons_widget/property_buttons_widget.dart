@@ -24,7 +24,7 @@ class PropertyButtonsWidget extends StatelessWidget {
       child: BlocBuilder<PropertyButtonsBloc, PropertyButtonsState>(
         builder: (context, state) {
           if (state is PropertyButtonsLoading) {
-            return LinearProgressIndicator(); // ou algum outro widget de carregamento
+            return LinearProgressIndicator();
           } else if (state is PropertyButtonsLoaded) {
             return SingleChildScrollView(
               child: Wrap(

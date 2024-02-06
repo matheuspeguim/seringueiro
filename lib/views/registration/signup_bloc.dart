@@ -1,46 +1,74 @@
-// signup_bloc.dart
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'signup_event.dart';
-import 'signup_state.dart';
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_seringueiro/views/registration/signup_event.dart';
+import 'package:flutter_seringueiro/views/registration/signup_state.dart';
 
 class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
   final FirebaseAuth _auth;
+  Timer? _emailVerificationTimer;
 
   SignUpBloc(this._auth) : super(SignUpInitial()) {
     on<SignUpSubmitted>(_onSignUpSubmitted);
+    // ... outros event handlers
   }
 
   Future<void> _onSignUpSubmitted(
       SignUpSubmitted event, Emitter<SignUpState> emit) async {
-    emit(SignUpLoading());
+    emit(SignUpLoading()); // Emitir estado de carregamento
+
     try {
-      // Tente criar um novo usuário com o Firebase Authentication
-      UserCredential newUser = await _auth.createUserWithEmailAndPassword(
+      // Tenta criar um novo usuário com e-mail e senha
+      UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
         email: event.email,
         password: event.senha,
       );
 
-      // Aqui você pode adicionar mais lógica, como salvar dados do usuário no Firestore
-
-      emit(SignUpSuccess());
+      User? user = userCredential.user;
+      if (user != null) {
+        if (!user.emailVerified) {
+          await user.sendEmailVerification(); // Enviar e-mail de verificação
+          _startEmailVerificationCheck(user, emit);
+        } else {
+          emit(SignUpSuccess(
+              user:
+                  user)); // Emitir estado de sucesso caso o usuário já esteja verificado
+        }
+      } else {
+        emit(SignUpFailure('Usuário não encontrado após o registro.'));
+      }
     } on FirebaseAuthException catch (e) {
-      String errorMessage = _handleFirebaseAuthException(e);
-      emit(SignUpFailure(errorMessage));
+      emit(SignUpFailure(
+          e.code)); // Emitir estado de falha com a mensagem de erro
     } catch (e) {
-      emit(SignUpFailure(e.toString()));
+      emit(SignUpFailure(
+          e.toString())); // Emitir estado de falha com a mensagem de erro
     }
   }
 
-  String _handleFirebaseAuthException(FirebaseAuthException e) {
-    switch (e.code) {
-      case 'weak-password':
-        return 'A senha fornecida é muito fraca.';
-      case 'email-already-in-use':
-        return 'Já existe uma conta com o e-mail fornecido.';
-      // Adicione mais casos conforme necessário
-      default:
-        return 'Ocorreu um erro desconhecido.';
-    }
+  void _startEmailVerificationCheck(User user, Emitter<SignUpState> emit) {
+    emit(EmailVerificationInProgress());
+
+    _emailVerificationTimer?.cancel(); // Cancela o timer anterior se existir
+    _emailVerificationTimer =
+        Timer.periodic(Duration(seconds: 5), (timer) async {
+      await user.reload();
+      User? currentUser = _auth.currentUser;
+
+      if (currentUser != null && currentUser.emailVerified) {
+        timer.cancel();
+        emit(EmailVerificationDone());
+        // Aqui você pode redirecionar para outra página ou realizar outra ação
+      }
+    });
+  }
+
+  @override
+  Future<void> close() {
+    _emailVerificationTimer
+        ?.cancel(); // Garante que o timer seja cancelado quando o Bloc for fechado
+    return super.close();
   }
 }

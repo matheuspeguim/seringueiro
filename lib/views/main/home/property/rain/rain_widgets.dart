@@ -2,8 +2,6 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_seringueiro/views/main/home/property/rain/rain_bloc.dart';
-import 'package:flutter_seringueiro/views/main/home/property/rain/rain_chart.dart';
-import 'package:flutter_seringueiro/views/main/home/property/rain/rain_data_processor.dart';
 import 'package:flutter_seringueiro/views/main/home/property/rain/rain_event.dart';
 import 'package:flutter_seringueiro/views/main/home/property/rain/rain_state.dart';
 
@@ -17,24 +15,6 @@ class RainChartWidget extends StatefulWidget {
 }
 
 class _RainChartWidgetState extends State<RainChartWidget> {
-  final RainDataProcessor _dataProcessor = RainDataProcessor();
-  final RainChart _rainChart = RainChart();
-
-  final List<String> seringueiraMonths = [
-    'Set',
-    'Out',
-    'Nov',
-    'Dez',
-    'Jan',
-    'Fev',
-    'Mar',
-    'Abr',
-    'Mai',
-    'Jun',
-    'Jul',
-    'Ago'
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -49,9 +29,9 @@ class _RainChartWidgetState extends State<RainChartWidget> {
     return BlocBuilder<RainBloc, RainState>(
       builder: (context, state) {
         if (state is RainChartDataLoaded) {
-          var rainData = _dataProcessor.transformRainData(state.chartData);
+          var rainData = _transformRainData(state.chartData);
           return rainData.isNotEmpty
-              ? _rainChart.buildChart(rainData, seringueiraMonths)
+              ? _buildChart(rainData.cast<FlSpot>())
               : Container();
         } else if (state is RainLoading) {
           return CircularProgressIndicator();
@@ -60,6 +40,41 @@ class _RainChartWidgetState extends State<RainChartWidget> {
         }
       },
     );
+  }
+
+  List<FlSpot> _transformRainData(List<RainChartData> chartData) {
+    DateTime startOfLastSeason;
+    DateTime endOfLastSeason;
+    DateTime now = DateTime.now();
+
+// Definindo a safra atual
+    if (now.month >= 9) {
+      // Se estivermos entre setembro e dezembro, a safra começa neste ano
+      startOfLastSeason = DateTime(now.year, 9);
+      endOfLastSeason = DateTime(now.year + 1, 7);
+    } else {
+      // Se estivermos entre janeiro e agosto, a safra começou no ano anterior
+      startOfLastSeason = DateTime(now.year - 1, 9);
+      endOfLastSeason = DateTime(now.year, 7);
+    }
+
+    Map<int, double> monthlyRainSum = {};
+    for (var data in chartData) {
+      if (data.date.isAfter(startOfLastSeason) &&
+          data.date.isBefore(endOfLastSeason)) {
+        int monthIndex = data.date.month - 9; // Setembro como mês 0
+        monthIndex = (monthIndex < 0)
+            ? monthIndex + 12
+            : monthIndex; // Ajuste para meses do ano seguinte
+        monthlyRainSum.update(
+            monthIndex, (currentSum) => currentSum + data.rainAmount.toDouble(),
+            ifAbsent: () => data.rainAmount.toDouble());
+      }
+    }
+
+    return monthlyRainSum.entries
+        .map((entry) => FlSpot(entry.key.toDouble(), entry.value))
+        .toList();
   }
 
   Widget _buildChart(List<FlSpot> rainData) {
@@ -80,6 +95,21 @@ class _RainChartWidgetState extends State<RainChartWidget> {
           (maxYValue / 5).ceil(); // Para valores maiores, aumentar o intervalo
     }
     final dynamicMaxY = (maxYValue / interval).ceil() * interval;
+
+    final List<String> seringueiraMonths = [
+      'Set',
+      'Out',
+      'Nov',
+      'Dez',
+      'Jan',
+      'Fev',
+      'Mar',
+      'Abr',
+      'Mai',
+      'Jun',
+      'Jul',
+      'Ago'
+    ];
 
     List<BarChartGroupData> barGroups = [];
     for (var spot in rainData) {

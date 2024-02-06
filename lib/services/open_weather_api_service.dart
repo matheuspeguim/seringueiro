@@ -58,31 +58,44 @@ class OpenWeatherApiService {
   Future<Map<String, dynamic>> getCurrentWeather(
       double latitude, double longitude) async {
     _cleanUpCache();
-
     final cacheKey = '$latitude,$longitude';
-    var connectivityResult = await Connectivity().checkConnectivity();
 
+    var cachedData = await _getCachedWeather(cacheKey);
+    if (cachedData != null) return cachedData;
+
+    var connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult == ConnectivityResult.none) {
+      throw Exception("Sem conexão com a internet");
+    }
+
+    var fetchedData = await _fetchWeather(latitude, longitude);
+    await _updateCache(cacheKey, fetchedData);
+    return fetchedData;
+  }
+
+  Future<void> _updateCache(String cacheKey, Map<String, dynamic> data) async {
+    if (_isCacheInitialized) {
+      DateTime now = DateTime.now();
+      await _cacheBox.put(cacheKey, {
+        'data': data,
+        'fetchTime': now.toIso8601String(),
+        'apiRequestTime': now.toIso8601String()
+      });
+    }
+  }
+
+  Future<Map<String, dynamic>?> _getCachedWeather(String cacheKey) async {
     if (_isCacheInitialized && _cacheBox.containsKey(cacheKey)) {
       var cachedData = _cacheBox.get(cacheKey);
       var fetchTime = DateTime.parse(cachedData['fetchTime']);
+      var apiRequestTime = DateTime.parse(cachedData['apiRequestTime']);
 
-      if (DateTime.now().difference(fetchTime) < Duration(hours: 1) ||
-          connectivityResult == ConnectivityResult.none) {
+      if (DateTime.now().difference(fetchTime) < Duration(hours: 1)) {
+        print("Dados da API obtidos em: $apiRequestTime");
         return cachedData['data'];
       }
     }
-
-    if (connectivityResult != ConnectivityResult.none) {
-      var fetchedData = await _fetchWeather(latitude, longitude);
-      DateTime now = DateTime.now();
-      if (_isCacheInitialized) {
-        await _cacheBox.put(cacheKey,
-            {'data': fetchedData, 'fetchTime': now.toIso8601String()});
-      }
-      return {'weatherData': fetchedData, 'lastUpdated': now};
-    } else {
-      throw Exception("Sem conexão com a internet");
-    }
+    return null;
   }
 
   Future<Map<String, dynamic>> weatherToFieldActivity(

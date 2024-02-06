@@ -124,26 +124,25 @@ class UsuarioDrawerHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DrawerHeader(
-      child: Row(children: <Widget>[
-        CircleAvatar(
-          radius: 25,
-          backgroundImage: NetworkImage(
-            usuario.profilePictureUrl.isNotEmpty
-                ? usuario.profilePictureUrl
-                : 'URL_DE_IMAGEM_PADRÃO',
-          ),
+        child: Row(children: <Widget>[
+      CircleAvatar(
+        radius: 25,
+        backgroundImage: NetworkImage(
+          usuario.profilePictureUrl.isNotEmpty
+              ? usuario.profilePictureUrl
+              : 'URL_DE_IMAGEM_PADRÃO',
         ),
-        SizedBox(
-          width: 8,
+      ),
+      SizedBox(
+        width: 8,
+      ),
+      Text(
+        usuario.nome,
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.bold,
         ),
-        Text(
-          usuario.nome,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ]),
-    );
+      ),
+    ]));
   }
 }

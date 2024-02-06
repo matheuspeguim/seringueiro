@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:flutter_seringueiro/services/via_cep_service.dart';
-import 'package:flutter_seringueiro/validators/personal_info_validator.dart';
+import 'package:flutter_seringueiro/validators/validators.dart';
 import 'package:flutter_seringueiro/views/registration/user_info/adress/adress_bloc.dart';
 import 'package:flutter_seringueiro/views/registration/user_info/adress/adress_info_page.dart';
 import 'package:flutter_seringueiro/views/registration/user_info/personal/personal_bloc.dart';
@@ -119,7 +119,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                       labelStyle: TextStyle(color: Colors.white),
                     ),
                     style: TextStyle(color: Colors.white, fontSize: 18.0),
-                    validator: PersonalInfoValidator.validarNome,
+                    validator: Validators.validarNome,
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     onFieldSubmitted: (_) {
                       FocusScope.of(context).requestFocus(nascimentoFocus);
@@ -133,7 +133,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                       labelStyle: TextStyle(color: Colors.white),
                     ),
                     style: TextStyle(color: Colors.white, fontSize: 18.0),
-                    validator: PersonalInfoValidator.validarIdPersonalizado,
+                    validator: Validators.validarIdPersonalizado,
                   ),
                   SizedBox(height: 16.0),
                   TextFormField(
@@ -145,7 +145,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                       labelStyle: TextStyle(color: Colors.white),
                     ),
                     style: TextStyle(color: Colors.white, fontSize: 18.0),
-                    validator: PersonalInfoValidator.validarNascimento,
+                    validator: Validators.validarNascimento,
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     onFieldSubmitted: (_) {
                       FocusScope.of(context).requestFocus(cpfFocus);
@@ -161,7 +161,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                       labelStyle: TextStyle(color: Colors.white),
                     ),
                     style: TextStyle(color: Colors.white, fontSize: 18.0),
-                    validator: PersonalInfoValidator.validarCPF,
+                    validator: Validators.validarCPF,
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     onFieldSubmitted: (_) {
                       FocusScope.of(context).requestFocus(rgFocus);
@@ -176,7 +176,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                       labelStyle: TextStyle(color: Colors.white),
                     ),
                     style: TextStyle(color: Colors.white, fontSize: 18.0),
-                    validator: PersonalInfoValidator.validarRG,
+                    validator: Validators.validarRG,
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     onFieldSubmitted: (value) => _onSubmitForm(),
                   ),

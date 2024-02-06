@@ -1,9 +1,16 @@
-// signup_state.dart
+import 'package:firebase_auth/firebase_auth.dart';
+
 abstract class SignUpState {}
 
 class SignUpInitial extends SignUpState {}
 
 class SignUpLoading extends SignUpState {}
+
+class EmailVerificationSentState extends SignUpState {}
+
+class EmailVerificationInProgress extends SignUpState {}
+
+class EmailVerificationDone extends SignUpState {}
 
 class SignUpFailure extends SignUpState {
   final String error;
@@ -11,4 +18,8 @@ class SignUpFailure extends SignUpState {
   SignUpFailure(this.error);
 }
 
-class SignUpSuccess extends SignUpState {}
+class SignUpSuccess extends SignUpState {
+  final User user;
+
+  SignUpSuccess({required this.user});
+}
