@@ -1,3 +1,5 @@
+import 'package:image_picker/image_picker.dart';
+
 abstract class SignUpEvent {}
 
 class SignUpSubmitted extends SignUpEvent {
@@ -15,6 +17,7 @@ class SignUpSubmitted extends SignUpEvent {
   final String bairro;
   final String cidade;
   final String estado;
+  final XFile? imageFile;
 
   SignUpSubmitted({
     required this.email,
@@ -31,6 +34,7 @@ class SignUpSubmitted extends SignUpEvent {
     required this.bairro,
     required this.cidade,
     required this.estado,
+    this.imageFile,
   });
 }
 

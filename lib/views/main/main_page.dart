@@ -11,7 +11,6 @@ import 'package:flutter_seringueiro/views/main/jotinha/jotinha_bloc.dart';
 import 'package:flutter_seringueiro/views/main/jotinha/jotinha_page.dart';
 import 'package:flutter_seringueiro/widgets/custom_drawer.dart';
 
-
 class MainPage extends StatefulWidget {
   final User user;
 
@@ -30,20 +29,28 @@ class _MainPageState extends State<MainPage> {
   @override
   void initState() {
     super.initState();
-    _fetchUserName();
+    _fetchUserData();
   }
 
-  void _fetchUserName() async {
+  void _fetchUserData() async {
     DocumentSnapshot userDoc = await FirebaseFirestore.instance
         .collection('users')
         .doc(widget.user.uid)
         .get();
+
     if (userDoc.exists) {
       var userData = userDoc.data() as Map<String, dynamic>;
-      Usuario usuario = Usuario.fromFirebaseUser(widget.user, userData);
+
+      // Supondo que a classe Usuario tenha um construtor nomeado adequado
+      // que aceita Map<String, dynamic> diretamente.
+      Usuario usuario = Usuario.fromMap(userData);
+
       setState(() {
+        // Supondo que a classe Usuario tenha uma propriedade 'nome'
+        // e que você deseje extrair o primeiro nome para exibir.
         userName = usuario.nome.split(" ").first;
-        // Salve o objeto Usuario para uso posterior
+
+        // Salve o objeto Usuario completo para uso posterior.
         _currentUser = usuario;
       });
     }

@@ -350,6 +350,7 @@ class _SignUpPageState extends State<SignUpPage> {
           bairro: _bairroController.text,
           cidade: _cidadeController.text,
           estado: _estadoController.text,
+          imageFile: _imageFile,
         ),
       );
     } else {
