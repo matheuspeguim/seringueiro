@@ -10,7 +10,7 @@ import 'package:flutter_seringueiro/views/main/home/home_page_bloc.dart';
 import 'package:flutter_seringueiro/views/main/jotinha/jotinha_bloc.dart';
 import 'package:flutter_seringueiro/views/main/jotinha/jotinha_page.dart';
 import 'package:flutter_seringueiro/widgets/custom_drawer.dart';
-import 'package:vibration/vibration.dart';
+
 
 class MainPage extends StatefulWidget {
   final User user;
@@ -109,9 +109,6 @@ class _MainPageState extends State<MainPage> {
   }
 
   void _onDestinationSelected(int index) async {
-    if (await Vibration.hasVibrator() ?? false) {
-      Vibration.vibrate(duration: 50);
-    }
     setState(() => _currentIndex = index);
     _pageController.animateToPage(index,
         duration: Duration(milliseconds: 300), curve: Curves.easeInOut);

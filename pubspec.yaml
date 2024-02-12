@@ -28,7 +28,7 @@ dependencies:
   geolocator:
   hive:
   hive_flutter:
-  sensors:
+  sensors_plus:
   vibration:
   connectivity_plus:
   build_runner:

@@ -7,12 +7,12 @@ import 'package:flutter_seringueiro/views/login/login_bloc.dart';
 import 'package:flutter_seringueiro/views/login/login_event.dart';
 import 'package:flutter_seringueiro/views/login/login_state.dart';
 import 'package:flutter_seringueiro/views/main/main_page.dart';
-import 'package:flutter_seringueiro/views/registration/signup_bloc.dart';
+import 'package:flutter_seringueiro/views/registration/signup/signup_bloc.dart';
+import 'package:flutter_seringueiro/views/registration/signup/signup_page.dart';
 import 'package:flutter_seringueiro/views/registration/user_info/adress/adress_bloc.dart';
 import 'package:flutter_seringueiro/views/registration/user_info/adress/adress_info_page.dart';
 import 'package:flutter_seringueiro/views/registration/user_info/personal/personal_bloc.dart';
 import 'package:flutter_seringueiro/views/registration/user_info/personal/personal_info_page.dart';
-import 'package:flutter_seringueiro/views/registration/signup_page.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -173,8 +173,7 @@ class _LoginPageState extends State<LoginPage> {
                                         .push(MaterialPageRoute(
                                       builder: (context) =>
                                           BlocProvider<SignUpBloc>(
-                                        create: (context) =>
-                                            SignUpBloc(FirebaseAuth.instance),
+                                        create: (context) => SignUpBloc(),
                                         child: SignUpPage(),
                                       ),
                                     ));

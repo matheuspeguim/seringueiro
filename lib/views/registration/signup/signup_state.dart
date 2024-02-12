@@ -6,12 +6,6 @@ class SignUpInitial extends SignUpState {}
 
 class SignUpLoading extends SignUpState {}
 
-class EmailVerificationSentState extends SignUpState {}
-
-class EmailVerificationInProgress extends SignUpState {}
-
-class EmailVerificationDone extends SignUpState {}
-
 class SignUpFailure extends SignUpState {
   final String error;
 

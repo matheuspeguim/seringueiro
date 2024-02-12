@@ -37,7 +37,6 @@ class _PropertyPageState extends State<PropertyPage> {
           PropertyBloc()..add(LoadPropertyDetails(user, propertyId)),
       child: BlocConsumer<PropertyBloc, PropertyState>(
         listener: (context, state) {
-          // Listener logic here
         },
         builder: (context, state) {
           return Scaffold(
