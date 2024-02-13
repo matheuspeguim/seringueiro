@@ -19,7 +19,6 @@ class NewPropertyPage extends StatefulWidget {
 }
 
 class _NewPropertyPageState extends State<NewPropertyPage> {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   late GoogleMapController mapController;
   LatLng? currentMapPosition;
   bool isSeringueiro = false;

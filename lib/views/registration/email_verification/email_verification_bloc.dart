@@ -20,7 +20,6 @@ class EmailVerificationBloc
   void _sendVerificationEmail() async {
     final user = _auth.currentUser;
     if (user != null && !user.emailVerified) {
-      print('E-mail de verificacao solicitado!');
       await user.sendEmailVerification();
       add(SendVerificationEmail());
     }
@@ -30,8 +29,6 @@ class EmailVerificationBloc
       SendVerificationEmail event, Emitter<EmailVerificationState> emit) async {
     emit(EmailVerificationSent());
   }
-
-// Ajuste na função _onCheckEmailVerified
 
   Future<void> _onCheckEmailVerified(
       CheckEmailVerified event, Emitter<EmailVerificationState> emit) async {

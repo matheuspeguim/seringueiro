@@ -1,6 +1,5 @@
 // login_bloc.dart
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'login_event.dart';
@@ -26,38 +25,26 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
       if (userCredential.user != null) {
         // Chama o método para verificar as informações do usuário
-        await _checkUserInformation(userCredential.user!, emit);
+        await _checkEmailVerification(emit);
       }
     } catch (e) {
       emit(LoginFailure(error: e.toString()));
     }
   }
 
-  Future<void> _checkUserInformation(
-      User user, Emitter<LoginState> emit) async {
-    // Verifica se as informações pessoais estão presentes
-    var personalInfo = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid)
-        .collection('personal_info')
-        .get();
+  Future<void> _checkEmailVerification(Emitter<LoginState> emit) async {
+    User? user = FirebaseAuth.instance.currentUser;
 
-    if (personalInfo.docs.isEmpty) {
-      emit(PersonalInfoMissing(
-          user: user)); // Estado para informação pessoal faltante
-      return;
+    if (user == null) {
+      emit(LoginFailure(
+          error:
+              'Usuário não foi autenticado!')); // Estado para usuário não autenticado
+    } else if (!user.emailVerified) {
+      emit(EmailNotVerified(
+          user: user)); // Estado específico para e-mail não verificado
+    } else {
+      emit(LoginSuccess(
+          user: user)); // Usuário autenticado com sucesso e e-mail verificado
     }
-
-    var adressInfo = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid)
-        .collection('adress_info')
-        .get();
-    if (adressInfo.docs.isEmpty) {
-      emit(AdressInfoMissing(
-          user: user)); //Estado para infomação de endereço faltante
-      return;
-    }
-    emit(LoginSuccess(user: user));
   }
 }

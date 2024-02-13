@@ -10,8 +10,6 @@ import 'package:flutter_seringueiro/views/registration/email_verification/email_
 import 'package:flutter_seringueiro/views/registration/signup/signup_bloc.dart';
 import 'package:flutter_seringueiro/views/registration/signup/signup_event.dart';
 import 'package:flutter_seringueiro/views/registration/signup/signup_state.dart';
-import 'package:flutter_seringueiro/views/registration/user_info/personal/personal_bloc.dart';
-import 'package:flutter_seringueiro/views/registration/user_info/personal/personal_info_page.dart';
 import 'package:image_picker/image_picker.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -229,9 +227,7 @@ class _SignUpPageState extends State<SignUpPage> {
             nextFocusNode: _cepFocus,
             keyboardType: TextInputType.text,
           ),
-          Divider(),
-
-          //Dados de endereço
+          SizedBox(height: 32.0),
           _buildTextField(
             context: context,
             controller: _cepController,

@@ -6,6 +6,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_seringueiro/views/registration/signup/signup_event.dart';
 import 'package:flutter_seringueiro/views/registration/signup/signup_state.dart';
+import 'package:intl/intl.dart';
 
 class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
   SignUpBloc() : super(SignUpInitial()) {
@@ -50,13 +51,18 @@ class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
         profilePictureUrl = await snapshot.ref.getDownloadURL();
       }
 
-      // Salva os dados adicionais no Firestore, incluindo a URL da imagem de perfil (se houver)
+      // Converte a data de nascimento de String para DateTime
+      DateFormat format = DateFormat("dd/MM/yyyy");
+      DateTime dataNascimento = format.parse(event.nascimento);
+      Timestamp nascimentoTimestamp = Timestamp.fromDate(dataNascimento);
+
+      // Salva os dados adicionais no Firestore
       await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
         'email': event.email,
         'celular': event.celular,
         'idPersonalizado': event.idPersonalizado,
         'nome': event.nome,
-        'nascimento': event.nascimento,
+        'nascimento': nascimentoTimestamp, // Salva como Timestamp
         'cpf': event.cpf,
         'rg': event.rg,
         'cep': event.cep,
@@ -65,10 +71,7 @@ class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
         'bairro': event.bairro,
         'cidade': event.cidade,
         'estado': event.estado,
-        if (profilePictureUrl != null)
-          'profilePictureUrl':
-              profilePictureUrl, // Adiciona a URL da imagem de perfil condicionalmente
-        // Outros campos conforme necessário
+        if (profilePictureUrl != null) 'profilePictureUrl': profilePictureUrl,
       });
 
       emit(SignUpSuccess(user: user));

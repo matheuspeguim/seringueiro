@@ -40,6 +40,7 @@ class _MainPageState extends State<MainPage> {
 
     if (userDoc.exists) {
       var userData = userDoc.data() as Map<String, dynamic>;
+      print('Usuario instanciado!');
 
       // Supondo que a classe Usuario tenha um construtor nomeado adequado
       // que aceita Map<String, dynamic> diretamente.
@@ -64,10 +65,12 @@ class _MainPageState extends State<MainPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        backgroundColor: Colors.green.shade100,
+        backgroundColor: Colors.green.shade900,
         elevation: 50,
+        iconTheme: IconThemeData(color: Colors.white),
         title: Text(
           'Olá, $userName',
+          style: TextStyle(color: Colors.white),
         ),
       ),
       drawer: CustomDrawer(usuario: _currentUser!),
@@ -92,7 +95,7 @@ class _MainPageState extends State<MainPage> {
 
   NavigationBar _buildNavigationBar() {
     return NavigationBar(
-      backgroundColor: Colors.green.shade100,
+      backgroundColor: Colors.green.shade200,
       elevation: 50,
       shadowColor: Colors.grey.shade900,
       selectedIndex: _currentIndex,

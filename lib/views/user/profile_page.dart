@@ -3,6 +3,8 @@ import 'package:flutter_seringueiro/models/usuario.dart';
 
 class ProfilePage extends StatelessWidget {
   final Usuario usuario;
+  final String iconUsuario =
+      'https://firebasestorage.googleapis.com/v0/b/seringueiroapp.appspot.com/o/profilePictures%2Fvecteezy_illustration-of-human-icon-vector-user-symbol-icon-modern_8442086.jpg?alt=media&token=cdadba3c-68db-4d1b-ace3-b18d7b4733a2';
 
   ProfilePage({Key? key, required this.usuario}) : super(key: key);
 
@@ -18,7 +20,12 @@ class ProfilePage extends StatelessWidget {
             SizedBox(height: 20),
             CircleAvatar(
               radius: 50,
-              backgroundImage: NetworkImage(usuario.profilePictureUrl),
+              backgroundImage: NetworkImage(
+                usuario.profilePictureUrl != null &&
+                        usuario.profilePictureUrl!.isNotEmpty
+                    ? usuario.profilePictureUrl!
+                    : iconUsuario,
+              ),
             ),
             SizedBox(height: 20),
             Text(
@@ -37,7 +44,7 @@ class ProfilePage extends StatelessWidget {
             ),
             SizedBox(height: 10),
             Text(
-              'Data de Nascimento: ${usuario.dataDeNascimento.toLocal().toString().split(' ')[0]}',
+              'Data de Nascimento: ${usuario.nascimento.toLocal().toString().split(' ')[0]}',
               style: TextStyle(
                 fontSize: 18,
               ),

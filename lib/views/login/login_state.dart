@@ -8,14 +8,9 @@ class LoginInitial extends LoginState {}
 
 class LoginLoading extends LoginState {}
 
-class PersonalInfoMissing extends LoginState {
+class EmailNotVerified extends LoginState {
   final User user;
-  PersonalInfoMissing({required this.user});
-}
-
-class AdressInfoMissing extends LoginState {
-  final User user;
-  AdressInfoMissing({required this.user});
+  EmailNotVerified({required this.user});
 }
 
 class LoginSuccess extends LoginState {

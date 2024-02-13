@@ -1,32 +1,39 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_seringueiro/views/user/account_management_page.dart';
 import 'package:flutter_seringueiro/views/user/profile_page.dart';
 
 class Usuario {
+  final String email;
+  final String celular;
   final String cpf;
-  final DateTime dataDeNascimento;
+  final DateTime nascimento;
   final String idPersonalizado;
   final String nome;
-  final String profilePictureUrl;
+  final String? profilePictureUrl;
   final String rg;
 
   Usuario({
+    required this.email,
+    required this.celular,
     required this.cpf,
-    required this.dataDeNascimento,
+    required this.nascimento,
     required this.idPersonalizado,
     required this.nome,
-    required this.profilePictureUrl,
+    this.profilePictureUrl,
     required this.rg,
   });
 
   factory Usuario.fromMap(Map<String, dynamic> data) {
     return Usuario(
+      email: data['email'],
+      celular: data['celular'],
       cpf: data['cpf'],
-      dataDeNascimento: DateTime.parse(data['dataDeNascimento']),
+      nascimento: (data['nascimento'] as Timestamp)
+          .toDate(), // Convertendo de Timestamp para DateTime
       idPersonalizado: data['idPersonalizado'],
       nome: data['nome'],
-      profilePictureUrl: data['profilePictureUrl'],
+      profilePictureUrl: data['profilePictureUrl'] as String?,
       rg: data['rg'],
     );
   }
@@ -34,11 +41,14 @@ class Usuario {
   factory Usuario.fromFirebaseUser(
       User user, Map<String, dynamic> firestoreData) {
     return Usuario(
+      email: firestoreData['email'],
+      celular: firestoreData['celular'],
       cpf: firestoreData['cpf'],
-      dataDeNascimento: DateTime.parse(firestoreData['dataDeNascimento']),
+      nascimento:
+          (firestoreData['nascimento'] as Timestamp).toDate(), // Ajuste aqui
       idPersonalizado: firestoreData['idPersonalizado'],
       nome: firestoreData['nome'],
-      profilePictureUrl: firestoreData['profilePictureUrl'],
+      profilePictureUrl: firestoreData['profilePictureUrl'] as String?,
       rg: firestoreData['rg'],
     );
   }
@@ -46,27 +56,29 @@ class Usuario {
 
 class UsuarioListItem extends StatelessWidget {
   final Usuario usuario;
+  final String iconUsuario =
+      'https://firebasestorage.googleapis.com/v0/b/seringueiroapp.appspot.com/o/profilePictures%2Fvecteezy_illustration-of-human-icon-vector-user-symbol-icon-modern_8442086.jpg?alt=media&token=cdadba3c-68db-4d1b-ace3-b18d7b4733a2';
 
-  // A chave deve ser marcada como opcional e inicializada com `null` se não for fornecida.
   UsuarioListItem({Key? key, required this.usuario}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
       leading: CircleAvatar(
-        // Garantir que o URL da imagem de perfil não seja nulo. Caso contrário, fornecer um placeholder.
-        backgroundImage: NetworkImage(usuario.profilePictureUrl.isNotEmpty
-            ? usuario.profilePictureUrl
-            : 'URL_DE_IMAGEM_PADRÃO'),
+        // Verifica se profilePictureUrl é nulo ou vazio. Se for, usa um placeholder.
+        backgroundImage: NetworkImage(
+          usuario.profilePictureUrl != null &&
+                  usuario.profilePictureUrl!.isNotEmpty
+              ? usuario.profilePictureUrl!
+              : iconUsuario,
+        ),
       ),
       title: Text(
         usuario.nome,
         style: TextStyle(fontWeight: FontWeight.bold),
       ),
-      // Substitua 'usuario.funcao' pelo campo correto do seu modelo de usuário, se necessário.
       subtitle: Text(usuario.idPersonalizado),
       onTap: () {
-        // Navegue para a página de perfil do usuário.
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -80,6 +92,8 @@ class UsuarioListItem extends StatelessWidget {
 
 class UsuarioIcon extends StatelessWidget {
   final Usuario usuario;
+  final String iconUsuario =
+      'https://firebasestorage.googleapis.com/v0/b/seringueiroapp.appspot.com/o/profilePictures%2Fvecteezy_illustration-of-human-icon-vector-user-symbol-icon-modern_8442086.jpg?alt=media&token=cdadba3c-68db-4d1b-ace3-b18d7b4733a2';
 
   UsuarioIcon({Key? key, required this.usuario}) : super(key: key);
 
@@ -100,9 +114,10 @@ class UsuarioIcon extends StatelessWidget {
           CircleAvatar(
             radius: 30,
             backgroundImage: NetworkImage(
-              usuario.profilePictureUrl.isNotEmpty
-                  ? usuario.profilePictureUrl
-                  : 'URL_DE_IMAGEM_PADRÃO', // Substitua com um URL de imagem padrão
+              usuario.profilePictureUrl != null &&
+                      usuario.profilePictureUrl!.isNotEmpty
+                  ? usuario.profilePictureUrl!
+                  : iconUsuario,
             ),
           ),
           SizedBox(height: 8),
@@ -118,6 +133,8 @@ class UsuarioIcon extends StatelessWidget {
 
 class UsuarioDrawerHeader extends StatelessWidget {
   final Usuario usuario;
+  final String iconUsuario =
+      'https://firebasestorage.googleapis.com/v0/b/seringueiroapp.appspot.com/o/profilePictures%2Fvecteezy_illustration-of-human-icon-vector-user-symbol-icon-modern_8442086.jpg?alt=media&token=cdadba3c-68db-4d1b-ace3-b18d7b4733a2';
 
   UsuarioDrawerHeader({Key? key, required this.usuario}) : super(key: key);
 
@@ -128,9 +145,10 @@ class UsuarioDrawerHeader extends StatelessWidget {
       CircleAvatar(
         radius: 25,
         backgroundImage: NetworkImage(
-          usuario.profilePictureUrl.isNotEmpty
-              ? usuario.profilePictureUrl
-              : 'URL_DE_IMAGEM_PADRÃO',
+          usuario.profilePictureUrl != null &&
+                  usuario.profilePictureUrl!.isNotEmpty
+              ? usuario.profilePictureUrl!
+              : iconUsuario,
         ),
       ),
       SizedBox(

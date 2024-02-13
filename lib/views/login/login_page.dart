@@ -2,17 +2,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_seringueiro/services/via_cep_service.dart';
 import 'package:flutter_seringueiro/views/login/login_bloc.dart';
 import 'package:flutter_seringueiro/views/login/login_event.dart';
 import 'package:flutter_seringueiro/views/login/login_state.dart';
 import 'package:flutter_seringueiro/views/main/main_page.dart';
+import 'package:flutter_seringueiro/views/registration/email_verification/email_verification_bloc.dart';
+import 'package:flutter_seringueiro/views/registration/email_verification/email_verification_page.dart';
 import 'package:flutter_seringueiro/views/registration/signup/signup_bloc.dart';
 import 'package:flutter_seringueiro/views/registration/signup/signup_page.dart';
-import 'package:flutter_seringueiro/views/registration/user_info/adress/adress_bloc.dart';
-import 'package:flutter_seringueiro/views/registration/user_info/adress/adress_info_page.dart';
-import 'package:flutter_seringueiro/views/registration/user_info/personal/personal_bloc.dart';
-import 'package:flutter_seringueiro/views/registration/user_info/personal/personal_info_page.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -30,7 +27,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.green.shade100,
+      backgroundColor: Colors.green.shade900,
       appBar: AppBar(
         elevation: 50,
         title: Text('Entrar na conta', style: TextStyle(color: Colors.white)),
@@ -45,23 +42,13 @@ class _LoginPageState extends State<LoginPage> {
               MaterialPageRoute(
                   builder: (context) => MainPage(user: state.user)),
             );
-          } else if (state is PersonalInfoMissing) {
+          } else if (state is EmailNotVerified) {
             Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => BlocProvider<PersonalBloc>(
-                    create: (context) => PersonalBloc(),
-                    child: PersonalInfoPage(user: state.user),
-                  ),
-                ));
-          } else if (state is AdressInfoMissing) {
-            Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => BlocProvider<AdressBloc>(
-                    create: (context) =>
-                        AdressBloc(viaCepService: ViaCepService()),
-                    child: AdressInfoPage(user: state.user),
+                  builder: (context) => BlocProvider<EmailVerificationBloc>(
+                    create: (context) => EmailVerificationBloc(),
+                    child: EmailVerificationPage(),
                   ),
                 ));
           } else if (state is LoginFailure) {
@@ -92,9 +79,10 @@ class _LoginPageState extends State<LoginPage> {
                         decoration: InputDecoration(
                             labelText: 'E-mail',
                             labelStyle: TextStyle(
+                              color: Colors.white,
                               fontSize: 18.0,
                             )),
-                        style: TextStyle(fontSize: 18.0),
+                        style: TextStyle(fontSize: 18.0, color: Colors.white),
                         onFieldSubmitted: (value) {
                           FocusScope.of(context).requestFocus(senhaFocus);
                         },
@@ -115,6 +103,7 @@ class _LoginPageState extends State<LoginPage> {
                           labelText: 'Senha',
                           labelStyle: TextStyle(
                             fontSize: 18.0,
+                            color: Colors.white,
                           ),
                           suffixIcon: IconButton(
                             icon: Icon(
@@ -122,6 +111,7 @@ class _LoginPageState extends State<LoginPage> {
                               _senhaVisivel
                                   ? Icons.visibility
                                   : Icons.visibility_off,
+                              color: Colors.white,
                             ),
                             onPressed: () {
                               // Alterna o estado da visibilidade da senha
@@ -131,7 +121,10 @@ class _LoginPageState extends State<LoginPage> {
                             },
                           ),
                         ),
-                        style: TextStyle(fontSize: 18.0),
+                        style: TextStyle(
+                          fontSize: 18.0,
+                          color: Colors.white,
+                        ),
                         obscureText: !_senhaVisivel,
                         onFieldSubmitted: (value) => _executarLogin(context),
                       ),
@@ -145,7 +138,10 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       TextButton(
                         onPressed: () => _showResetPasswordDialog(context),
-                        child: Text("Esqueci minha senha"),
+                        child: Text("Esqueci minha senha",
+                            style: TextStyle(
+                              color: Colors.white,
+                            )),
                       ),
                       Divider(
                         indent: 10,
@@ -160,11 +156,11 @@ class _LoginPageState extends State<LoginPage> {
                             children: <TextSpan>[
                               TextSpan(
                                   text: 'Novo usuário? ',
-                                  style: TextStyle(color: Colors.black)),
+                                  style: TextStyle(color: Colors.white)),
                               TextSpan(
                                 text: 'Criar uma conta',
                                 style: TextStyle(
-                                    color: Colors.black,
+                                    color: Colors.white,
                                     fontWeight: FontWeight.bold,
                                     decoration: TextDecoration.underline),
                                 recognizer: TapGestureRecognizer()
