@@ -51,13 +51,13 @@ class DailyForecastCard extends StatelessWidget {
     if (now.day == forecast.date.day &&
         now.month == forecast.date.month &&
         now.year == forecast.date.year) {
-      displayDate = "Hoje";
+      displayDate = "hoje";
     }
 
     if (now.day + 1 == forecast.date.day &&
         now.month == forecast.date.month &&
         now.year == forecast.date.year) {
-      displayDate = "Hoje";
+      displayDate = "amanhã";
     }
 
     return Container(

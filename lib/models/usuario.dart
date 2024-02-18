@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_seringueiro/views/user/profile_page.dart';
+import 'package:flutter_seringueiro/views/user/profile_page/profile_page.dart';
 
 class Usuario {
   final String email;
@@ -140,27 +140,33 @@ class UsuarioDrawerHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DrawerHeader(
-        child: Row(children: <Widget>[
-      CircleAvatar(
-        radius: 25,
-        backgroundImage: NetworkImage(
-          usuario.profilePictureUrl != null &&
-                  usuario.profilePictureUrl!.isNotEmpty
-              ? usuario.profilePictureUrl!
-              : iconUsuario,
+    return InkWell(
+      onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => ProfilePage(usuario: usuario))),
+      child: DrawerHeader(
+          child: Row(children: <Widget>[
+        CircleAvatar(
+          radius: 25,
+          backgroundImage: NetworkImage(
+            usuario.profilePictureUrl != null &&
+                    usuario.profilePictureUrl!.isNotEmpty
+                ? usuario.profilePictureUrl!
+                : iconUsuario,
+          ),
         ),
-      ),
-      SizedBox(
-        width: 8,
-      ),
-      Text(
-        usuario.nome,
-        style: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.bold,
+        SizedBox(
+          width: 8,
         ),
-      ),
-    ]));
+        Text(
+          usuario.nome,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ])),
+    );
   }
 }
