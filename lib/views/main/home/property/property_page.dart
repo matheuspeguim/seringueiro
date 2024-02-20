@@ -12,6 +12,7 @@ import 'package:flutter_seringueiro/views/main/home/property/property_widgets/pr
 import 'package:flutter_seringueiro/views/main/home/property/rain/rain_bloc.dart';
 import 'package:flutter_seringueiro/views/main/home/property/rain/rain_widgets.dart';
 import 'package:flutter_seringueiro/views/main/home/weather/hourly_weather_widget.dart';
+import 'package:flutter_seringueiro/widgets/cup_fill.dart';
 import 'package:flutter_seringueiro/widgets/custom_Circular_Progress_indicator.dart';
 import 'package:flutter_seringueiro/widgets/custom_card.dart';
 
@@ -36,8 +37,7 @@ class _PropertyPageState extends State<PropertyPage> {
       create: (context) =>
           PropertyBloc()..add(LoadPropertyDetails(user, propertyId)),
       child: BlocConsumer<PropertyBloc, PropertyState>(
-        listener: (context, state) {
-        },
+        listener: (context, state) {},
         builder: (context, state) {
           return Scaffold(
             appBar: AppBar(
@@ -47,15 +47,15 @@ class _PropertyPageState extends State<PropertyPage> {
                 _getAppBarTitle(state),
                 style: TextStyle(color: Colors.white),
               ),
-              backgroundColor: Colors.green.shade800,
+              backgroundColor: Colors.green.shade900,
               elevation: 50,
             ),
             body: _buildBody(context, state),
-            backgroundColor: Colors.green.shade100,
+            backgroundColor: Colors.green,
             floatingActionButton: FloatingActionButton(
               onPressed: _showPropertyButtons,
               child: Icon(Icons.add, color: Colors.white),
-              backgroundColor: Colors.green, // Cor do botão
+              backgroundColor: Colors.green.shade900, // Cor do botão
               elevation: 10,
 
               // Você pode adicionar mais personalizações aqui se necessário
@@ -75,7 +75,8 @@ class _PropertyPageState extends State<PropertyPage> {
 
   void _showPropertyButtons() {
     showModalBottomSheet(
-      backgroundColor: Colors.grey.shade200,
+      enableDrag: true,
+      backgroundColor: Colors.white.withOpacity(0.0),
       context: context,
       builder: (BuildContext context) {
         return PropertyButtonsWidget(
@@ -100,29 +101,10 @@ class _PropertyPageState extends State<PropertyPage> {
           child: Column(
             children: [
               SizedBox(height: 8),
-              CustomCard(
-                title: "Previsão do tempo",
-                onButtonPressed: () => {},
-                colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.teal),
-                body: HourlyWeatherWidget(location: state.property.localizacao),
+              HourlyWeatherWidget(location: state.property.localizacao),
+              Divider(
+                color: Colors.white,
               ),
-              SizedBox(height: 8),
-              _buildPainelDeAtividades(state.property),
-              SizedBox(height: 8),
-              CustomCard(
-                title: "Histórico de Chuvas",
-                onButtonPressed: () => {},
-                colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue),
-                body: Column(children: [
-                  BlocProvider<RainBloc>(
-                    create: (context) => RainBloc(
-                        firestore: FirebaseFirestore.instance,
-                        weatherApiService: OpenWeatherApiService(
-                            apiKey: dotenv.env['OPENWEATHER_API_KEY']!)),
-                    child: RainChartWidget(propertyId: state.property.id),
-                  ),
-                ]),
-              )
             ],
           ),
         ),
@@ -132,16 +114,5 @@ class _PropertyPageState extends State<PropertyPage> {
     } else {
       return Center(child: Text('Estado não reconhecido!'));
     }
-  }
-
-  Widget _buildPainelDeAtividades(Property property) {
-    // Conteúdo do Painel de Atividades aqui
-    return CustomCard(
-      title: 'Painel de atividades',
-      body: Column(),
-      onButtonPressed: () {
-        // Ação do botão
-      },
-    );
   }
 }

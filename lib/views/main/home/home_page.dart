@@ -13,9 +13,11 @@ import 'package:flutter_seringueiro/views/main/home/property/property_page.dart'
 import 'package:flutter_seringueiro/views/main/home/property/searcher/search_property_bloc.dart';
 import 'package:flutter_seringueiro/views/main/home/property/searcher/search_property_page.dart';
 import 'package:flutter_seringueiro/views/main/home/weather/daily_weather_widget.dart';
+import 'package:flutter_seringueiro/widgets/cup_fill.dart';
 import 'package:flutter_seringueiro/widgets/custom_Circular_Progress_indicator.dart';
 import 'package:flutter_seringueiro/widgets/custom_button.dart';
 import 'package:flutter_seringueiro/widgets/custom_card.dart';
+import 'package:flutter_seringueiro/widgets/percentage_circle.dart';
 
 class HomePage extends StatelessWidget {
   final User user;
@@ -58,7 +60,37 @@ class HomePage extends StatelessWidget {
       body: Column(
         children: [
           DailyWeatherWidget(location: property.localizacao),
-          // Outras informações da propriedade aqui
+          Divider(
+            color: Colors.white,
+          ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: <Widget>[
+              CupFill(
+                titulo: "Pluviômetro",
+                valor: 21,
+                escala: 0.6,
+                corPreenchimento: Colors.blue,
+              ),
+              SizedBox(
+                width: 8.0,
+              ),
+              CupFill(
+                titulo: "Caneca",
+                valor: 33,
+                escala: 0.6,
+                corPreenchimento: Colors.white,
+                unidade: "%",
+              ),
+              SizedBox(
+                width: 8.0,
+              ),
+              PercentageCircle(
+                titulo: "Eficiência",
+                valor: 33,
+              )
+            ],
+          )
         ],
       ),
       onButtonPressed: () {

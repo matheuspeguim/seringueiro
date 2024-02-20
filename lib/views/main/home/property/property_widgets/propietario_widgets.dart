@@ -9,16 +9,9 @@ class ProprietarioWidgets {
     // Exemplo: widgets.add(SeuBotaoDeProprietario());
 
     // Por enquanto, retornando apenas um divisor e um cabeçalho
-    widgets.add(Divider());
-    widgets.add(
-      Align(
-        alignment: Alignment.topCenter,
-        child: Text(
-          'Proprietário',
-          style: TextStyle(fontSize: 12.0, color: Colors.green),
-        ),
-      ),
-    );
+    widgets.add(SizedBox(
+      height: 0,
+    ));
 
     // Adicionar mais widgets conforme necessário
 

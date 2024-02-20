@@ -30,8 +30,8 @@ class PropertyButtonsWidget extends StatelessWidget {
               child: Wrap(
                 direction:
                     Axis.horizontal, // Organiza os filhos horizontalmente
-                spacing: 4.0, // Espaço horizontal entre os botões
-                runSpacing: 4.0, // Espaço vertical entre as linhas
+                spacing: 1.0, // Espaço horizontal entre os botões
+                runSpacing: 1.0, // Espaço vertical entre as linhas
                 alignment: WrapAlignment
                     .center, // Alinha os botões ao início do eixo principal
                 children: state.buttons, // Os botões carregados

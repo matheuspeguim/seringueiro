@@ -3,9 +3,18 @@ import 'package:flutter/material.dart';
 class CupFill extends StatefulWidget {
   final String titulo;
   final double valor;
+  final double escala;
+  final Color corPreenchimento;
+  final String unidade;
 
-  const CupFill({Key? key, required this.titulo, required this.valor})
-      : super(key: key);
+  const CupFill({
+    Key? key,
+    required this.titulo,
+    required this.valor,
+    this.escala = 1,
+    this.corPreenchimento = Colors.blue,
+    this.unidade = "mm",
+  }) : super(key: key);
 
   @override
   _CupFillState createState() => _CupFillState();
@@ -37,29 +46,33 @@ class _CupFillState extends State<CupFill> with SingleTickerProviderStateMixin {
   }
 
   Color _getColorForValue(double value) {
-    if (value < 30) return Colors.blue.shade100;
-    if (value < 60) return Colors.blue.shade500;
-    return Colors.blue.shade800;
+    return widget.corPreenchimento;
   }
 
   @override
   Widget build(BuildContext context) {
+    // Dimensões proporcionais baseadas no fator de escala
+    double width = 100 * widget.escala;
+    double height = 200 * widget.escala;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 200,
-          height: 300,
-          padding: const EdgeInsets.all(8.0), // Adiciona uma margem interna
+          width: width,
+          height: height,
+          padding: const EdgeInsets.all(4.0), // Adiciona uma margem interna
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12.0),
+            color: Colors.white.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(
+                12.0 * widget.escala), // Arredondamento proporcional
             boxShadow: [
               BoxShadow(
                 color: Colors.grey.withOpacity(0.5),
-                spreadRadius: 5,
-                blurRadius: 7,
-                offset: Offset(0, 3), // changes position of shadow
+                spreadRadius: 5 * widget.escala, // Sombra proporcional
+                blurRadius: 7 * widget.escala,
+                offset: Offset(
+                    0, 3 * widget.escala), // Posição da sombra proporcional
               ),
             ],
           ),
@@ -70,35 +83,66 @@ class _CupFillState extends State<CupFill> with SingleTickerProviderStateMixin {
                 animation: _animation,
                 builder: (_, child) {
                   return Container(
-                    height: 3.0 *
-                        _animation.value, // Altura baseada no valor animado
+                    height: 2 *
+                        widget.escala *
+                        _animation
+                            .value, // Altura baseada no valor animado e escala
                     decoration: BoxDecoration(
                       color: _getColorForValue(_animation.value),
-                      borderRadius: BorderRadius.circular(8.0),
+                      borderRadius: BorderRadius.circular(8.0 * widget.escala),
                     ),
                   );
                 },
               ),
               Positioned.fill(
                 child: Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(4.0),
                   child: Align(
-                    alignment: Alignment.topCenter,
-                    child: Text(
-                      '${_animation.value.toInt()}%',
-                      style:
-                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                    ),
-                  ),
+                      alignment: Alignment.topCenter,
+                      child: RichText(
+                        textAlign: TextAlign.center,
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: '${_animation.value.toInt()}',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 25 * widget.escala,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            WidgetSpan(
+                              child: Transform.translate(
+                                offset: const Offset(0.0,
+                                    -4.0), // Ajusta a posição do 'mm' em relação ao número
+                                child: Text(
+                                  widget.unidade,
+                                  // Texto menor e com menos destaque que o número
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14 * widget.escala,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )),
                 ),
               ),
             ],
           ),
         ),
-        SizedBox(height: 20),
+        SizedBox(height: 10 * widget.escala),
         Text(
-          widget.titulo.toUpperCase(),
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          widget.titulo,
+          style: TextStyle(
+            fontSize: 24 * widget.escala,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
         ),
       ],
     );

@@ -4,8 +4,8 @@ import 'package:flutter_seringueiro/models/usuario.dart';
 import 'package:flutter_seringueiro/views/user/account_management/account_management_bloc.dart';
 import 'package:flutter_seringueiro/views/user/account_management/account_management_page.dart';
 import 'package:flutter_seringueiro/widgets/cup_fill.dart';
-import 'package:flutter_seringueiro/widgets/custom_card.dart';
-import 'package:flutter_seringueiro/widgets/porcentage_circle.dart';
+import 'package:flutter_seringueiro/widgets/mug_fill.dart';
+import 'package:flutter_seringueiro/widgets/percentage_circle.dart';
 
 class ProfilePage extends StatelessWidget {
   final Usuario usuario;
@@ -112,6 +112,16 @@ class ProfilePage extends StatelessWidget {
             ),
             Divider(),
             // Adicione mais widgets conforme necessário
+            CupFill(
+              titulo: "Chuva",
+              valor: 44,
+              escala: 0.7,
+            ),
+            Divider(),
+            RubberCollectionMugWidget(
+              title: "Produção",
+              percentage: 33,
+            )
           ],
         ),
       ),

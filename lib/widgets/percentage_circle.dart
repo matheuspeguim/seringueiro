@@ -44,41 +44,36 @@ class _PercentageCircleState extends State<PercentageCircle>
     final size =
         MediaQuery.of(context).size.width * 0.18; // 60% da largura da tela
 
-    return Padding(
-      // Adicionando uma margem ao redor do widget
-      padding: const EdgeInsets.all(10.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              CustomPaint(
-                size: Size(size, size),
-                painter:
-                    _CirclePainter(_animation.value), // Usando o valor animado
-              ),
-              Text(
-                '${_animation.value.toInt()}%',
-                style: TextStyle(
-                  fontSize: size * 0.2,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey[800],
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 20),
-          Text(
-            widget.titulo.toUpperCase(),
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey[700],
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Stack(
+          alignment: Alignment.center,
+          children: [
+            CustomPaint(
+              size: Size(size, size),
+              painter:
+                  _CirclePainter(_animation.value), // Usando o valor animado
             ),
+            Text(
+              '${_animation.value.toInt()}%',
+              style: TextStyle(
+                fontSize: size * 0.2,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 20),
+        Text(
+          widget.titulo,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -91,7 +86,7 @@ class _CirclePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     Paint basePaint = Paint()
-      ..color = Colors.grey[300]!
+      ..color = Colors.white.withOpacity(0.2)
       ..strokeWidth = 15
       ..style = PaintingStyle.stroke;
 

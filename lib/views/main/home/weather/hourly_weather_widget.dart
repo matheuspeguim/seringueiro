@@ -88,19 +88,18 @@ class HourlyForecastCard extends StatelessWidget {
                   style: (TextStyle(color: Colors.white, fontSize: 12))),
             ],
           ),
-          if (forecast.precipitation > 0) // Exibir se houver precipitação
-            Row(
-              children: [
-                Icon(
-                  Icons.water_drop,
-                  size: 16,
-                  color: Colors.blue,
-                ),
-                SizedBox(width: 4),
-                Text('${forecast.precipitation.toStringAsFixed(1)}mm',
-                    style: TextStyle(color: Colors.white, fontSize: 12)),
-              ],
-            ),
+          Row(
+            children: [
+              Icon(
+                Icons.water_drop,
+                size: 16,
+                color: Colors.blue,
+              ),
+              SizedBox(width: 4),
+              Text('${forecast.precipitation.toStringAsFixed(1)}mm',
+                  style: TextStyle(color: Colors.white, fontSize: 12)),
+            ],
+          ),
         ],
       ),
     );

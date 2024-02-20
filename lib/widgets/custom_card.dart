@@ -7,6 +7,7 @@ class CustomCard extends StatelessWidget {
   final VoidCallback onButtonPressed;
   final String buttonText;
   final ColorScheme? colorScheme;
+  final double? elevation;
 
   CustomCard({
     Key? key,
@@ -16,6 +17,7 @@ class CustomCard extends StatelessWidget {
     required this.onButtonPressed,
     this.buttonText = "Mais informações",
     this.colorScheme,
+    this.elevation = 50.0,
   }) : super(key: key);
 
   @override
@@ -25,11 +27,11 @@ class CustomCard extends StatelessWidget {
         colorScheme ?? ColorScheme.fromSwatch(primarySwatch: Colors.green);
 
     return Card(
-      elevation: 50,
+      elevation: elevation,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15.0),
       ),
-      color: colors.primary,
+      color: colors.primary.withOpacity(0.8),
       margin: EdgeInsets.all(8.0),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -39,7 +41,7 @@ class CustomCard extends StatelessWidget {
           Container(
             padding: EdgeInsets.symmetric(vertical: 10.0),
             decoration: BoxDecoration(
-              color: colors.primary,
+              color: colors.primary.withOpacity(0.8),
               borderRadius: BorderRadius.vertical(top: Radius.circular(15.0)),
             ),
             child: Text(
