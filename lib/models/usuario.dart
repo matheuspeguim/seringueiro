@@ -10,8 +10,12 @@ class Usuario {
   final DateTime nascimento;
   final String idPersonalizado;
   final String nome;
-  final String? profilePictureUrl;
+  final String profilePictureUrl; // Agora é uma String não nula
   final String rg;
+
+  // URL da imagem padrão
+  static const String _defaultProfilePictureUrl =
+      'https://firebasestorage.googleapis.com/v0/b/seringueiroapp.appspot.com/o/profilePictures%2Fvecteezy_illustration-of-human-icon-vector-user-symbol-icon-modern_8442086.jpg?alt=media&token=cdadba3c-68db-4d1b-ace3-b18d7b4733a2';
 
   Usuario({
     required this.email,
@@ -20,9 +24,9 @@ class Usuario {
     required this.nascimento,
     required this.idPersonalizado,
     required this.nome,
-    this.profilePictureUrl,
+    String? profilePictureUrl,
     required this.rg,
-  });
+  }) : this.profilePictureUrl = profilePictureUrl ?? _defaultProfilePictureUrl;
 
   factory Usuario.fromMap(Map<String, dynamic> data) {
     return Usuario(
@@ -33,7 +37,7 @@ class Usuario {
           .toDate(), // Convertendo de Timestamp para DateTime
       idPersonalizado: data['idPersonalizado'],
       nome: data['nome'],
-      profilePictureUrl: data['profilePictureUrl'] as String?,
+      profilePictureUrl: data['profilePictureUrl'],
       rg: data['rg'],
     );
   }
@@ -48,7 +52,7 @@ class Usuario {
           (firestoreData['nascimento'] as Timestamp).toDate(), // Ajuste aqui
       idPersonalizado: firestoreData['idPersonalizado'],
       nome: firestoreData['nome'],
-      profilePictureUrl: firestoreData['profilePictureUrl'] as String?,
+      profilePictureUrl: firestoreData['profilePictureUrl'],
       rg: firestoreData['rg'],
     );
   }
@@ -56,8 +60,6 @@ class Usuario {
 
 class UsuarioListItem extends StatelessWidget {
   final Usuario usuario;
-  final String iconUsuario =
-      'https://firebasestorage.googleapis.com/v0/b/seringueiroapp.appspot.com/o/profilePictures%2Fvecteezy_illustration-of-human-icon-vector-user-symbol-icon-modern_8442086.jpg?alt=media&token=cdadba3c-68db-4d1b-ace3-b18d7b4733a2';
 
   UsuarioListItem({Key? key, required this.usuario}) : super(key: key);
 
@@ -65,13 +67,7 @@ class UsuarioListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       leading: CircleAvatar(
-        // Verifica se profilePictureUrl é nulo ou vazio. Se for, usa um placeholder.
-        backgroundImage: NetworkImage(
-          usuario.profilePictureUrl != null &&
-                  usuario.profilePictureUrl!.isNotEmpty
-              ? usuario.profilePictureUrl!
-              : iconUsuario,
-        ),
+        backgroundImage: NetworkImage(usuario.profilePictureUrl),
       ),
       title: Text(
         usuario.nome,
@@ -92,9 +88,6 @@ class UsuarioListItem extends StatelessWidget {
 
 class UsuarioIcon extends StatelessWidget {
   final Usuario usuario;
-  final String iconUsuario =
-      'https://firebasestorage.googleapis.com/v0/b/seringueiroapp.appspot.com/o/profilePictures%2Fvecteezy_illustration-of-human-icon-vector-user-symbol-icon-modern_8442086.jpg?alt=media&token=cdadba3c-68db-4d1b-ace3-b18d7b4733a2';
-
   UsuarioIcon({Key? key, required this.usuario}) : super(key: key);
 
   @override
@@ -113,12 +106,7 @@ class UsuarioIcon extends StatelessWidget {
         children: <Widget>[
           CircleAvatar(
             radius: 30,
-            backgroundImage: NetworkImage(
-              usuario.profilePictureUrl != null &&
-                      usuario.profilePictureUrl!.isNotEmpty
-                  ? usuario.profilePictureUrl!
-                  : iconUsuario,
-            ),
+            backgroundImage: NetworkImage(usuario.profilePictureUrl),
           ),
           SizedBox(height: 8),
           Text(
@@ -133,9 +121,6 @@ class UsuarioIcon extends StatelessWidget {
 
 class UsuarioDrawerHeader extends StatelessWidget {
   final Usuario usuario;
-  final String iconUsuario =
-      'https://firebasestorage.googleapis.com/v0/b/seringueiroapp.appspot.com/o/profilePictures%2Fvecteezy_illustration-of-human-icon-vector-user-symbol-icon-modern_8442086.jpg?alt=media&token=cdadba3c-68db-4d1b-ace3-b18d7b4733a2';
-
   UsuarioDrawerHeader({Key? key, required this.usuario}) : super(key: key);
 
   @override
@@ -149,12 +134,7 @@ class UsuarioDrawerHeader extends StatelessWidget {
           child: Row(children: <Widget>[
         CircleAvatar(
           radius: 25,
-          backgroundImage: NetworkImage(
-            usuario.profilePictureUrl != null &&
-                    usuario.profilePictureUrl!.isNotEmpty
-                ? usuario.profilePictureUrl!
-                : iconUsuario,
-          ),
+          backgroundImage: NetworkImage(usuario.profilePictureUrl),
         ),
         SizedBox(
           width: 8,

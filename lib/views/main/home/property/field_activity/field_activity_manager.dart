@@ -59,13 +59,13 @@ class FieldActivityManager {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Seleciona a tabela de sangria'),
+          title: Text('Seleciona a tabela'),
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
                 for (var i = 1; i <= 5; i++)
                   ListTile(
-                    title: Text('Tabela $i'),
+                    title: Text('T$i'),
                     onTap: () {
                       tabelaSelecionada = 'Tabela $i';
                       Navigator.of(context).pop();

@@ -14,7 +14,7 @@ package="com.peguim.seringueiro"
 
         <meta-data 
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyCUoUoNODG2bOCkFG5-G3Qkn8-kMfxjiys"/>
+            android:value="AIzaSyBcT8FM1BMtA9De9ms6AuLS4Q9q-uYsl9g"/>
 
         <activity
             android:name=".MainActivity"

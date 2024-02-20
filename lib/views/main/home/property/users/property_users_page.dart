@@ -1,52 +1,172 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_seringueiro/models/usuario.dart';
-import 'package:flutter_seringueiro/views/main/home/property/users/property_users_bloc.dart';
-import 'package:flutter_seringueiro/views/main/home/property/users/property_users_event.dart';
-import 'package:flutter_seringueiro/views/main/home/property/users/property_users_state.dart';
+import 'package:flutter_seringueiro/widgets/custom_button.dart';
+import 'package:flutter_seringueiro/widgets/user_card.dart';
 
 class PropertyUsersPage extends StatelessWidget {
   final String propertyId;
 
-  PropertyUsersPage({Key? key, required this.propertyId}) : super(key: key);
+  PropertyUsersPage({required this.propertyId});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.green.shade900,
-        title: Text('Usuários da Propriedade',
-            style: TextStyle(color: Colors.white)),
-      ),
-      body: BlocProvider(
-          create: (context) =>
-              PropertyUsersBloc()..add(FetchPropertyUsers(propertyId)),
-          child: BlocBuilder<PropertyUsersBloc, PropertyUsersState>(
-            builder: (context, state) {
-              // Log para diagnóstico
-              print('Current State: $state');
+    // Stream que escuta as mudanças na coleção 'property_users' relativas a esta propriedade
+    Stream<QuerySnapshot> propertyUsersStream = FirebaseFirestore.instance
+        .collection('properties')
+        .doc(propertyId) // 'propertyId' é o ID do documento da propriedade
+        .collection('property_users')
+        .snapshots();
 
-              if (state is PropertyUsersInitial) {
-                return Center(
-                    child: Text('Toque no botão para carregar usuários.'));
-              } else if (state is PropertyUsersLoading) {
+    Stream<DocumentSnapshot> propertyDataStream = FirebaseFirestore.instance
+        .collection('properties')
+        .doc(propertyId)
+        .snapshots();
+
+    return Scaffold(
+        appBar: AppBar(
+          iconTheme: IconThemeData(
+            color: Colors.white,
+          ),
+          backgroundColor: Colors.green.shade900,
+          title: Text(
+            'Gerenciar Propriedade',
+            style: TextStyle(
+              color: Colors.white,
+            ),
+          ),
+          centerTitle: true,
+        ),
+        body: StreamBuilder<DocumentSnapshot>(
+            stream: propertyDataStream,
+            builder:
+                (context, AsyncSnapshot<DocumentSnapshot> propertySnapshot) {
+              if (propertySnapshot.connectionState == ConnectionState.waiting) {
                 return Center(child: CircularProgressIndicator());
-              } else if (state is PropertyUsersLoaded) {
-                if (state.users.isEmpty) {
-                  return Center(child: Text('Nenhum usuário encontrado.'));
-                }
-                return ListView(
-                  children: state.users
-                      .map((usuario) => UsuarioListItem(usuario: usuario))
-                      .toList(),
-                );
-              } else if (state is PropertyUsersError) {
-                return Center(child: Text('Erro: ${state.message}'));
               }
-              // Adicionado estado inicial para diagnóstico
-              return Center(child: Text('Estado desconhecido.'));
-            },
-          )),
-    );
+
+              if (propertySnapshot.hasError) {
+                return Center(
+                    child: Text('Ocorreu um erro ao carregar a propriedade'));
+              }
+
+              if (!propertySnapshot.hasData) {
+                return Center(
+                    child: Text('Dados da propriedade não encontrados'));
+              }
+
+              // Aqui você constrói o cartão com os dados da propriedade
+              var propertyData =
+                  propertySnapshot.data!.data() as Map<String, dynamic>;
+              var propertyCard = Card(
+                elevation: 4.0,
+                color: Colors.green,
+                margin: EdgeInsets.all(8.0),
+                child: Container(
+                  padding: EdgeInsets.all(8),
+                  child: Column(
+                    children: [
+                      ListTile(
+                        title:
+                            Text("Nome: ${propertyData['nomeDaPropriedade']}"),
+                        trailing: IconButton(
+                          icon: Icon(
+                            Icons.edit,
+                            color: Colors.white,
+                          ),
+                          onPressed: () {},
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+
+              return StreamBuilder<QuerySnapshot>(
+                stream: propertyUsersStream,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+
+                  if (snapshot.hasError) {
+                    return Center(child: Text('Ocorreu um erro'));
+                  }
+
+                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return Center(child: Text('Nenhum usuário encontrado'));
+                  }
+
+                  return ListView.builder(
+                    itemCount: snapshot.data!.docs.length,
+                    itemBuilder: (context, index) {
+                      var propertyUser = snapshot.data!.docs[index];
+                      var userId = propertyUser['uid'];
+
+                      // Stream para buscar os dados do usuário com base no UID
+                      Stream<DocumentSnapshot> userStream = FirebaseFirestore
+                          .instance
+                          .collection('users')
+                          .doc(userId)
+                          .snapshots();
+
+                      return StreamBuilder<DocumentSnapshot>(
+                        stream: userStream,
+                        builder: (context, userSnapshot) {
+                          if (userSnapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return Card(
+                                child: ListTile(title: Text('Carregando...')));
+                          }
+
+                          if (userSnapshot.hasError) {
+                            return Card(
+                                child: ListTile(
+                                    title: Text('Erro ao carregar usuário')));
+                          }
+
+                          if (!userSnapshot.hasData) {
+                            return Text('Usuários não encontrados');
+                          }
+
+                          var user = userSnapshot.data!;
+                          return SingleChildScrollView(
+                              child: Column(
+                            children: <Widget>[
+                              SizedBox(
+                                height: 16,
+                              ),
+                              propertyCard,
+                              Divider(),
+                              UserCard(
+                                userData: user,
+                                propertyUserData: propertyUser,
+                                onRolesEdit: () =>
+                                    _editRoles(context, propertyUser),
+                                onDelete: () =>
+                                    _deletePropertyUser(context, propertyUser),
+                              ),
+                              CustomButton(
+                                onPressed: () {},
+                                label: "Adicionar usuário",
+                                backgroundColor: Colors.green,
+                                icon: Icons.add,
+                              )
+                            ],
+                          ));
+                        },
+                      );
+                    },
+                  );
+                },
+              );
+            }));
   }
+}
+
+void _editRoles(BuildContext context, DocumentSnapshot propertyUser) {
+  // Implementar a lógica para editar os papéis do usuário
+}
+
+void _deletePropertyUser(BuildContext context, DocumentSnapshot propertyUser) {
+  // Implementar a lógica para excluir o usuário da propriedade
 }

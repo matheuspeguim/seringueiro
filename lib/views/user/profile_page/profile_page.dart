@@ -3,8 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_seringueiro/models/usuario.dart';
 import 'package:flutter_seringueiro/views/user/account_management/account_management_bloc.dart';
 import 'package:flutter_seringueiro/views/user/account_management/account_management_page.dart';
-import 'package:flutter_seringueiro/widgets/cup_fill.dart';
-import 'package:flutter_seringueiro/widgets/mug_fill.dart';
 import 'package:flutter_seringueiro/widgets/percentage_circle.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -15,7 +13,6 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
         iconTheme: IconThemeData(color: Colors.white),
         backgroundColor: Colors.green.shade900,
@@ -71,10 +68,15 @@ class ProfilePage extends StatelessWidget {
                 fontSize: 16,
               ),
             ),
-            Divider(),
+            Divider(
+              color: Colors.black,
+            ),
             Text(
               "Desempenho profissional".toUpperCase(),
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             Text(
               "São considerados dados das duas últimas safras, ou mais recentes.",
@@ -91,37 +93,30 @@ class ProfilePage extends StatelessWidget {
                 PercentageCircle(
                   titulo: "Rotina",
                   valor: 56,
+                  themeColor: Colors.black,
                 ),
                 PercentageCircle(
                   titulo: "Técnica",
                   valor: 65,
+                  themeColor: Colors.black,
                 ),
                 PercentageCircle(
                   titulo: "Manejo",
                   valor: 100,
+                  themeColor: Colors.black,
                 ),
                 PercentageCircle(
                   titulo: "Reposição",
                   valor: 87,
+                  themeColor: Colors.black,
                 ),
                 PercentageCircle(
                   titulo: "Consumo",
                   valor: 18,
+                  themeColor: Colors.black,
                 )
               ],
             ),
-            Divider(),
-            // Adicione mais widgets conforme necessário
-            CupFill(
-              titulo: "Chuva",
-              valor: 44,
-              escala: 0.7,
-            ),
-            Divider(),
-            RubberCollectionMugWidget(
-              title: "Produção",
-              percentage: 33,
-            )
           ],
         ),
       ),

@@ -4,8 +4,13 @@ import 'dart:math' as math;
 class PercentageCircle extends StatefulWidget {
   final String titulo;
   final double valor;
+  final Color? themeColor;
 
-  const PercentageCircle({Key? key, required this.titulo, required this.valor})
+  const PercentageCircle(
+      {Key? key,
+      required this.titulo,
+      required this.valor,
+      this.themeColor = Colors.white})
       : super(key: key);
 
   @override
@@ -44,49 +49,53 @@ class _PercentageCircleState extends State<PercentageCircle>
     final size =
         MediaQuery.of(context).size.width * 0.18; // 60% da largura da tela
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Stack(
-          alignment: Alignment.center,
+    return Container(
+        padding: EdgeInsets.all(4),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            CustomPaint(
-              size: Size(size, size),
-              painter:
-                  _CirclePainter(_animation.value), // Usando o valor animado
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                CustomPaint(
+                  size: Size(size, size),
+                  painter: _CirclePainter(_animation.value,
+                      widget.themeColor! // Usando o valor animado
+                      ),
+                ),
+                Text(
+                  '${_animation.value.toInt()}%',
+                  style: TextStyle(
+                    fontSize: size * 0.2,
+                    fontWeight: FontWeight.bold,
+                    color: widget.themeColor,
+                  ),
+                ),
+              ],
             ),
+            SizedBox(height: 20),
             Text(
-              '${_animation.value.toInt()}%',
+              widget.titulo,
               style: TextStyle(
-                fontSize: size * 0.2,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: widget.themeColor,
               ),
             ),
           ],
-        ),
-        SizedBox(height: 20),
-        Text(
-          widget.titulo,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-      ],
-    );
+        ));
   }
 }
 
 class _CirclePainter extends CustomPainter {
   final double valor;
+  final Color themeColor;
 
-  _CirclePainter(this.valor);
+  _CirclePainter(this.valor, this.themeColor);
 
   @override
   void paint(Canvas canvas, Size size) {
     Paint basePaint = Paint()
-      ..color = Colors.white.withOpacity(0.2)
+      ..color = themeColor.withOpacity(0.2)
       ..strokeWidth = 15
       ..style = PaintingStyle.stroke;
 
@@ -97,9 +106,8 @@ class _CirclePainter extends CustomPainter {
     } else if (valor < 60) {
       colors = [Colors.orange, Colors.yellow];
     } else {
-      colors = [Colors.lightGreen, Colors.green];
+      colors = [Colors.greenAccent, Colors.green];
     }
-
     Paint progressPaint = Paint()
       ..strokeWidth = 15
       ..shader = LinearGradient(
