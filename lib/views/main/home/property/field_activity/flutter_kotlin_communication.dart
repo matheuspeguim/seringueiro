@@ -4,9 +4,9 @@ class FlutterKotlinCommunication {
   static const MethodChannel _channel =
       MethodChannel('com.peguim.seringueiro/sangria');
 
-  static Future<void> IniciarRegistroPontos(String sangriaId) async {
-    await _channel
-        .invokeMethod('iniciarRegistroPontos', {'sangriaId': sangriaId});
+  static Future<void> iniciarRegistroPontos(String fieldActivityId) async {
+    await _channel.invokeMethod(
+        'iniciarRegistroPontos', {'fieldActivityId': fieldActivityId});
   }
 
   static Future<List<dynamic>?> finalizarRegistroPontos(

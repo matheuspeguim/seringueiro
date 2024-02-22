@@ -5,13 +5,11 @@ class UserCard extends StatelessWidget {
   final DocumentSnapshot userData;
   final DocumentSnapshot propertyUserData;
   final VoidCallback onRolesEdit;
-  final VoidCallback onDelete;
 
   UserCard({
     required this.userData,
     required this.propertyUserData,
     required this.onRolesEdit,
-    required this.onDelete,
   });
 
   @override

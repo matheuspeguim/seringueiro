@@ -140,10 +140,8 @@ class PropertyUsersPage extends StatelessWidget {
                               UserCard(
                                 userData: user,
                                 propertyUserData: propertyUser,
-                                onRolesEdit: () =>
-                                    _editRoles(context, propertyUser),
-                                onDelete: () =>
-                                    _deletePropertyUser(context, propertyUser),
+                                onRolesEdit: () => _editRoles(
+                                    context, propertyUser, propertyId),
                               ),
                               CustomButton(
                                 onPressed: () {},
@@ -163,10 +161,153 @@ class PropertyUsersPage extends StatelessWidget {
   }
 }
 
-void _editRoles(BuildContext context, DocumentSnapshot propertyUser) {
-  // Implementar a lógica para editar os papéis do usuário
+void _editRoles(
+    BuildContext context, DocumentSnapshot propertyUser, String propertyId) {
+  final Map<String, dynamic> funcoes = propertyUser['funcoes'];
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return StatefulBuilder(
+        // Use StatefulBuilder para atualizar o estado dos checkboxes
+        builder: (context, setState) {
+          return AlertDialog(
+            title: Text('Editar Papéis do Usuário'),
+            content: SingleChildScrollView(
+              child: ListBody(
+                children: [
+                  CheckboxListTile(
+                    value: funcoes['seringueiro'],
+                    title: Text('Seringueiro'),
+                    onChanged: (value) {
+                      setState(() {
+                        funcoes['seringueiro'] = value!;
+                      });
+                    },
+                  ),
+                  CheckboxListTile(
+                    value: funcoes['agronomo'],
+                    title: Text('Agrônomo'),
+                    onChanged: (value) {
+                      setState(() {
+                        funcoes['agronomo'] = value!;
+                      });
+                    },
+                  ),
+                  CheckboxListTile(
+                    value: funcoes['proprietario'],
+                    title: Text('Proprietário'),
+                    onChanged: (value) {
+                      setState(() {
+                        funcoes['proprietario'] = value!;
+                      });
+                    },
+                  ),
+                  CheckboxListTile(
+                    value: funcoes['admin'],
+                    title: Text('Administrador'),
+                    onChanged: (value) {
+                      setState(() {
+                        funcoes['admin'] = value!;
+                      });
+                    },
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      _deletePropertyUser(context, propertyUser, propertyId);
+                    },
+                    child: Text(
+                      "Excluir usuário",
+                      style: TextStyle(
+                        color: Colors.red,
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: Text('Cancelar'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              TextButton(
+                child: Text('Salvar'),
+                onPressed: () {
+                  propertyUser.reference.update(
+                      {'funcoes': funcoes}); // Atualiza os papéis no Firestore
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
 }
 
-void _deletePropertyUser(BuildContext context, DocumentSnapshot propertyUser) {
-  // Implementar a lógica para excluir o usuário da propriedade
+void _deletePropertyUser(
+    BuildContext context, DocumentSnapshot propertyUser, String propertyId) {
+  // Primeiro, apresente um diálogo de confirmação
+  showDialog(
+    context: context,
+    builder: (BuildContext dialogContext) {
+      return AlertDialog(
+        title: Text('Excluir Usuário'),
+        content: Text(
+            'Tem certeza de que deseja excluir este usuário da propriedade?'),
+        actions: <Widget>[
+          TextButton(
+            child: Text('Cancelar'),
+            onPressed: () {
+              // Apenas feche o diálogo de confirmação
+              Navigator.of(dialogContext).pop();
+            },
+          ),
+          TextButton(
+            child: Text('Excluir',
+                style: TextStyle(
+                  color: Colors.red,
+                )),
+            onPressed: () {
+              // Verifica se é o último usuário
+              FirebaseFirestore.instance
+                  .collection('properties')
+                  .doc(propertyId)
+                  .collection('property_users')
+                  .get()
+                  .then((QuerySnapshot querySnapshot) {
+                if (querySnapshot.docs.length > 1) {
+                  // Proceder com a exclusão
+                  propertyUser.reference.delete().then((_) {
+                    Navigator.of(dialogContext)
+                        .pop(); // Fecha o diálogo de confirmação
+                    Navigator.of(context)
+                        .pop(); // Fecha o diálogo de edição de roles, se estiver aberto
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Usuário excluído com sucesso.'),
+                      ),
+                    );
+                  });
+                } else {
+                  // Mostrar um aviso de que não se pode excluir o último usuário
+                  Navigator.of(dialogContext)
+                      .pop(); // Fecha o diálogo de confirmação
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                          'Não é possível excluir o último usuário da propriedade!'),
+                    ),
+                  );
+                }
+              });
+            },
+          ),
+        ],
+      );
+    },
+  );
 }

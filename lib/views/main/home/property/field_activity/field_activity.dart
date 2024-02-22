@@ -1,14 +1,17 @@
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_seringueiro/models/usuario.dart';
 import 'package:flutter_seringueiro/views/main/home/property/field_activity/activity_point.dart';
+import 'package:uuid/uuid.dart';
 
 class FieldActivity {
   String id;
-  DateTime momento;
-  Duration duracaoTotal;
+  DateTime inicio;
+  DateTime fim;
   String tabela;
-  String usuarioId; // Armazenar o ID do usuário como string
+  String atividade;
+  String usuarioUid;
   String propertyId;
   Map<String, dynamic> condicoesClimaticas;
   bool finalizada;
@@ -16,10 +19,11 @@ class FieldActivity {
 
   FieldActivity({
     required this.id,
-    required this.momento,
-    required this.duracaoTotal,
+    required this.inicio,
+    required this.fim,
     required this.tabela,
-    required this.usuarioId,
+    required this.atividade,
+    required this.usuarioUid,
     required this.propertyId,
     required this.condicoesClimaticas,
     required this.finalizada,
@@ -27,18 +31,19 @@ class FieldActivity {
   });
 
   static String gerarUuid() {
-    // Gerando um UUID simples com base no tempo e um número aleatório
-    return DateTime.now().millisecondsSinceEpoch.toString() +
-        Random().nextInt(99999).toString();
+    // Utilizando a biblioteca uuid para gerar um UUID
+    var uuid = Uuid();
+    return uuid.v4(); // Gera um UUID versão 4
   }
 
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'momento': Timestamp.fromDate(momento),
-      'duracaoTotal': duracaoTotal.inMilliseconds,
+      'inicio': Timestamp.fromDate(inicio),
+      'fim': Timestamp.fromDate(fim),
       'tabela': tabela,
-      'usuarioId': usuarioId,
+      'atividade': atividade,
+      'usuarioUid': usuarioUid,
       'propertyId': propertyId,
       'condicoesClimaticas': condicoesClimaticas,
       'finalizada': finalizada,
@@ -51,10 +56,11 @@ class FieldActivity {
   static FieldActivity fromMap(Map<String, dynamic> map) {
     return FieldActivity(
       id: map['id'],
-      momento: (map['momento'] as Timestamp).toDate(),
-      duracaoTotal: Duration(milliseconds: map['duracaoTotal']),
+      inicio: (map['inicio'] as Timestamp).toDate(),
+      fim: (map['fim'] as Timestamp).toDate(),
       tabela: map['tabela'],
-      usuarioId: map['usuarioId'],
+      atividade: map['atividade'],
+      usuarioUid: map['usuarioUid'],
       propertyId: map['propertyId'],
       condicoesClimaticas: map['condicoesClimaticas'],
       finalizada: map['finalizada'] ?? false,

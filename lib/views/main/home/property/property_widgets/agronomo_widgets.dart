@@ -17,7 +17,7 @@ class AgronomoWidgets {
   static Widget buildAnaliseButton(context, user, property) {
     return CustomButton(
       label: 'Análise',
-      icon: Icons.add,
+      icon: Icons.assignment_rounded,
       onPressed: () => {},
     );
   }
@@ -25,7 +25,7 @@ class AgronomoWidgets {
   static Widget buildAvaliacaoButton(user, property) {
     return CustomButton(
       label: "Avaliação",
-      icon: Icons.add,
+      icon: Icons.task,
       onPressed: () => {},
     );
   }

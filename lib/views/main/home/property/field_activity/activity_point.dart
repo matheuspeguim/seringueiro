@@ -1,39 +1,40 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class ActivityPoint {
-  final int id;
-  final int timestamp;
+  final String
+      id; // Considerando o uso de String se IDs forem UUIDs ou gerados pelo Firestore
+  final DateTime momento;
   final double latitude;
   final double longitude;
-  final int duracao;
   final String fieldActivityId;
 
   ActivityPoint({
     required this.id,
-    required this.timestamp,
+    required this.momento,
     required this.latitude,
     required this.longitude,
-    required this.duracao,
     required this.fieldActivityId,
   });
 
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'timestamp': timestamp,
+      'momento':
+          Timestamp.fromDate(momento), // Convertendo DateTime para Timestamp
       'latitude': latitude,
       'longitude': longitude,
-      'duracao': duracao,
       'fieldActivityId': fieldActivityId,
     };
   }
 
-  // Método fromMap
+  // Método fromMap com conversão correta de Timestamp para DateTime
   factory ActivityPoint.fromMap(Map<String, dynamic> map) {
     return ActivityPoint(
       id: map['id'],
-      timestamp: map['timestamp'],
+      momento: (map['momento'] as Timestamp)
+          .toDate(), // Convertendo Timestamp para DateTime
       latitude: map['latitude'],
       longitude: map['longitude'],
-      duracao: map['duracao'],
       fieldActivityId: map['fieldActivityId'],
     );
   }

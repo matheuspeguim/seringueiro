@@ -116,10 +116,11 @@ class FieldActivityAdapter extends TypeAdapter<FieldActivity> {
   @override
   FieldActivity read(BinaryReader reader) {
     var id = reader.readString();
-    var momento = DateTime.fromMillisecondsSinceEpoch(reader.readInt());
-    var duracaoTotal = Duration(milliseconds: reader.readInt());
+    var inicio = DateTime.fromMillisecondsSinceEpoch(reader.readInt());
+    var fim = DateTime.fromMicrosecondsSinceEpoch(reader.readInt());
     var tabela = reader.readString();
-    var usuarioId = reader.readString();
+    var atividade = reader.readString();
+    var usuarioUid = reader.readString();
     var propertyId = reader.readString();
     var finalizada = reader.readBool();
     var condicoesClimaticas = Map<String, dynamic>.from(reader.readMap());
@@ -127,10 +128,11 @@ class FieldActivityAdapter extends TypeAdapter<FieldActivity> {
 
     return FieldActivity(
       id: id,
-      momento: momento,
-      duracaoTotal: duracaoTotal,
+      inicio: inicio,
+      fim: fim,
       tabela: tabela,
-      usuarioId: usuarioId,
+      atividade: atividade,
+      usuarioUid: usuarioUid,
       propertyId: propertyId,
       finalizada: finalizada,
       condicoesClimaticas: condicoesClimaticas,
@@ -141,10 +143,11 @@ class FieldActivityAdapter extends TypeAdapter<FieldActivity> {
   @override
   void write(BinaryWriter writer, FieldActivity obj) {
     writer.writeString(obj.id);
-    writer.writeInt(obj.momento.millisecondsSinceEpoch);
-    writer.writeInt(obj.duracaoTotal.inMilliseconds);
+    writer.writeInt(obj.inicio.millisecondsSinceEpoch);
+    writer.writeInt(obj.fim.millisecondsSinceEpoch);
     writer.writeString(obj.tabela);
-    writer.writeString(obj.usuarioId);
+    writer.writeString(obj.atividade);
+    writer.writeString(obj.usuarioUid);
     writer.writeString(obj.propertyId);
     writer.writeMap(obj.condicoesClimaticas);
     writer.writeBool(obj.finalizada);
@@ -158,30 +161,27 @@ class ActivityPointAdapter extends TypeAdapter<ActivityPoint> {
 
   @override
   ActivityPoint read(BinaryReader reader) {
-    var id = reader.readInt();
-    var timestamp = DateTime.fromMillisecondsSinceEpoch(reader.readInt());
+    var id = reader.readString();
+    var momento = DateTime.fromMillisecondsSinceEpoch(reader.readInt());
     var latitude = reader.readDouble();
     var longitude = reader.readDouble();
-    var duracao = reader.readInt();
     var fieldActivityId = reader.readString();
 
     return ActivityPoint(
       id: id,
-      timestamp: timestamp.millisecondsSinceEpoch,
+      momento: momento,
       latitude: latitude,
       longitude: longitude,
-      duracao: duracao,
       fieldActivityId: fieldActivityId,
     );
   }
 
   @override
   void write(BinaryWriter writer, ActivityPoint obj) {
-    writer.writeInt(obj.id);
-    writer.writeInt(obj.timestamp);
+    writer.writeString(obj.id);
+    writer.writeInt(obj.momento.millisecondsSinceEpoch);
     writer.writeDouble(obj.latitude);
     writer.writeDouble(obj.longitude);
-    writer.writeInt(obj.duracao);
     writer.writeString(obj.fieldActivityId);
   }
 }

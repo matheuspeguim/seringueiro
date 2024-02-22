@@ -28,14 +28,14 @@ class PropertyButtonsWidget extends StatelessWidget {
           } else if (state is PropertyButtonsLoaded) {
             return SingleChildScrollView(
               child: Wrap(
-                direction:
-                    Axis.horizontal, // Organiza os filhos horizontalmente
-                spacing: 1.0, // Espaço horizontal entre os botões
-                runSpacing: 1.0, // Espaço vertical entre as linhas
-                alignment: WrapAlignment
-                    .center, // Alinha os botões ao início do eixo principal
-                children: state.buttons, // Os botões carregados
-              ),
+                  direction:
+                      Axis.horizontal, // Organiza os filhos horizontalmente
+                  spacing: 1.0, // Espaço horizontal entre os botões
+                  runSpacing: 10.0, // Espaço vertical entre as linhas
+                  alignment: WrapAlignment
+                      .start, // Alinha os botões ao início do eixo principal
+                  children: state.buttons // Os botões carregados
+                  ),
             );
           } else if (state is PropertyButtonsError) {
             return Text('Erro: ${state.message}');

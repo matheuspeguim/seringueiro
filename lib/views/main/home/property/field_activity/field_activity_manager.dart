@@ -1,158 +1,103 @@
-// sangria_manager.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_seringueiro/models/property.dart';
+import 'package:flutter_seringueiro/services/open_weather_api_service.dart';
+import 'package:flutter_seringueiro/services/storage_service/local_storage_service.dart';
 import 'package:flutter_seringueiro/services/utilidade_service.dart';
 import 'package:flutter_seringueiro/views/main/home/property/field_activity/activity_point.dart';
-import 'package:flutter_seringueiro/models/property.dart';
-import 'package:flutter_seringueiro/views/main/home/property/field_activity/flutter_kotlin_communication.dart';
 import 'package:flutter_seringueiro/views/main/home/property/field_activity/field_activity.dart';
-import 'package:flutter_seringueiro/services/storage_service/local_storage_service.dart';
-import 'package:flutter_seringueiro/services/open_weather_api_service.dart';
-
-// CLASSE RESPONSÁVEL POR GERENCIAR A ATIVIDADE DE SANGRIA.
+import 'package:flutter_seringueiro/views/main/home/property/field_activity/flutter_kotlin_communication.dart';
 
 class FieldActivityManager {
-  bool _isFieldActivityStarted = false;
   FieldActivity? currentFieldActivity;
   Property? currentProperty;
 
-  bool get isActivityStarted => _isFieldActivityStarted;
-// Adicionando um callback para atualizar a UI quando o estado muda
-  Function(bool)? onFieldActivityStateChanged;
+  // Callback para atualização da UI, se necessário
+  Function(FieldActivity?)? onActivityUpdate;
 
-  FieldActivityManager({this.onFieldActivityStateChanged});
+  FieldActivityManager({this.onActivityUpdate});
 
-  void toggleActivity(
-      BuildContext context, User user, Property property) async {
-    _isFieldActivityStarted = !_isFieldActivityStarted;
-    onFieldActivityStateChanged
-        ?.call(_isFieldActivityStarted); // Chamando o callback
+  bool get isActivityStarted =>
+      currentFieldActivity != null &&
+      currentFieldActivity!.fim.isAfter(DateTime.now());
 
-    if (_isFieldActivityStarted) {
-      String? tabelaSelecionada = await _escolherTabela(context);
-      if (tabelaSelecionada != null) {
-        currentFieldActivity = await startFieldActivity(
-            context, property, user, tabelaSelecionada);
-        if (currentFieldActivity == null) {
-          _isFieldActivityStarted = false;
-          onFieldActivityStateChanged?.call(_isFieldActivityStarted);
-          return;
-        }
-      } else {
-        _isFieldActivityStarted = false;
-        onFieldActivityStateChanged?.call(_isFieldActivityStarted);
-      }
-    } else {
-      if (currentFieldActivity != null) {
-        await finalizarSangria(currentFieldActivity!);
-        currentFieldActivity = null;
-      }
+  Future<void> iniciarAtividade(BuildContext context, User user,
+      Property property, String atividade) async {
+    if (isActivityStarted) {
+      return; // Já existe uma atividade em andamento
     }
-  }
 
-  Future<String?> _escolherTabela(BuildContext context) async {
-    String? tabelaSelecionada;
-
-    await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Seleciona a tabela'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                for (var i = 1; i <= 5; i++)
-                  ListTile(
-                    title: Text('T$i'),
-                    onTap: () {
-                      tabelaSelecionada = 'Tabela $i';
-                      Navigator.of(context).pop();
-                    },
-                  ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-
-    return tabelaSelecionada;
-  }
-
-  Future<FieldActivity?> startFieldActivity(BuildContext context,
-      Property property, User user, String tabelaSelecionada) async {
+    // Verificar e obter permissões de localização
     if (!await UtilidadeService.verificarEObterPermissaoLocalizacao(context)) {
-      return null;
+      return;
     }
 
+    // Obter condições climáticas
     var condicoesClimaticas =
         await _obterCondicoesClimaticas(property.localizacao);
 
-    return _createFieldActivity(
-        property, user, tabelaSelecionada, condicoesClimaticas);
-  }
-
-  Future<FieldActivity> _createFieldActivity(
-      Property property,
-      User user,
-      String tabelaSelecionada,
-      Map<String, dynamic> condicoesClimaticas) async {
-    var fieldActivity = FieldActivity(
+    // Criar a FieldActivity
+    currentFieldActivity = FieldActivity(
       id: FieldActivity.gerarUuid(),
-      momento: DateTime.now(),
-      duracaoTotal: Duration.zero,
-      tabela: tabelaSelecionada,
-      usuarioId: user.uid,
+      inicio: DateTime.now(),
+      fim: DateTime.now().add(Duration(
+          hours:
+              1)), // Define um tempo de fim padrão que será atualizado ao finalizar
+      tabela: "Tabela_Padrão", // Isso deve ser configurado adequadamente
+      atividade: atividade,
+      usuarioUid: user.uid,
       propertyId: property.id,
       condicoesClimaticas: condicoesClimaticas,
       finalizada: false,
       activityPoints: [],
     );
 
-    // Salva a sangria vazia localmente
-    await LocalStorageService().saveFieldActivity(fieldActivity);
+    // Salvar a atividade inicial no armazenamento local
+    await LocalStorageService().saveFieldActivity(currentFieldActivity!);
 
-    // Solicita ao Kotlin para iniciar o registro de pontos
-    await FlutterKotlinCommunication.IniciarRegistroPontos(fieldActivity.id);
+    // Iniciar o registro de pontos no lado do Kotlin
+    FlutterKotlinCommunication.iniciarRegistroPontos(currentFieldActivity!.id);
 
-    return fieldActivity;
+    // Atualizar a UI
+    onActivityUpdate?.call(currentFieldActivity);
   }
 
-  Future<void> finalizarSangria(FieldActivity fieldActivity) async {
-    //finaliza o timer da sangria
-    fieldActivity.duracaoTotal =
-        DateTime.now().difference(fieldActivity.momento);
-
-    //recupera os pontos de sangria salvos no lado kotlin
-    await _recuperarPontosDeSangria(fieldActivity);
-
-    // Marcar a sangria como finalizada
-    fieldActivity.finalizada = true;
-
-    //sava a sangria no hive
-    await LocalStorageService().saveFieldActivity(fieldActivity);
-
-    //tenta sincronizar se possível
-    await LocalStorageService().verificarConexaoESincronizarSeNecessario();
-  }
-
-  Future<void> _recuperarPontosDeSangria(FieldActivity fieldActivity) async {
-    try {
-      final pontosMapList =
-          await FlutterKotlinCommunication.finalizarRegistroPontos(
-              fieldActivity.id);
-      if (pontosMapList != null) {
-        final activityPoints = pontosMapList
-            .map<ActivityPoint>(
-                (map) => ActivityPoint.fromMap(map as Map<String, dynamic>))
-            .toList();
-        activityPoints.addAll(activityPoints);
-      }
-    } catch (e) {
-      print("Erro ao recuperar ActitivitiesPoint: $e");
+  Future<void> finalizarAtividade() async {
+    if (!isActivityStarted || currentFieldActivity == null) {
+      return; // Não há atividade em andamento para finalizar
     }
+
+    // Finalizar o registro de pontos no lado do Kotlin e recuperar pontos
+    var pontosMapList =
+        await FlutterKotlinCommunication.finalizarRegistroPontos(
+            currentFieldActivity!.id);
+
+// Verifica se a lista recebida não é nula antes de tentar mapeá-la.
+    if (pontosMapList != null) {
+      var pontos = pontosMapList
+          .map<ActivityPoint>(
+              (ponto) => ActivityPoint.fromMap(ponto as Map<String, dynamic>))
+          .toList();
+      currentFieldActivity!.activityPoints.addAll(pontos);
+    } else {
+      // Handle the case where pontosMapList is null if necessary
+      print("Nenhum ponto de atividade foi retornado.");
+    }
+
+    // Atualizar o estado da atividade para finalizada
+    currentFieldActivity!.fim = DateTime.now();
+    currentFieldActivity!.finalizada = true;
+
+    // Salvar a atividade finalizada no armazenamento local
+    await LocalStorageService().saveFieldActivity(currentFieldActivity!);
+
+    // Atualizar a UI
+    onActivityUpdate?.call(currentFieldActivity);
+
+    // Limpar a atividade atual
+    currentFieldActivity = null;
   }
 
   Future<Map<String, dynamic>> _obterCondicoesClimaticas(

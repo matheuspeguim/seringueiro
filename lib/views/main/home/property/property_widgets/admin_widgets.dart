@@ -11,7 +11,6 @@ class AdminWidgets {
 
     // Adicionar todos os widgets relacionados ao administrador
     widgets.add(buildUsersManager(context, property));
-    widgets.add(buildDeleteButton(context, property));
 
     // Adicionar mais widgets conforme necessário
 
@@ -21,7 +20,7 @@ class AdminWidgets {
   static Widget buildUsersManager(context, property) {
     return CustomButton(
       label: 'Gerenciar',
-      icon: Icons.add,
+      icon: Icons.settings,
       onPressed: () {
         Navigator.push(
           context,
@@ -30,56 +29,6 @@ class AdminWidgets {
           ),
         );
       },
-    );
-  }
-
-  static Widget buildDeleteButton(BuildContext context, Property property) {
-    final FirebaseFirestore firestore = FirebaseFirestore.instance;
-
-    return Center(
-      child: TextButton(
-        onPressed: () async {
-          final confirmDelete = await showDialog<bool>(
-            context: context,
-            builder: (dialogContext) {
-              return AlertDialog(
-                title: Text('Confirmar Exclusão'),
-                content: Text(
-                    'Deseja realmente excluir a propriedade ${property.nomeDaPropriedade.toUpperCase()}?'),
-                actions: <Widget>[
-                  TextButton(
-                    child: Text('Cancelar'),
-                    onPressed: () => Navigator.of(dialogContext).pop(false),
-                  ),
-                  ElevatedButton(
-                    child:
-                        Text('Excluir', style: TextStyle(color: Colors.white)),
-                    style:
-                        ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                    onPressed: () => Navigator.of(dialogContext).pop(true),
-                  ),
-                ],
-              );
-            },
-          );
-
-          if (confirmDelete == true) {
-            try {
-              await firestore
-                  .collection('properties')
-                  .doc(property.id)
-                  .delete();
-              // Navegar de volta após a exclusão bem-sucedida
-              Navigator.of(context).pop(); // Volta para a tela anterior
-            } catch (e) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Erro ao excluir propriedade: $e')),
-              );
-            }
-          }
-        },
-        child: Text('Excluir Propriedade', style: TextStyle(color: Colors.red)),
-      ),
     );
   }
 }

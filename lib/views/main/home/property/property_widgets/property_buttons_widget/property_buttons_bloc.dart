@@ -49,6 +49,10 @@ class PropertyButtonsBloc
         FieldActivityManager activityManager = FieldActivityManager();
 
         // Adicionar botões com base nas funções do usuário
+        if (userRoleData['funcoes']['seringueiro'] == true) {
+          buttons.addAll(SeringueiroWidgets.buildSeringueiroWidgets(
+              context, user, property, activityManager));
+        }
         if (userRoleData['funcoes']['agronomo'] == true) {
           buttons.addAll(
               AgronomoWidgets.buildAgronomoWidgets(context, user, property));
@@ -57,10 +61,7 @@ class PropertyButtonsBloc
           buttons
               .addAll(ProprietarioWidgets.buildProprietarioWidgets(property));
         }
-        if (userRoleData['funcoes']['seringueiro'] == true) {
-          buttons.addAll(SeringueiroWidgets.buildSeringueiroWidgets(
-              context, user, property, activityManager));
-        }
+
         if (userRoleData['funcoes']['admin'] == true) {
           buttons.addAll(AdminWidgets.buildAdminWidgets(context, property));
         }

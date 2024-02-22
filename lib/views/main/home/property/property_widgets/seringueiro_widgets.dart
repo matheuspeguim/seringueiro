@@ -25,12 +25,22 @@ class SeringueiroWidgets {
     return widgets;
   }
 
-  static Widget buildSangriaButton(BuildContext context, User user,
-      Property property, FieldActivityManager activityManager) {
+  static Widget buildSangriaButton(
+    BuildContext context,
+    User user,
+    Property property,
+    FieldActivityManager activityManager,
+  ) {
+    String activity = "Sangria";
     return CustomButton(
       label: 'Sangria',
       icon: Icons.add,
-      onPressed: () => activityManager.toggleActivity(context, user, property),
+      onPressed: () => activityManager.iniciarAtividade(
+        context,
+        user,
+        property,
+        activity,
+      ),
     );
   }
 
@@ -45,6 +55,7 @@ class SeringueiroWidgets {
 
   static Widget buildEstimulacaoButton(BuildContext context, User user,
       Property property, FieldActivityManager activityManager) {
+    String activity = "Estimulação";
     return CustomButton(
       label: 'Estimulação',
       icon: Icons.add,

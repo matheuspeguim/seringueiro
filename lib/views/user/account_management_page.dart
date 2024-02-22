@@ -18,12 +18,7 @@ class AccountManagementPage extends StatelessWidget {
             SizedBox(height: 20),
             CircleAvatar(
               radius: 50,
-              backgroundImage: NetworkImage(
-                usuario.profilePictureUrl != null &&
-                        usuario.profilePictureUrl!.isNotEmpty
-                    ? usuario.profilePictureUrl!
-                    : iconUsuario,
-              ),
+              backgroundImage: NetworkImage(usuario.profilePictureUrl),
             ),
             SizedBox(height: 20),
             Text(
