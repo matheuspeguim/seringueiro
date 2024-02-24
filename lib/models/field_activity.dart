@@ -1,12 +1,9 @@
-import 'dart:math';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_seringueiro/models/usuario.dart';
-import 'package:flutter_seringueiro/views/main/home/property/field_activity/activity_point.dart';
+import 'package:flutter_seringueiro/models/activity_point.dart';
 import 'package:uuid/uuid.dart';
 
 class FieldActivity {
-  String id;
+  String? id;
   DateTime inicio;
   DateTime fim;
   String tabela;
@@ -18,7 +15,7 @@ class FieldActivity {
   List<ActivityPoint> activityPoints;
 
   FieldActivity({
-    required this.id,
+    this.id,
     required this.inicio,
     required this.fim,
     required this.tabela,

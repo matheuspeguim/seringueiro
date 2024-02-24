@@ -1,20 +1,13 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_seringueiro/models/property.dart';
-import 'package:flutter_seringueiro/services/open_weather_api_service.dart';
+import 'package:flutter_seringueiro/views/main/home/property/field_activity/field_activity_widgets/field_activity_control_painel.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_bloc.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_event.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_state.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_widgets/property_buttons_widget/property_buttons_widget.dart';
-import 'package:flutter_seringueiro/views/main/home/property/rain/rain_bloc.dart';
-import 'package:flutter_seringueiro/views/main/home/property/rain/rain_widgets.dart';
 import 'package:flutter_seringueiro/views/main/home/weather/hourly_weather_widget.dart';
-import 'package:flutter_seringueiro/widgets/cup_fill.dart';
 import 'package:flutter_seringueiro/widgets/custom_Circular_Progress_indicator.dart';
-import 'package:flutter_seringueiro/widgets/custom_card.dart';
 
 class PropertyPage extends StatefulWidget {
   final User user;
@@ -105,6 +98,10 @@ class _PropertyPageState extends State<PropertyPage> {
               Divider(
                 color: Colors.white,
               ),
+              FieldActivityControlPanel(
+                userId: widget.user.uid,
+                propertyId: widget.propertyId,
+              )
             ],
           ),
         ),

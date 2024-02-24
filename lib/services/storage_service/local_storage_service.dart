@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:flutter_seringueiro/views/main/home/property/field_activity/activity_point.dart';
-import 'package:flutter_seringueiro/views/main/home/property/field_activity/field_activity.dart';
+import 'package:flutter_seringueiro/models/activity_point.dart';
+import 'package:flutter_seringueiro/models/field_activity.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 class LocalStorageService {
@@ -142,7 +142,6 @@ class FieldActivityAdapter extends TypeAdapter<FieldActivity> {
 
   @override
   void write(BinaryWriter writer, FieldActivity obj) {
-    writer.writeString(obj.id);
     writer.writeInt(obj.inicio.millisecondsSinceEpoch);
     writer.writeInt(obj.fim.millisecondsSinceEpoch);
     writer.writeString(obj.tabela);

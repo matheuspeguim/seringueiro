@@ -29,7 +29,6 @@ dependencies:
   hive:
   hive_flutter:
   sensors_plus:
-  vibration:
   connectivity_plus:
   build_runner:
   hive_generator:

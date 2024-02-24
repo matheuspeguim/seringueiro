@@ -47,10 +47,7 @@ class ProfilePage extends StatelessWidget {
             Center(
               child: CircleAvatar(
                 radius: 50,
-                backgroundImage: NetworkImage(
-                  usuario.profilePictureUrl ??
-                      'https://firebasestorage.googleapis.com/v0/b/seringueiroapp.appspot.com/o/profilePictures%2Fvecteezy_illustration-of-human-icon-vector-user-symbol-icon-modern_8442086.jpg?alt=media&token=cdadba3c-68db-4d1b-ace3-b18d7b4733a2',
-                ),
+                backgroundImage: NetworkImage(usuario.profilePictureUrl),
               ),
             ),
             SizedBox(height: 20),

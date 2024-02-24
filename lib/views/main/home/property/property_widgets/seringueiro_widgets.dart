@@ -59,16 +59,27 @@ class SeringueiroWidgets {
     return CustomButton(
       label: 'Estimulação',
       icon: Icons.add,
-      onPressed: () {},
+      onPressed: () => activityManager.iniciarAtividade(
+        context,
+        user,
+        property,
+        activity,
+      ),
     );
   }
 
   static Widget buildTratamentoButton(BuildContext context, User user,
       Property property, FieldActivityManager activityManager) {
+    String activity = "Tratamento";
     return CustomButton(
       label: "Tratamento",
       icon: Icons.add,
-      onPressed: () {},
+      onPressed: () => activityManager.iniciarAtividade(
+        context,
+        user,
+        property,
+        activity,
+      ),
     );
   }
 

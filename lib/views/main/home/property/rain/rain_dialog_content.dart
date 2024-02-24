@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_seringueiro/models/property.dart';
 import 'package:intl/intl.dart';
-import 'package:vibration/vibration.dart';
 import 'package:flutter_seringueiro/views/main/home/property/rain/rain_bloc.dart';
 import 'package:flutter_seringueiro/views/main/home/property/rain/rain_event.dart';
 import 'package:flutter_seringueiro/views/main/home/property/rain/rain_state.dart';
@@ -84,9 +83,6 @@ class _RainDialogContentState extends State<RainDialogContent> {
       child: CupertinoPicker(
         itemExtent: 32.0,
         onSelectedItemChanged: (int index) async {
-          if (await Vibration.hasVibrator() ?? false) {
-            Vibration.vibrate(duration: 30);
-          }
           setState(() {
             selectedRainAmount = index;
           });

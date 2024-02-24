@@ -1,8 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ActivityPoint {
-  final String
-      id; // Considerando o uso de String se IDs forem UUIDs ou gerados pelo Firestore
+  final String id;
   final DateTime momento;
   final double latitude;
   final double longitude;
