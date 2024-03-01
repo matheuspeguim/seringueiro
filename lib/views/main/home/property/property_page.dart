@@ -7,7 +7,6 @@ import 'package:flutter_seringueiro/views/main/home/property/property_event.dart
 import 'package:flutter_seringueiro/views/main/home/property/property_state.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_widgets/property_buttons_widget/property_buttons_widget.dart';
 import 'package:flutter_seringueiro/views/main/home/weather/hourly_weather_widget.dart';
-import 'package:flutter_seringueiro/widgets/custom_Circular_Progress_indicator.dart';
 
 class PropertyPage extends StatefulWidget {
   final User user;
@@ -80,7 +79,7 @@ class _PropertyPageState extends State<PropertyPage> {
 
   Widget _buildBody(BuildContext context, PropertyState state) {
     if (state is PropertyLoading) {
-      return Center(child: CustomCircularProgressIndicator());
+      return Center(child: CircularProgressIndicator());
     } else if (state is PropertyError) {
       return Center(child: Text(state.message));
     } else if (state is PropertyLoaded) {
@@ -101,7 +100,7 @@ class _PropertyPageState extends State<PropertyPage> {
               FieldActivityControlPanel(
                 userId: widget.user.uid,
                 propertyId: widget.propertyId,
-              )
+              ),
             ],
           ),
         ),

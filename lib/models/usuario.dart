@@ -87,34 +87,65 @@ class UsuarioListItem extends StatelessWidget {
 }
 
 class UsuarioIcon extends StatelessWidget {
-  final Usuario usuario;
-  UsuarioIcon({Key? key, required this.usuario}) : super(key: key);
+  final String usuarioUid;
+  UsuarioIcon({Key? key, required this.usuarioUid}) : super(key: key);
+
+  Future<Usuario?> getUsuario(String uid) async {
+    // Supondo que você tenha uma função que retorna o usuário dado o UID.
+    // Adapte para sua estrutura de dados e coleção.
+    DocumentSnapshot usuarioSnapshot =
+        await FirebaseFirestore.instance.collection('users').doc(uid).get();
+
+    if (usuarioSnapshot.exists) {
+      // Supondo que você tenha um método fromMap para a classe Usuario.
+      return Usuario.fromMap(usuarioSnapshot.data() as Map<String, dynamic>);
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ProfilePage(usuario: usuario),
+    return FutureBuilder<Usuario?>(
+      future: getUsuario(usuarioUid),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return Center(child: Text('Erro ao carregar usuário.'));
+        }
+
+        if (!snapshot.hasData || snapshot.data == null) {
+          return Center(child: Text('Usuário não encontrado.'));
+        }
+
+        Usuario usuario = snapshot.data!;
+        return InkWell(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ProfilePage(usuario: usuario),
+              ),
+            );
+          },
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              CircleAvatar(
+                radius: 30,
+                backgroundImage: NetworkImage(usuario.profilePictureUrl),
+              ),
+              SizedBox(height: 8),
+              Text(
+                usuario.nome.split(' ').first, // Exibe apenas o primeiro nome
+                style: TextStyle(fontSize: 14),
+              ),
+            ],
           ),
         );
       },
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          CircleAvatar(
-            radius: 30,
-            backgroundImage: NetworkImage(usuario.profilePictureUrl),
-          ),
-          SizedBox(height: 8),
-          Text(
-            usuario.nome.split(' ').first, // Exibe apenas o primeiro nome
-            style: TextStyle(fontSize: 14),
-          ),
-        ],
-      ),
     );
   }
 }

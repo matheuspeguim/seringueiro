@@ -8,7 +8,6 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'views/login/login_page_wrapper.dart';
-import 'widgets/custom_Circular_Progress_indicator.dart';
 import 'services/storage_service/local_storage_service.dart';
 // Importe seus adapters do Hive aqui
 
@@ -122,7 +121,7 @@ class LoadingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.green.shade900,
-      body: Center(child: CustomCircularProgressIndicator()),
+      body: Center(child: CircularProgressIndicator()),
     );
   }
 }

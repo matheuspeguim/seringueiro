@@ -14,7 +14,6 @@ import 'package:flutter_seringueiro/views/main/home/property/searcher/search_pro
 import 'package:flutter_seringueiro/views/main/home/property/searcher/search_property_page.dart';
 import 'package:flutter_seringueiro/views/main/home/weather/daily_weather_widget.dart';
 import 'package:flutter_seringueiro/widgets/cup_fill.dart';
-import 'package:flutter_seringueiro/widgets/custom_Circular_Progress_indicator.dart';
 import 'package:flutter_seringueiro/widgets/custom_button.dart';
 import 'package:flutter_seringueiro/widgets/custom_card.dart';
 import 'package:flutter_seringueiro/widgets/percentage_circle.dart';
@@ -129,7 +128,7 @@ class HomePage extends StatelessWidget {
   }
 
   Widget _loadingWidget() {
-    return CustomCircularProgressIndicator();
+    return Center(child: CircularProgressIndicator());
   }
 
   Widget _errorWidget(String message, BuildContext context) {

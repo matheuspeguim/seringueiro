@@ -79,6 +79,14 @@ dependencies {
     implementation "com.google.code.gson:gson:$gson_version"
     implementation platform('com.google.firebase:firebase-bom:29.0.3') // Firebase BOM
     implementation 'com.google.firebase:firebase-firestore' // Firebase Firestore
+    implementation 'com.google.firebase:firebase-auth'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.0'
+    implementation 'com.google.firebase:firebase-appcheck-playintegrity'
+    implementation("com.google.firebase:firebase-appcheck-debug")
+
+
+
+
 
 }
 

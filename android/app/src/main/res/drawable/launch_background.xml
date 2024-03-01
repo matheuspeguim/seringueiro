@@ -5,6 +5,6 @@
     <item>
         <bitmap
             android:gravity="center"
-            android:src="@drawable/icon_sem_fundo"/> <!-- Referência à sua imagem de splash screen -->
+            android:src="@drawable/ic_tracker"/> <!-- Referência à sua imagem de splash screen -->
     </item>
 </layer-list>

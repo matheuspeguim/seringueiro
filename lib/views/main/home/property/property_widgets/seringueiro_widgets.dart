@@ -35,12 +35,16 @@ class SeringueiroWidgets {
     return CustomButton(
       label: 'Sangria',
       icon: Icons.add,
-      onPressed: () => activityManager.iniciarAtividade(
-        context,
-        user,
-        property,
-        activity,
-      ),
+      onPressed: () async {
+        await activityManager.iniciarAtividade(
+          context,
+          user,
+          property,
+          activity,
+        );
+        // Após iniciar a atividade, fecha o ModalBottomSheet
+        Navigator.pop(context);
+      },
     );
   }
 
@@ -59,12 +63,16 @@ class SeringueiroWidgets {
     return CustomButton(
       label: 'Estimulação',
       icon: Icons.add,
-      onPressed: () => activityManager.iniciarAtividade(
-        context,
-        user,
-        property,
-        activity,
-      ),
+      onPressed: () async {
+        await activityManager.iniciarAtividade(
+          context,
+          user,
+          property,
+          activity,
+        );
+        // Após iniciar a atividade, fecha o ModalBottomSheet
+        Navigator.pop(context);
+      },
     );
   }
 
@@ -74,18 +82,22 @@ class SeringueiroWidgets {
     return CustomButton(
       label: "Tratamento",
       icon: Icons.add,
-      onPressed: () => activityManager.iniciarAtividade(
-        context,
-        user,
-        property,
-        activity,
-      ),
+      onPressed: () async {
+        await activityManager.iniciarAtividade(
+          context,
+          user,
+          property,
+          activity,
+        );
+        // Após iniciar a atividade, fecha o ModalBottomSheet
+        Navigator.pop(context);
+      },
     );
   }
 
-  static void showRainRecordingDialog(
-      BuildContext context, User user, Property property) {
-    showModalBottomSheet(
+  static Future<void> showRainRecordingDialog(
+      BuildContext context, User user, Property property) async {
+    return showModalBottomSheet<void>(
       context: context,
       builder: (BuildContext context) {
         return BlocProvider<RainBloc>(

@@ -37,7 +37,6 @@ class _FieldActivityControlPanelState extends State<FieldActivityControlPanel> {
 
   Stream<FieldActivity?> getFieldActivityStream(
       String userId, String propertyId) {
-    // Consulta específica para a subcoleção 'field_activities' dentro de uma 'property' específica
     return FirebaseFirestore.instance
         .collection('properties')
         .doc(propertyId)
@@ -57,7 +56,7 @@ class _FieldActivityControlPanelState extends State<FieldActivityControlPanel> {
       stream: getFieldActivityStream(widget.userId, widget.propertyId),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
+          return Container();
         }
 
         final activity = snapshot.data;
@@ -121,9 +120,43 @@ class _FieldActivityControlPanelState extends State<FieldActivityControlPanel> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       ElevatedButton(
-                        onPressed: () {
-                          // Implemente a lógica para cancelar a atividade
-                          print("Cancelar atividade");
+                        onPressed: () async {
+                          // Exibe um AlertDialog para confirmar o cancelamento
+                          final bool confirm = await showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: Text("Cancelar Atividade"),
+                                  content: Text(
+                                      "Você realmente deseja CANCELAR esta atividade?"),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.of(context).pop(false),
+                                      child: Text("Cancelar"),
+                                    ),
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.of(context).pop(true),
+                                      child: Text(
+                                        "Confirmar",
+                                        style: TextStyle(
+                                          color: Colors.red,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ) ??
+                              false; // O '?? false' garante um valor padrão de 'false' caso 'null' seja retornado
+
+                          if (confirm) {
+                            // Se confirmado, chama o método para finalizar a atividade
+                            // Certifique-se de que você tem uma instância válida de FieldActivityManager e que o método finalizarAtividade está correto
+                            await fieldActivityManager.cancelarAtividade(
+                              context,
+                              activity,
+                            ); // Ajuste conforme sua implementação real
+                          }
                         },
                         child: Text('Cancelar',
                             style: TextStyle(
@@ -167,8 +200,8 @@ class _FieldActivityControlPanelState extends State<FieldActivityControlPanel> {
                             // Se confirmado, chama o método para finalizar a atividade
                             // Certifique-se de que você tem uma instância válida de FieldActivityManager e que o método finalizarAtividade está correto
                             await fieldActivityManager.finalizarAtividade(
-                                fieldActivityManager,
-                                context); // Ajuste conforme sua implementação real
+                                context,
+                                activity); // Ajuste conforme sua implementação real
                           }
                         },
                         child: Text(

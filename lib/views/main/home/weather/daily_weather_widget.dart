@@ -7,7 +7,6 @@ import 'package:flutter_seringueiro/services/open_weather_api_service.dart';
 import 'package:flutter_seringueiro/views/main/home/weather/weather_bloc.dart';
 import 'package:flutter_seringueiro/views/main/home/weather/weather_event.dart';
 import 'package:flutter_seringueiro/views/main/home/weather/weather_state.dart';
-import 'package:flutter_seringueiro/widgets/custom_Circular_Progress_indicator.dart';
 import 'package:intl/intl.dart';
 
 class DailyWeatherForecast {
@@ -136,7 +135,7 @@ class DailyWeatherWidget extends StatelessWidget {
       child: BlocBuilder<WeatherBloc, WeatherState>(
         builder: (context, state) {
           if (state is WeatherLoadInProgress) {
-            return CustomCircularProgressIndicator();
+            return CircularProgressIndicator();
           } else if (state is WeatherLoadSuccess) {
             final forecastList = parseDailyWeatherData(state.weatherData);
             return DailyWeatherRow(forecastList: forecastList);

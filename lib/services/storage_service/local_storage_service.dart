@@ -124,7 +124,6 @@ class FieldActivityAdapter extends TypeAdapter<FieldActivity> {
     var propertyId = reader.readString();
     var finalizada = reader.readBool();
     var condicoesClimaticas = Map<String, dynamic>.from(reader.readMap());
-    var activityPoints = reader.readList().cast<ActivityPoint>();
 
     return FieldActivity(
       id: id,
@@ -136,7 +135,6 @@ class FieldActivityAdapter extends TypeAdapter<FieldActivity> {
       propertyId: propertyId,
       finalizada: finalizada,
       condicoesClimaticas: condicoesClimaticas,
-      activityPoints: activityPoints,
     );
   }
 
@@ -150,7 +148,6 @@ class FieldActivityAdapter extends TypeAdapter<FieldActivity> {
     writer.writeString(obj.propertyId);
     writer.writeMap(obj.condicoesClimaticas);
     writer.writeBool(obj.finalizada);
-    writer.writeList(obj.activityPoints);
   }
 }
 

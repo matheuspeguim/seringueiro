@@ -12,7 +12,6 @@ class FieldActivity {
   String propertyId;
   Map<String, dynamic> condicoesClimaticas;
   bool finalizada;
-  List<ActivityPoint> activityPoints;
 
   FieldActivity({
     this.id,
@@ -24,7 +23,6 @@ class FieldActivity {
     required this.propertyId,
     required this.condicoesClimaticas,
     required this.finalizada,
-    this.activityPoints = const [],
   });
 
   static String gerarUuid() {
@@ -44,9 +42,6 @@ class FieldActivity {
       'propertyId': propertyId,
       'condicoesClimaticas': condicoesClimaticas,
       'finalizada': finalizada,
-      'activityPoints': activityPoints
-          .map((activityPoints) => activityPoints.toMap())
-          .toList(),
     };
   }
 
@@ -61,9 +56,6 @@ class FieldActivity {
       propertyId: map['propertyId'],
       condicoesClimaticas: map['condicoesClimaticas'],
       finalizada: map['finalizada'] ?? false,
-      activityPoints: List<ActivityPoint>.from(
-        map['activityPoints'].map((x) => ActivityPoint.fromMap(x)),
-      ),
     );
   }
 }
