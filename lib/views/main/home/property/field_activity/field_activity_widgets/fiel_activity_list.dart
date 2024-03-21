@@ -21,12 +21,9 @@ class FieldActivityList extends StatefulWidget {
 }
 
 class _FieldActivityListState extends State<FieldActivityList> {
-  late DateTime _selectedDay;
-
   @override
   void initState() {
     super.initState();
-    _selectedDay = DateTime.now();
   }
 
   String formatarHora(DateTime dataHora) {
