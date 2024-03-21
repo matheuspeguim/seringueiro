@@ -1,5 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_seringueiro/services/open_weather_api_service.dart';
+import 'package:flutter_seringueiro/common/services/open_weather_api_service.dart';
 import 'package:flutter_seringueiro/views/main/home/weather/weather_event.dart';
 import 'package:flutter_seringueiro/views/main/home/weather/weather_state.dart';
 

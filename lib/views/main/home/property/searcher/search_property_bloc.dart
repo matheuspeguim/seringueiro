@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_seringueiro/models/property.dart';
+import 'package:flutter_seringueiro/common/models/property.dart';
 import 'search_property_event.dart';
 import 'search_property_state.dart';
 

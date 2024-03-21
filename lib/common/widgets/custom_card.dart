@@ -17,38 +17,40 @@ class CustomCard extends StatelessWidget {
     required this.onButtonPressed,
     this.buttonText = "Mais informações",
     this.colorScheme,
-    this.elevation = 50.0,
+    this.elevation = 1.0, // Ajuste o padrão de elevação se necessário
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // Define o esquema de cores padrão se nenhum for fornecido
-    ColorScheme colors =
-        colorScheme ?? ColorScheme.fromSwatch(primarySwatch: Colors.green);
+    // Usa o esquema de cores do tema do app se nenhum for fornecido
+    ColorScheme colors = colorScheme ?? Theme.of(context).colorScheme;
 
     return Card(
       elevation: elevation,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15.0),
       ),
-      color: colors.primary.withOpacity(0.8),
-      margin: EdgeInsets.all(8.0),
+      color: colors
+          .surface, // Utiliza surface em vez de primary para o fundo do card
+      margin: const EdgeInsets.all(8.0),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Cabeçalho
           Container(
-            padding: EdgeInsets.symmetric(vertical: 10.0),
+            padding: const EdgeInsets.symmetric(vertical: 10.0),
             decoration: BoxDecoration(
-              color: colors.primary.withOpacity(0.8),
-              borderRadius: BorderRadius.vertical(top: Radius.circular(15.0)),
+              color: colors
+                  .surface, // A cor do cabeçalho pode permanecer como primary
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(15.0)),
             ),
             child: Text(
-              title.toUpperCase(),
+              title,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: colors.onPrimary,
+                color: colors.onSurface,
                 fontSize: 18.0,
                 fontWeight: FontWeight.bold,
               ),
@@ -56,43 +58,45 @@ class CustomCard extends StatelessWidget {
           ),
           if (subtitle != null) // Verifica se o subtítulo foi fornecido
             Padding(
-              padding: EdgeInsets.only(bottom: 8.0),
+              padding: const EdgeInsets.only(bottom: 8.0),
               child: Text(
                 subtitle!, // Exibe o subtítulo
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: colors.onPrimary,
-                  fontSize:
-                      14.0, // Ajuste o tamanho da fonte conforme necessário
+                  color:
+                      colors.onSurface, // Usar onSurface para melhor contraste
+                  fontSize: 14.0,
                 ),
               ),
             ),
 
           // Corpo
-          Container(
-            child: Padding(
-              padding: EdgeInsets.all(8.0),
-              child: body,
-            ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: body,
           ),
 
           // Rodapé com botão
           Container(
-            padding: EdgeInsets.symmetric(vertical: 1.0),
+            padding: const EdgeInsets.symmetric(vertical: 10.0),
             decoration: BoxDecoration(
-              color: colors.secondaryContainer,
+              color: colors.surface, // Utiliza secondary para o rodapé
               borderRadius:
-                  BorderRadius.vertical(bottom: Radius.circular(15.0)),
+                  const BorderRadius.vertical(bottom: Radius.circular(15.0)),
             ),
             child: TextButton(
-              style: TextButton.styleFrom(),
+              style: TextButton.styleFrom(
+                foregroundColor: colors
+                    .onSurface, // Ajusta para onSecondary para o texto do botão
+              ),
               onPressed: onButtonPressed,
               child: Text(
                 buttonText,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: colors.onSecondaryContainer,
-                  fontSize: 13.0,
+                  color: colors
+                      .onSurface, // Garante que o texto do botão use onSecondary para contraste
+                  fontSize: 16.0, // Ajustado para melhor legibilidade
                 ),
               ),
             ),

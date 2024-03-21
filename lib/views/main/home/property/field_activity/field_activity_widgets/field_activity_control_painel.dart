@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_seringueiro/models/field_activity.dart';
+import 'package:flutter_seringueiro/common/models/field_activity.dart';
 import 'package:flutter_seringueiro/views/main/home/property/field_activity/field_activity_manager.dart';
 import 'package:flutter_seringueiro/views/main/home/property/field_activity/field_activity_widgets/time_elapsed_display.dart';
 
@@ -38,9 +38,8 @@ class _FieldActivityControlPanelState extends State<FieldActivityControlPanel> {
   Stream<FieldActivity?> getFieldActivityStream(
       String userId, String propertyId) {
     return FirebaseFirestore.instance
-        .collection('properties')
-        .doc(propertyId)
         .collection('field_activities')
+        .where('propertyId', isEqualTo: propertyId)
         .where('usuarioUid', isEqualTo: userId)
         .where('finalizada', isEqualTo: false)
         .snapshots()

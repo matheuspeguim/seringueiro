@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_seringueiro/models/property.dart';
+import 'package:flutter_seringueiro/common/models/property.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_seringueiro/views/main/home/property/rain/rain_bloc.dart';
 import 'package:flutter_seringueiro/views/main/home/property/rain/rain_event.dart';

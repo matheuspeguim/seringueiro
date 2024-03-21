@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_seringueiro/models/activity_point.dart';
 import 'package:uuid/uuid.dart';
 
 class FieldActivity {

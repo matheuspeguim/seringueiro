@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_seringueiro/models/property.dart';
-import 'package:flutter_seringueiro/views/main/home/property/users/property_users_page.dart';
-import 'package:flutter_seringueiro/widgets/custom_button.dart';
+import 'package:flutter_seringueiro/common/models/property.dart';
+import 'package:flutter_seringueiro/views/main/home/property/property_settings/property_settings_page.dart';
+import 'package:flutter_seringueiro/common/widgets/custom_button.dart';
 
 class AdminWidgets {
   static List<Widget> buildAdminWidgets(
@@ -20,14 +20,7 @@ class AdminWidgets {
     return CustomButton(
       label: 'Gerenciar',
       icon: Icons.settings,
-      onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => PropertyUsersPage(propertyId: property.id),
-          ),
-        );
-      },
+      onPressed: () {},
     );
   }
 }

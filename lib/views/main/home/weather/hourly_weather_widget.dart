@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_seringueiro/services/open_weather_api_service.dart';
+import 'package:flutter_seringueiro/common/services/open_weather_api_service.dart';
 import 'package:flutter_seringueiro/views/main/home/weather/weather_bloc.dart';
 import 'package:flutter_seringueiro/views/main/home/weather/weather_event.dart';
 import 'package:flutter_seringueiro/views/main/home/weather/weather_state.dart';
@@ -51,18 +51,18 @@ List<HourlyWeatherForecast> parseWeatherData(Map<String, dynamic> weatherData) {
 class HourlyForecastCard extends StatelessWidget {
   final HourlyWeatherForecast forecast;
 
+  HourlyForecastCard({Key? key, required this.forecast}) : super(key: key);
+
   bool isCurrentHour(DateTime forecastTime) {
     DateTime now = DateTime.now();
-    DateTime currentHour = DateTime(now.year, now.month, now.day, now.hour);
-    return currentHour ==
+    return DateTime(now.year, now.month, now.day, now.hour) ==
         DateTime(forecastTime.year, forecastTime.month, forecastTime.day,
             forecastTime.hour);
   }
 
-  HourlyForecastCard({Key? key, required this.forecast}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     String displayTime = isCurrentHour(forecast.time)
         ? 'Agora'
         : DateFormat('HH:mm').format(forecast.time);
@@ -73,7 +73,8 @@ class HourlyForecastCard extends StatelessWidget {
         children: [
           Text(
             displayTime,
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            style: theme.textTheme.bodyText1
+                ?.copyWith(fontWeight: FontWeight.bold),
           ),
           Image.network(
             'http://openweathermap.org/img/wn/${forecast.weatherIcon}.png',
@@ -82,22 +83,22 @@ class HourlyForecastCard extends StatelessWidget {
           ),
           Row(
             children: [
-              Icon(Icons.thermostat, size: 16, color: Colors.orange),
+              Icon(Icons.thermostat, size: 12, color: Colors.orange),
               SizedBox(width: 4),
-              Text('${forecast.temperature.toStringAsFixed(1)}°C',
-                  style: (TextStyle(color: Colors.white, fontSize: 12))),
+              Text(
+                '${forecast.temperature.toStringAsFixed(1)}°C',
+                style: theme.textTheme.bodySmall,
+              ),
             ],
           ),
           Row(
             children: [
-              Icon(
-                Icons.water_drop,
-                size: 16,
-                color: Colors.blue,
-              ),
+              Icon(Icons.water_drop, size: 12, color: Colors.blue),
               SizedBox(width: 4),
-              Text('${forecast.precipitation.toStringAsFixed(1)}mm',
-                  style: TextStyle(color: Colors.white, fontSize: 12)),
+              Text(
+                '${forecast.precipitation.toStringAsFixed(1)}mm',
+                style: theme.textTheme.bodySmall,
+              ),
             ],
           ),
         ],
@@ -129,8 +130,10 @@ class HourlyWeatherRow extends StatelessWidget {
 // Widget principal que usa o WeatherBloc para buscar e exibir a previsão do tempo por hora
 class HourlyWeatherWidget extends StatelessWidget {
   final GeoPoint location;
+  final DateTime? selectedDate;
 
-  HourlyWeatherWidget({Key? key, required this.location}) : super(key: key);
+  HourlyWeatherWidget({Key? key, required this.location, this.selectedDate})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {

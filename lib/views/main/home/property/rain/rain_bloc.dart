@@ -1,6 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_seringueiro/services/open_weather_api_service.dart';
+import 'package:flutter_seringueiro/common/services/open_weather_api_service.dart';
 import 'package:flutter_seringueiro/views/main/home/property/rain/rain_event.dart';
 import 'package:flutter_seringueiro/views/main/home/property/rain/rain_state.dart';
 
@@ -71,8 +71,6 @@ class RainBloc extends Bloc<RainEvent, RainState> {
       LoadRainHistoryFromApi event, Emitter<RainState> emit) async {
     try {
       emit(RainLoading());
-      var rainData = await weatherApiService.fetchRainHistory(event.latitude,
-          event.longitude, event.startTimestamp, event.endTimestamp);
       // Converta rainData para o formato necessário
       // Emita um estado com os dados convertidos
     } catch (e) {

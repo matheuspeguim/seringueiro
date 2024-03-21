@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_seringueiro/services/open_weather_api_service.dart';
+import 'package:flutter_seringueiro/common/services/open_weather_api_service.dart';
 import 'package:flutter_seringueiro/views/main/home/weather/weather_bloc.dart';
 import 'package:flutter_seringueiro/views/main/home/weather/weather_event.dart';
 import 'package:flutter_seringueiro/views/main/home/weather/weather_state.dart';
@@ -45,51 +45,40 @@ class DailyForecastCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context); // Acessando o tema
     DateTime now = DateTime.now();
     String displayDate = DateFormat('EEE').format(forecast.date);
+
     if (now.day == forecast.date.day &&
         now.month == forecast.date.month &&
         now.year == forecast.date.year) {
-      displayDate = "hoje";
-    }
-
-    if (now.day + 1 == forecast.date.day &&
+      displayDate = "Hoje";
+    } else if (now.day + 1 == forecast.date.day &&
         now.month == forecast.date.month &&
         now.year == forecast.date.year) {
-      displayDate = "amanhã";
+      displayDate = "Amanhã";
     }
 
     return Container(
       width: 75,
       child: Column(
         children: [
-          Text(
-            displayDate,
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          Text(displayDate, style: theme.textTheme.bodySmall),
+          Image.network(
+            'http://openweathermap.org/img/wn/${forecast.weatherIcon}.png',
+            width: 50,
+            height: 50,
           ),
-          Container(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Image.network(
-                  'http://openweathermap.org/img/wn/${forecast.weatherIcon}.png',
-                  width: 50,
-                  height: 50,
-                ),
-                Row(
-                  children: [
-                    Icon(Icons.water_drop,
-                        size: 12, color: Colors.blue), // Ícone de chuva
-                    SizedBox(width: 4),
-                    Text(
-                      '${forecast.rain.toStringAsFixed(1)}mm', // Mostrando a quantidade de chuva com uma casa decimal
-                      style: TextStyle(color: Colors.white, fontSize: 12),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          )
+          Row(
+            children: [
+              Icon(Icons.water_drop, size: 12, color: Colors.blue),
+              SizedBox(width: 4),
+              Text(
+                '${forecast.rain.toStringAsFixed(1)}mm',
+                style: theme.textTheme.bodySmall,
+              ),
+            ],
+          ),
         ],
       ),
     );

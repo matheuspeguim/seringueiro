@@ -115,6 +115,7 @@ class OpenWeatherApiService {
           'temperature': data['main']['temp'],
           'humidity': data['main']['humidity'],
           'condition': data['weather'][0]['main'],
+          'icon': data['weather'][0]['icon'],
           // Inclua outros campos relevantes conforme necessário
         };
       } else {

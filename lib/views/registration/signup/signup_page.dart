@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
-import 'package:flutter_seringueiro/validators/validators.dart';
+import 'package:flutter_seringueiro/common/validators/validators.dart';
 import 'package:flutter_seringueiro/views/registration/email_verification/email_verification_bloc.dart';
 import 'package:flutter_seringueiro/views/registration/email_verification/email_verification_page.dart';
 import 'package:flutter_seringueiro/views/registration/signup/signup_bloc.dart';

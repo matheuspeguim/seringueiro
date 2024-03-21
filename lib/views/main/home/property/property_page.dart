@@ -1,114 +1,134 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_seringueiro/common/models/property.dart';
+import 'package:flutter_seringueiro/common/models/property_user.dart';
+import 'package:flutter_seringueiro/views/main/home/property/field_activity/field_activity_manager.dart';
 import 'package:flutter_seringueiro/views/main/home/property/field_activity/field_activity_widgets/field_activity_control_painel.dart';
-import 'package:flutter_seringueiro/views/main/home/property/property_bloc.dart';
-import 'package:flutter_seringueiro/views/main/home/property/property_event.dart';
-import 'package:flutter_seringueiro/views/main/home/property/property_state.dart';
+import 'package:flutter_seringueiro/views/main/home/property/property_settings/property_settings_bloc.dart';
+import 'package:flutter_seringueiro/views/main/home/property/property_settings/property_settings_event.dart';
+import 'package:flutter_seringueiro/views/main/home/property/property_settings/property_settings_page.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_widgets/property_buttons_widget/property_buttons_widget.dart';
+import 'package:flutter_seringueiro/views/main/home/property/property_widgets/property_calendar.dart';
 import 'package:flutter_seringueiro/views/main/home/weather/hourly_weather_widget.dart';
 
 class PropertyPage extends StatefulWidget {
-  final User user;
-  final String propertyId;
+  final Property property;
 
-  PropertyPage({Key? key, required this.user, required this.propertyId})
-      : super(key: key);
+  const PropertyPage({Key? key, required this.property}) : super(key: key);
 
   @override
   _PropertyPageState createState() => _PropertyPageState();
 }
 
 class _PropertyPageState extends State<PropertyPage> {
+  late Future<PropertyUser> _permissionsFuture;
+  late User _currentUser;
+  late FieldActivityManager _activityManager;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentUser = FirebaseAuth.instance.currentUser!;
+    _activityManager = FieldActivityManager();
+    _permissionsFuture = _getPermissionsForProperty(widget.property.id);
+  }
+
+  Future<PropertyUser> _getPermissionsForProperty(String propertyId) async {
+    final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+    final docSnapshot = await _firestore
+        .collection('property_users')
+        .where('uid', isEqualTo: _currentUser.uid)
+        .where('propertyId', isEqualTo: propertyId)
+        .limit(1)
+        .get();
+
+    if (docSnapshot.docs.isEmpty) {
+      throw Exception("Permissões não encontradas.");
+    }
+    return PropertyUser.fromFirestore(docSnapshot.docs.first);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final user = widget.user;
-    final propertyId = widget.propertyId;
-
-    return BlocProvider(
-      create: (context) =>
-          PropertyBloc()..add(LoadPropertyDetails(user, propertyId)),
-      child: BlocConsumer<PropertyBloc, PropertyState>(
-        listener: (context, state) {},
-        builder: (context, state) {
-          return Scaffold(
-            appBar: AppBar(
-              iconTheme: IconThemeData(color: Colors.white),
-              centerTitle: true,
-              title: Text(
-                _getAppBarTitle(state),
-                style: TextStyle(color: Colors.white),
-              ),
-              backgroundColor: Colors.green.shade900,
-              elevation: 50,
-            ),
-            body: _buildBody(context, state),
-            backgroundColor: Colors.green,
-            floatingActionButton: FloatingActionButton(
-              onPressed: _showPropertyButtons,
-              child: Icon(Icons.add, color: Colors.white),
-              backgroundColor: Colors.green.shade900, // Cor do botão
-              elevation: 10,
-
-              // Você pode adicionar mais personalizações aqui se necessário
-            ),
-          );
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.property.nomeDaPropriedade.toUpperCase()),
+        actions: [
+          IconButton(
+              onPressed: _navigateToPropertySettings,
+              icon: Icon(Icons.settings))
+        ],
+      ),
+      body: FutureBuilder<PropertyUser>(
+        future: _permissionsFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text("Erro ao carregar permissões."));
+          }
+          return _buildPropertyDetails(snapshot.data!);
+        },
+      ),
+      floatingActionButton: FutureBuilder<PropertyUser>(
+        future: _permissionsFuture,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return FloatingActionButton(
+              onPressed: () => _showPropertyButtons(snapshot.data!),
+              child: Icon(Icons.add),
+            );
+          } else {
+            return SizedBox.shrink(); // Esconde o FAB se não houver permissões
+          }
         },
       ),
     );
   }
 
-  String _getAppBarTitle(PropertyState state) {
-    if (state is PropertyLoaded) {
-      return state.property.nomeDaPropriedade.toUpperCase();
-    }
-    return 'Detalhes da Propriedade';
-  }
-
-  void _showPropertyButtons() {
+  void _showPropertyButtons(PropertyUser propertyUser) {
     showModalBottomSheet(
-      enableDrag: true,
-      backgroundColor: Colors.white.withOpacity(0.0),
+      elevation: 0,
+      backgroundColor: Colors.transparent,
       context: context,
-      builder: (BuildContext context) {
-        return PropertyButtonsWidget(
-            user: widget.user, propertyId: widget.propertyId);
-      },
+      builder: (_) => PropertyButtonsWidget(
+          user: _currentUser,
+          property: widget.property,
+          activityManager: _activityManager,
+          propertyUser: propertyUser),
     );
   }
 
-  Widget _buildBody(BuildContext context, PropertyState state) {
-    if (state is PropertyLoading) {
-      return Center(child: CircularProgressIndicator());
-    } else if (state is PropertyError) {
-      return Center(child: Text(state.message));
-    } else if (state is PropertyLoaded) {
-      return RefreshIndicator(
-        onRefresh: () async {
-          context
-              .read<PropertyBloc>()
-              .add(LoadPropertyDetails(widget.user, widget.propertyId));
-        },
+  Widget _buildPropertyDetails(PropertyUser permissions) {
+    return Padding(
+        padding: EdgeInsets.all(4),
         child: SingleChildScrollView(
           child: Column(
             children: [
-              SizedBox(height: 8),
-              HourlyWeatherWidget(location: state.property.localizacao),
-              Divider(
-                color: Colors.white,
-              ),
+              HourlyWeatherWidget(location: widget.property.localizacao),
+              Divider(),
               FieldActivityControlPanel(
-                userId: widget.user.uid,
-                propertyId: widget.propertyId,
-              ),
+                  userId: _currentUser.uid, propertyId: widget.property.id),
+              PropertyCalendar(propertyId: widget.property.id),
+              // Inclua outros widgets conforme necessário, baseados nas permissões
             ],
           ),
-        ),
+        ));
+  }
 
-        // Outros componentes relacionados à propriedade podem ser adicionados aqui
-      );
-    } else {
-      return Center(child: Text('Estado não reconhecido!'));
-    }
+  void _navigateToPropertySettings() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BlocProvider<PropertySettingsBloc>(
+          create: (context) => PropertySettingsBloc()
+            ..add(LoadPropertySettings(widget.property.id)),
+          child: PropertySettingsPage(property: widget.property),
+        ),
+      ),
+    );
   }
 }

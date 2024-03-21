@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_seringueiro/models/property.dart';
-import 'package:flutter_seringueiro/widgets/custom_button.dart';
+import 'package:flutter_seringueiro/common/models/property.dart';
+import 'package:flutter_seringueiro/common/widgets/custom_button.dart';
 
 class AgronomoWidgets {
   static List<Widget> buildAgronomoWidgets(

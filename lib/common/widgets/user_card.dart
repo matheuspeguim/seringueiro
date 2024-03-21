@@ -19,7 +19,6 @@ class UserCard extends StatelessWidget {
         propertyUserData.data() as Map<String, dynamic>;
 
     return Card(
-        color: Colors.black.withOpacity(0.3),
         margin: EdgeInsets.all(8.0),
         child: Container(
           padding: EdgeInsets.all(8),
@@ -27,27 +26,20 @@ class UserCard extends StatelessWidget {
             ListTile(
               leading: CircleAvatar(
                 // Use a placeholder if the `photoUrl` is not available
-                backgroundImage:
-                    NetworkImage(user['photoUrl'] ?? 'path_to_default_image'),
+                backgroundImage: NetworkImage(user['profilePictureUrl'] ??
+                    'https://firebasestorage.googleapis.com/v0/b/seringueiroapp.appspot.com/o/profilePictures%2Fvecteezy_illustration-of-human-icon-vector-user-symbol-icon-modern_8442086.jpg?alt=media&token=cdadba3c-68db-4d1b-ace3-b18d7b4733a2'),
               ),
               title: Text(
                 user['nome'] ?? 'Usuário não identificado',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(),
               ),
               subtitle: Text(
                 user['idPersonalizado'] ?? '',
-                style: TextStyle(
-                  color: Colors.white,
-                ),
+                style: TextStyle(),
               ),
               trailing: IconButton(
                 icon: Icon(
                   Icons.edit,
-                  color: Colors.white,
                 ),
                 onPressed: onRolesEdit,
               ),
@@ -59,25 +51,19 @@ class UserCard extends StatelessWidget {
                 if (propertyUser['funcoes']['seringueiro'])
                   Text(
                     'Seringueiro | ',
-                    style: TextStyle(
-                      color: Colors.white,
-                    ),
                   ),
                 if (propertyUser['funcoes']['agronomo'])
-                  Text('Agrônomo | ',
-                      style: TextStyle(
-                        color: Colors.white,
-                      )),
+                  Text(
+                    'Agrônomo | ',
+                  ),
                 if (propertyUser['funcoes']['proprietario'])
-                  Text('Proprietário | ',
-                      style: TextStyle(
-                        color: Colors.white,
-                      )),
+                  Text(
+                    'Proprietário | ',
+                  ),
                 if (propertyUser['funcoes']['admin'])
-                  Text('Administrador',
-                      style: TextStyle(
-                        color: Colors.white,
-                      )),
+                  Text(
+                    'Administrador',
+                  ),
               ],
             ),
           ]),

@@ -4,6 +4,7 @@ class Property {
   final String id;
   final String nomeDaPropriedade;
   final int quantidadeDeArvores;
+  final String cidade;
   final GeoPoint localizacao; // Tipo GeoPoint para a localização
 
   Property({
@@ -11,6 +12,7 @@ class Property {
     required this.nomeDaPropriedade,
     required this.quantidadeDeArvores,
     required this.localizacao,
+    required this.cidade,
   });
 
   factory Property.fromFirestore(DocumentSnapshot doc) {
@@ -22,6 +24,7 @@ class Property {
       quantidadeDeArvores: data['quantidadeDeArvores'] ?? 0,
       localizacao: data['localizacao'] ??
           GeoPoint(0, 0), // Valor padrão para GeoPoint se for nulo
+      cidade: data['cidade'] ?? '',
     );
   }
 }

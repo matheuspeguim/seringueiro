@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_seringueiro/views/main/home/property/field_activity/field_activity_manager.dart';
-import 'package:flutter_seringueiro/models/property.dart';
+import 'package:flutter_seringueiro/common/models/property.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_widgets/admin_widgets.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_widgets/agronomo_widgets.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_widgets/property_buttons_widget/property_button_event.dart';
@@ -28,10 +28,9 @@ class PropertyButtonsBloc
     emit(PropertyButtonsLoading());
     try {
       final querySnapshot = await firestore
-          .collection('properties')
-          .doc(event.propertyId)
           .collection('property_users')
           .where('uid', isEqualTo: event.userId)
+          .where('propertyId', isEqualTo: event.propertyId)
           .get();
 
       if (querySnapshot.docs.isNotEmpty) {
@@ -49,20 +48,20 @@ class PropertyButtonsBloc
         FieldActivityManager activityManager = FieldActivityManager();
 
         // Adicionar botões com base nas funções do usuário
-        if (userRoleData['funcoes']['seringueiro'] == true) {
+        if (userRoleData['seringueiro'] == true) {
           buttons.addAll(SeringueiroWidgets.buildSeringueiroWidgets(
               context, user, property, activityManager));
         }
-        if (userRoleData['funcoes']['agronomo'] == true) {
+        if (userRoleData['agronomo'] == true) {
           buttons.addAll(
               AgronomoWidgets.buildAgronomoWidgets(context, user, property));
         }
-        if (userRoleData['funcoes']['proprietario'] == true) {
+        if (userRoleData['proprietario'] == true) {
           buttons
               .addAll(ProprietarioWidgets.buildProprietarioWidgets(property));
         }
 
-        if (userRoleData['funcoes']['admin'] == true) {
+        if (userRoleData['admin'] == true) {
           buttons.addAll(AdminWidgets.buildAdminWidgets(context, property));
         }
 

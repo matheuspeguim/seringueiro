@@ -1,6 +1,6 @@
 // home_page_state.dart
 
-import 'package:flutter_seringueiro/models/property.dart';
+import 'package:flutter_seringueiro/common/models/property.dart';
 
 abstract class HomePageState {}
 

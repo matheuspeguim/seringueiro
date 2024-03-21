@@ -4,9 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_seringueiro/views/main/home/property/new_property/new_property_bloc.dart';
 import 'package:flutter_seringueiro/views/main/home/property/new_property/new_property_page.dart';
-import 'package:flutter_seringueiro/views/main/home/property/property_bloc.dart';
-import 'package:flutter_seringueiro/views/main/home/property/property_event.dart';
-import 'package:flutter_seringueiro/views/main/home/property/property_page.dart';
 
 class SearchPropertyPage extends StatefulWidget {
   final User user;
@@ -41,10 +38,8 @@ class _SearchPropertyPageState extends State<SearchPropertyPage> {
       appBar: AppBar(
         title: Text(
           'Adicionar Propriedade',
-          style: TextStyle(color: Colors.white),
         ),
         centerTitle: true,
-        backgroundColor: Colors.green.shade900,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -56,71 +51,6 @@ class _SearchPropertyPageState extends State<SearchPropertyPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Autocomplete<PropriedadeSugestao>(
-                      optionsBuilder: (TextEditingValue textEditingValue) {
-                        if (textEditingValue.text.isEmpty) {
-                          return const Iterable<PropriedadeSugestao>.empty();
-                        }
-                        return _buscarSugestoes(textEditingValue.text);
-                      },
-                      optionsViewBuilder: (context, onSelected, options) {
-                        return Align(
-                          alignment: Alignment.topLeft,
-                          child: Material(
-                            child: Container(
-                              width: 300,
-                              height: 200,
-                              child: ListView.builder(
-                                itemCount: options.length,
-                                itemBuilder: (context, index) {
-                                  final option = options.elementAt(index);
-
-                                  return ListTile(
-                                    title: Text(
-                                      'Propriedade: ${option.nome}',
-                                      style: TextStyle(fontSize: 18.0),
-                                    ),
-                                    subtitle: Text(
-                                        'Administrador: ${option.adminName}'),
-                                    onTap: () {
-                                      onSelected(option);
-                                    },
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                      onSelected: (PropriedadeSugestao selecao) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => BlocProvider(
-                              create: (context) => PropertyBloc()
-                                ..add(LoadPropertyDetails(
-                                    widget.user, selecao.propertyId)),
-                              child: PropertyPage(
-                                  user: widget.user,
-                                  propertyId: selecao.propertyId),
-                            ),
-                          ),
-                        );
-                      },
-                      fieldViewBuilder:
-                          (context, controller, focusNode, onEditingComplete) {
-                        return TextField(
-                          controller: controller,
-                          focusNode: focusNode,
-                          onEditingComplete: onEditingComplete,
-                          decoration: InputDecoration(
-                            labelText: 'Buscar Propriedade',
-                            labelStyle: TextStyle(color: Colors.black),
-                          ),
-                          style: TextStyle(color: Colors.black, fontSize: 18.0),
-                        );
-                      },
-                    ),
                     SizedBox(height: 10),
                     Center(
                       child: ElevatedButton(
@@ -135,10 +65,6 @@ class _SearchPropertyPageState extends State<SearchPropertyPage> {
                           );
                         },
                         child: Text('Criar uma nova propriedade'),
-                        style: ElevatedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          backgroundColor: Colors.green,
-                        ),
                       ),
                     ),
                   ],

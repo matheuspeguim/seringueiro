@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter_seringueiro/models/property.dart';
+import 'package:flutter_seringueiro/common/models/property.dart';
+import 'package:flutter_seringueiro/common/models/property_user.dart';
 
 abstract class PropertyState extends Equatable {
   @override
@@ -12,8 +13,9 @@ class PropertyLoading extends PropertyState {}
 
 class PropertyLoaded extends PropertyState {
   final Property property;
+  final PropertyUser propertyUser;
 
-  PropertyLoaded(this.property);
+  PropertyLoaded(this.property, this.propertyUser);
 
   @override
   List<Object> get props => [property];

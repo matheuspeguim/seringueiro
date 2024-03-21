@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:flutter_seringueiro/models/activity_point.dart';
-import 'package:flutter_seringueiro/models/field_activity.dart';
+import 'package:flutter_seringueiro/common/models/activity_point.dart';
+import 'package:flutter_seringueiro/common/models/field_activity.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 class LocalStorageService {

@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_seringueiro/models/property.dart';
+import 'package:flutter_seringueiro/common/models/property.dart';
 import 'package:flutter_seringueiro/views/main/home/home_page_bloc.dart';
 import 'package:flutter_seringueiro/views/main/home/home_page_event.dart';
 import 'package:flutter_seringueiro/views/main/home/home_page_state.dart';
@@ -13,10 +13,8 @@ import 'package:flutter_seringueiro/views/main/home/property/property_page.dart'
 import 'package:flutter_seringueiro/views/main/home/property/searcher/search_property_bloc.dart';
 import 'package:flutter_seringueiro/views/main/home/property/searcher/search_property_page.dart';
 import 'package:flutter_seringueiro/views/main/home/weather/daily_weather_widget.dart';
-import 'package:flutter_seringueiro/widgets/cup_fill.dart';
-import 'package:flutter_seringueiro/widgets/custom_button.dart';
-import 'package:flutter_seringueiro/widgets/custom_card.dart';
-import 'package:flutter_seringueiro/widgets/percentage_circle.dart';
+import 'package:flutter_seringueiro/common/widgets/custom_button.dart';
+import 'package:flutter_seringueiro/common/widgets/custom_card.dart';
 
 class HomePage extends StatelessWidget {
   final User user;
@@ -32,7 +30,6 @@ class HomePage extends StatelessWidget {
         return bloc;
       },
       child: Scaffold(
-        backgroundColor: Colors.white,
         body: _buildPropertiesList(context),
       ),
     );
@@ -59,37 +56,6 @@ class HomePage extends StatelessWidget {
       body: Column(
         children: [
           DailyWeatherWidget(location: property.localizacao),
-          Divider(
-            color: Colors.white,
-          ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: <Widget>[
-              CupFill(
-                titulo: "Pluviômetro",
-                valor: 21,
-                escala: 0.6,
-                corPreenchimento: Colors.blue,
-              ),
-              SizedBox(
-                width: 8.0,
-              ),
-              CupFill(
-                titulo: "Caneca",
-                valor: 33,
-                escala: 0.6,
-                corPreenchimento: Colors.white,
-                unidade: "%",
-              ),
-              SizedBox(
-                width: 8.0,
-              ),
-              PercentageCircle(
-                titulo: "Eficiência",
-                valor: 33,
-              )
-            ],
-          )
         ],
       ),
       onButtonPressed: () {
@@ -99,7 +65,7 @@ class HomePage extends StatelessWidget {
             builder: (context) => BlocProvider(
               create: (context) =>
                   PropertyBloc()..add(LoadPropertyDetails(user, property.id)),
-              child: PropertyPage(user: user, propertyId: property.id),
+              child: PropertyPage(property: property),
             ),
           ),
         );

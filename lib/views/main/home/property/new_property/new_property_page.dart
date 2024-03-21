@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_seringueiro/validators/validators.dart';
+import 'package:flutter_seringueiro/common/validators/validators.dart';
 import 'package:flutter_seringueiro/views/main/home/property/new_property/full_screen_map_page.dart';
 import 'package:flutter_seringueiro/views/main/home/property/new_property/new_property_bloc.dart';
 import 'package:flutter_seringueiro/views/main/home/property/new_property/new_property_event.dart';
@@ -246,7 +246,12 @@ class _NewPropertyPageState extends State<NewPropertyPage> {
   Widget _buildProfessionCheckbox(String title, bool value,
       {bool enabled = true}) {
     return CheckboxListTile(
-      title: Text(title),
+      title: Text(
+        title,
+        style: TextStyle(
+          color: Colors.white,
+        ),
+      ),
       value: value,
       onChanged: enabled
           ? (bool? newValue) {

@@ -3,12 +3,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_seringueiro/services/open_weather_api_service.dart';
-import 'package:flutter_seringueiro/models/property.dart';
+import 'package:flutter_seringueiro/common/services/open_weather_api_service.dart';
+import 'package:flutter_seringueiro/common/models/property.dart';
 import 'package:flutter_seringueiro/views/main/home/property/field_activity/field_activity_manager.dart';
 import 'package:flutter_seringueiro/views/main/home/property/rain/rain_bloc.dart';
 import 'package:flutter_seringueiro/views/main/home/property/rain/rain_dialog_content.dart';
-import 'package:flutter_seringueiro/widgets/custom_button.dart';
+import 'package:flutter_seringueiro/common/widgets/custom_button.dart';
 
 class SeringueiroWidgets {
   static List<Widget> buildSeringueiroWidgets(BuildContext context, User user,

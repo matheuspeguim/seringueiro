@@ -1,50 +1,113 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_seringueiro/views/main/home/property/property_widgets/property_buttons_widget/property_button_event.dart';
-import 'property_buttons_bloc.dart';
-import 'property_buttons_state.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_seringueiro/common/models/property.dart';
+import 'package:flutter_seringueiro/common/models/property_user.dart';
+import 'package:flutter_seringueiro/common/widgets/custom_button.dart';
+import 'package:flutter_seringueiro/views/main/home/property/field_activity/field_activity_manager.dart';
 
 class PropertyButtonsWidget extends StatelessWidget {
-  final User user;
-  final String propertyId;
+  User user;
+  Property property;
+  PropertyUser propertyUser;
+  FieldActivityManager activityManager;
 
   PropertyButtonsWidget(
-      {Key? key, required this.user, required this.propertyId})
+      {Key? key,
+      required this.user,
+      required this.property,
+      required this.propertyUser,
+      required this.activityManager})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => PropertyButtonsBloc(
-          context: context, firestore: FirebaseFirestore.instance)
-        ..add(LoadPropertyButtons(
-            user: user, userId: user.uid, propertyId: propertyId)),
-      child: BlocBuilder<PropertyButtonsBloc, PropertyButtonsState>(
-        builder: (context, state) {
-          if (state is PropertyButtonsLoading) {
-            return LinearProgressIndicator();
-          } else if (state is PropertyButtonsLoaded) {
-            return SingleChildScrollView(
-              child: Wrap(
-                  direction:
-                      Axis.horizontal, // Organiza os filhos horizontalmente
-                  spacing: 1.0, // Espaço horizontal entre os botões
-                  runSpacing: 10.0, // Espaço vertical entre as linhas
-                  alignment: WrapAlignment
-                      .start, // Alinha os botões ao início do eixo principal
-                  children: state.buttons // Os botões carregados
-                  ),
-            );
-          } else if (state is PropertyButtonsError) {
-            return Text('Erro: ${state.message}');
-          }
-
-          return SizedBox
-              .shrink(); // Estado inicial ou outros estados não tratados
-        },
+    return SingleChildScrollView(
+      child: Wrap(
+        direction: Axis.horizontal,
+        spacing: 8.0, // Espaçamento horizontal
+        runSpacing: 8.0, // Espaçamento vertical
+        alignment: WrapAlignment.start, // Alinhamento dos botões
+        children: _createButtonsBasedOnPermissions(context),
       ),
     );
+  }
+
+  List<Widget> _createButtonsBasedOnPermissions(BuildContext context) {
+    List<Widget> buttons = [];
+
+    // Exemplo: Adiciona botões para o seringueiro
+    if (propertyUser.seringueiro) {
+      buttons.addAll([
+        _createButton(context, 'Sangria',
+            () => _performSangriaAction(context, user, property)),
+        _createButton(context, 'Estimulação',
+            () => _performEstimulacaoAction(context, user, property)),
+        _createButton(context, 'Tratamento',
+            () => _performTratamentoAction(context, user, property)),
+        // Adicione mais botões conforme necessário
+      ]);
+    }
+
+    // Exemplo para adicionar botões para agrônomos
+    if (propertyUser.agronomo) {
+      // Adicione mais botões conforme necessário
+    }
+
+    // Adiciona botões para outras permissões
+    if (propertyUser.administrador) {
+      // Exemplo de botão para administrador
+    }
+    if (propertyUser.proprietario) {
+      // Exemplo de botão para proprietário
+    }
+
+    return buttons;
+  }
+
+  Widget _createButton(
+      BuildContext context, String label, VoidCallback onPressed) {
+    return CustomButton(
+      icon: Icons.add,
+      label: label,
+      onPressed: onPressed,
+    );
+  }
+
+  Future<void> _performSangriaAction(
+      BuildContext context, User user, Property property) async {
+    // Ação específica para a Sangria
+    String activity = 'Sangria';
+    await activityManager.iniciarAtividade(
+      context,
+      user,
+      property,
+      activity,
+    );
+  }
+
+  Future<void> _performEstimulacaoAction(
+      BuildContext context, User user, Property property) async {
+    String activity = 'Estimulação';
+    await activityManager.iniciarAtividade(
+      context,
+      user,
+      property,
+      activity,
+    );
+  }
+
+  void _performTratamentoAction(
+      BuildContext context, User user, Property property) async {
+    String activity = 'Tratamento';
+    await activityManager.iniciarAtividade(
+      context,
+      user,
+      property,
+      activity,
+    );
+  }
+
+  void _performAvaliacaoSeringalAction(BuildContext context) {
+    // Ação específica para Avaliação do Seringal
   }
 }

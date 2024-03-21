@@ -19,9 +19,9 @@ dependencies:
   intl: 0.18.1
   flutter_masked_text2:
   validators:
-  firebase_core:
-  cloud_firestore:
-  firebase_auth:
+  firebase_core: ^2.27.0
+  cloud_firestore: ^4.15.8
+  firebase_auth: ^4.17.8
   flutter_bloc:
   google_maps_flutter:
   equatable:
@@ -34,14 +34,14 @@ dependencies:
   hive_generator:
   permission_handler:
   url_launcher: ^6.2.4
-  flutter_keyboard_visibility:
   flutter_launcher_icons:
   image_picker:
-  firebase_storage:
+  firebase_storage: ^11.6.9
   fl_chart:
   flutter_svg:
   shared_preferences: ^2.2.2
   uuid: ^4.3.3
+  package_info_plus: ^5.0.1
 
 dev_dependencies:
   flutter_test:

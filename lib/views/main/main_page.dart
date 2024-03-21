@@ -2,14 +2,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_seringueiro/models/usuario.dart';
+import 'package:flutter_seringueiro/common/models/usuario.dart';
+import 'package:flutter_seringueiro/views/main/seachers/user_seacher/user_seacher_bloc.dart';
+import 'package:flutter_seringueiro/views/main/seachers/user_seacher/user_seacher_page.dart';
 import 'package:flutter_seringueiro/views/main/seringuia/seringuia_bloc.dart';
 import 'package:flutter_seringueiro/views/main/seringuia/seringuia_page.dart';
 import 'package:flutter_seringueiro/views/main/home/home_page.dart';
 import 'package:flutter_seringueiro/views/main/home/home_page_bloc.dart';
 import 'package:flutter_seringueiro/views/main/jotinha/jotinha_bloc.dart';
 import 'package:flutter_seringueiro/views/main/jotinha/jotinha_page.dart';
-import 'package:flutter_seringueiro/widgets/custom_drawer.dart';
+import 'package:flutter_seringueiro/common/widgets/custom_drawer.dart';
 
 class MainPage extends StatefulWidget {
   final User user;
@@ -40,7 +42,6 @@ class _MainPageState extends State<MainPage> {
 
     if (userDoc.exists) {
       var userData = userDoc.data() as Map<String, dynamic>;
-      print('Usuario instanciado!');
 
       // Supondo que a classe Usuario tenha um construtor nomeado adequado
       // que aceita Map<String, dynamic> diretamente.
@@ -65,12 +66,8 @@ class _MainPageState extends State<MainPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        backgroundColor: Colors.green.shade900,
-        elevation: 50,
-        iconTheme: IconThemeData(color: Colors.white),
         title: Text(
           'Olá, $userName',
-          style: TextStyle(color: Colors.white),
         ),
       ),
       drawer: CustomDrawer(usuario: _currentUser!),
@@ -82,6 +79,10 @@ class _MainPageState extends State<MainPage> {
               create: (_) => HomePageBloc(user: widget.user),
               child: HomePage(user: widget.user)),
           BlocProvider(
+            create: (_) => UserSearchBloc(),
+            child: UserSearchPage(),
+          ),
+          BlocProvider(
               create: (_) => JotinhaBloc(user: widget.user),
               child: JotinhaPage(user: widget.user)),
           BlocProvider(
@@ -89,30 +90,32 @@ class _MainPageState extends State<MainPage> {
               child: SeringuiaPage(user: widget.user)),
         ],
       ),
-      bottomNavigationBar: _buildNavigationBar(),
+      bottomNavigationBar: _buildNavigationBar(context),
     );
   }
 
-  NavigationBar _buildNavigationBar() {
+  NavigationBar _buildNavigationBar(context) {
+    final theme = Theme.of(context);
     return NavigationBar(
-      backgroundColor: Colors.green.shade200,
-      elevation: 50,
-      shadowColor: Colors.grey.shade900,
+      indicatorColor: theme.colorScheme.primary,
       selectedIndex: _currentIndex,
       onDestinationSelected: (index) => _onDestinationSelected(index),
-      indicatorColor: Colors.green.shade500,
       destinations: [
         NavigationDestination(
             icon: Icon(Icons.home),
-            selectedIcon: Icon(Icons.home, color: Colors.white),
+            selectedIcon: Icon(Icons.home),
             label: 'Início'),
         NavigationDestination(
+            icon: Icon(Icons.search),
+            selectedIcon: Icon(Icons.search),
+            label: 'Buscar'),
+        NavigationDestination(
             icon: Icon(Icons.newspaper),
-            selectedIcon: Icon(Icons.newspaper, color: Colors.white),
-            label: 'Jornal Jotinha'),
+            selectedIcon: Icon(Icons.newspaper),
+            label: 'Painel'),
         NavigationDestination(
             icon: Icon(Icons.library_books),
-            selectedIcon: Icon(Icons.library_books, color: Colors.white),
+            selectedIcon: Icon(Icons.library_books),
             label: 'Seringuia'),
       ],
     );

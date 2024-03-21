@@ -2,23 +2,22 @@
 package com.peguim.seringueiro
 
 // Importações de classes e bibliotecas necessárias para o funcionamento do código.
-import android.app.Service
-import android.content.Intent
-import android.os.IBinder
-import android.os.Handler
-import android.os.Looper
-import com.google.android.gms.location.*
-import com.google.firebase.firestore.FirebaseFirestore
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
-import androidx.core.app.NotificationCompat
+import android.app.Service
 import android.content.Context
+import android.content.Intent
 import android.os.Build
-import androidx.annotation.RequiresApi
+import android.os.Handler
+import android.os.IBinder
+import android.os.Looper
+import androidx.core.app.NotificationCompat
+import com.google.android.gms.location.*
+import com.google.firebase.firestore.FirebaseFirestore
 
-// Declaração da classe TrackingService, que é um serviço do Android. 
+// Declaração da classe TrackingService, que é um serviço do Android.
 // Este serviço é usado para executar operações em background.
 class TrackingService : Service() {
 
@@ -42,7 +41,8 @@ class TrackingService : Service() {
     // Este método é chamado quando o serviço é criado. É um bom lugar para inicializações.
     override fun onCreate() {
         super.onCreate()
-        createNotificationChannel() // Cria um canal de notificação para versões do Android Oreo ou superiores.
+        createNotificationChannel() // Cria um canal de notificação para versões do Android Oreo ou
+        // superiores.
     }
 
     // Este método é chamado toda vez que o serviço é iniciado.
@@ -81,11 +81,12 @@ class TrackingService : Service() {
     // Cria um canal de notificação para versões do Android Oreo ou superiores.
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val serviceChannel = NotificationChannel(
-                    CHANNEL_ID,
-                    "Serviço de Rastreamento de Atividade",
-                    NotificationManager.IMPORTANCE_DEFAULT
-            )
+            val serviceChannel =
+                    NotificationChannel(
+                            CHANNEL_ID,
+                            "Serviço de Rastreamento de Atividade",
+                            NotificationManager.IMPORTANCE_DEFAULT
+                    )
             val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             manager.createNotificationChannel(serviceChannel)
         }
@@ -93,21 +94,23 @@ class TrackingService : Service() {
 
     // Inicia a coleta de localização com configurações específicas.
     private fun iniciarColetaDeLocalizacao() {
-        val locationRequest = LocationRequest.create().apply {
-            interval = 30000 // 30 segundos
-            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-        }
-
-        locationCallback = object : LocationCallback() {
-            override fun onLocationResult(locationResult: LocationResult) {
-                locationResult.locations.firstOrNull()?.let { location ->
-                    registrarLocalizacaoAtual(location.latitude, location.longitude)
+        val locationRequest =
+                LocationRequest.create().apply {
+                    interval = 30000 // 30 segundos
+                    priority = LocationRequest.PRIORITY_HIGH_ACCURACY
                 }
-                // Após receber a localização, remove as atualizações e reinicia o processo.
-                fusedLocationClient.removeLocationUpdates(this)
-                handler.postDelayed({ iniciarColetaDeLocalizacao() }, 30000)
-            }
-        }
+
+        locationCallback =
+                object : LocationCallback() {
+                    override fun onLocationResult(locationResult: LocationResult) {
+                        locationResult.locations.firstOrNull()?.let { location ->
+                            registrarLocalizacaoAtual(location.latitude, location.longitude)
+                        }
+                        // Após receber a localização, remove as atualizações e reinicia o processo.
+                        fusedLocationClient.removeLocationUpdates(this)
+                        handler.postDelayed({ iniciarColetaDeLocalizacao() }, 30000)
+                    }
+                }
 
         // Solicita atualizações de localização com as configurações definidas.
         fusedLocationClient.requestLocationUpdates(
@@ -119,20 +122,19 @@ class TrackingService : Service() {
 
     // Registra a localização atual no Firebase Firestore.
     private fun registrarLocalizacaoAtual(latitude: Double, longitude: Double) {
-        val activityPoint = hashMapOf(
-                "momento" to System.currentTimeMillis(),
-                "latitude" to latitude,
-                "longitude" to longitude,
-                "fieldActivityId" to activityId
-        )
+        val activityPoint =
+                hashMapOf(
+                        "momento" to System.currentTimeMillis(),
+                        "latitude" to latitude,
+                        "longitude" to longitude,
+                        "fieldActivityId" to activityId
+                )
 
         FirebaseFirestore.getInstance()
-                .collection("properties").document(propertyId!!)
-                .collection("field_activities").document(activityId!!)
-                .collection("activityPoints")
+                .collection("activity_points")
                 .add(activityPoint)
-                .addOnSuccessListener { /* Sucesso */ }
-                .addOnFailureListener { /* Falha */ }
+                .addOnSuccessListener { /* Sucesso */}
+                .addOnFailureListener { /* Falha */}
     }
 
     // Este método retorna null porque este serviço não é vinculado com componentes.

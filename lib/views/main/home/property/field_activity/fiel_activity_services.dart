@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_seringueiro/services/open_weather_api_service.dart';
+import 'package:flutter_seringueiro/common/services/open_weather_api_service.dart';
 
 class FieldActivityServices {
   // Verifica se existe alguma atividade em andamento para um usuário e propriedade específicos

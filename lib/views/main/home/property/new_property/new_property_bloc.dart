@@ -34,7 +34,7 @@ class NewPropertyBloc extends Bloc<NewPropertyEvent, NewPropertyState> {
       emit(PropertySubmissionInProgress());
       final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-      // Criando o documento da propriedade na coleção 'properties'
+      // Criando o documento da propriedade na coleção 'properties' e capturando a referência do documento criado
       DocumentReference propertyRef =
           await firestore.collection('properties').add({
         'nomeDaPropriedade': event.nomeDaPropriedade,
@@ -43,16 +43,17 @@ class NewPropertyBloc extends Bloc<NewPropertyEvent, NewPropertyState> {
             GeoPoint(event.localizacao.latitude, event.localizacao.longitude),
       });
 
-      // Criar a subcoleção 'property_users' para armazenar os usuários relacionados à propriedade
-      CollectionReference usersRef = propertyRef.collection('property_users');
-      await usersRef.add({
+      // Usar a propriedade 'id' do DocumentReference para obter o ID da propriedade recém-criada
+      String propertyId = propertyRef.id;
+
+      // Criar o documento em 'property_users' com a propertyId da propriedade recém-criada
+      await firestore.collection('property_users').add({
         'uid': event.user.uid,
-        'funcoes': {
-          'seringueiro': event.atividadesSelecionadas['seringueiro'] ?? false,
-          'agronomo': event.atividadesSelecionadas['agronomo'] ?? false,
-          'proprietario': event.atividadesSelecionadas['proprietario'] ?? false,
-          'admin': event.atividadesSelecionadas['admin'] ?? false,
-        },
+        'propertyId': propertyId,
+        'seringueiro': event.atividadesSelecionadas['seringueiro'] ?? false,
+        'agronomo': event.atividadesSelecionadas['agronomo'] ?? false,
+        'proprietario': event.atividadesSelecionadas['proprietario'] ?? false,
+        'admin': event.atividadesSelecionadas['admin'] ?? true,
       });
 
       emit(PropertySubmissionSuccess());

@@ -12,6 +12,12 @@ class Usuario {
   final String nome;
   final String profilePictureUrl; // Agora é uma String não nula
   final String rg;
+  final String cidade;
+  final String bairro;
+  final String estado;
+  final String logradouro;
+  final String numero;
+  final String cep;
 
   // URL da imagem padrão
   static const String _defaultProfilePictureUrl =
@@ -26,42 +32,60 @@ class Usuario {
     required this.nome,
     String? profilePictureUrl,
     required this.rg,
+    required this.bairro,
+    required this.cep,
+    required this.cidade,
+    required this.estado,
+    required this.logradouro,
+    required this.numero,
   }) : this.profilePictureUrl = profilePictureUrl ?? _defaultProfilePictureUrl;
 
   factory Usuario.fromMap(Map<String, dynamic> data) {
     return Usuario(
-      email: data['email'],
-      celular: data['celular'],
-      cpf: data['cpf'],
-      nascimento: (data['nascimento'] as Timestamp)
-          .toDate(), // Convertendo de Timestamp para DateTime
-      idPersonalizado: data['idPersonalizado'],
-      nome: data['nome'],
-      profilePictureUrl: data['profilePictureUrl'],
-      rg: data['rg'],
-    );
+        email: data['email'],
+        celular: data['celular'],
+        cpf: data['cpf'],
+        nascimento: (data['nascimento'] as Timestamp)
+            .toDate(), // Convertendo de Timestamp para DateTime
+        idPersonalizado: data['idPersonalizado'],
+        nome: data['nome'],
+        profilePictureUrl: data['profilePictureUrl'],
+        rg: data['rg'],
+        bairro: data['bairro'],
+        cep: data['cep'],
+        cidade: data['cidade'],
+        estado: data['estado'],
+        logradouro: data['logradouro'],
+        numero: data['numero']);
   }
 
   factory Usuario.fromFirebaseUser(
       User user, Map<String, dynamic> firestoreData) {
     return Usuario(
-      email: firestoreData['email'],
-      celular: firestoreData['celular'],
-      cpf: firestoreData['cpf'],
-      nascimento:
-          (firestoreData['nascimento'] as Timestamp).toDate(), // Ajuste aqui
-      idPersonalizado: firestoreData['idPersonalizado'],
-      nome: firestoreData['nome'],
-      profilePictureUrl: firestoreData['profilePictureUrl'],
-      rg: firestoreData['rg'],
-    );
+        email: firestoreData['email'],
+        celular: firestoreData['celular'],
+        cpf: firestoreData['cpf'],
+        nascimento:
+            (firestoreData['nascimento'] as Timestamp).toDate(), // Ajuste aqui
+        idPersonalizado: firestoreData['idPersonalizado'],
+        nome: firestoreData['nome'],
+        profilePictureUrl: firestoreData['profilePictureUrl'],
+        rg: firestoreData['rg'],
+        bairro: firestoreData['bairro'],
+        cep: firestoreData['cep'],
+        cidade: firestoreData['cidade'],
+        estado: firestoreData['estado'],
+        logradouro: firestoreData['logradouro'],
+        numero: firestoreData['numero']);
   }
 }
 
 class UsuarioListItem extends StatelessWidget {
   final Usuario usuario;
+  final String? propertyId;
 
-  UsuarioListItem({Key? key, required this.usuario}) : super(key: key);
+  UsuarioListItem({Key? key, required this.usuario, this.propertyId})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -71,14 +95,17 @@ class UsuarioListItem extends StatelessWidget {
       ),
       title: Text(
         usuario.nome,
-        style: TextStyle(fontWeight: FontWeight.bold),
       ),
-      subtitle: Text(usuario.idPersonalizado),
+      subtitle: Row(children: [
+        Text('${usuario.idPersonalizado} | '),
+        Text(usuario.cidade)
+      ]),
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ProfilePage(usuario: usuario),
+            builder: (context) =>
+                ProfilePage(usuario: usuario, propertyId: propertyId),
           ),
         );
       },
@@ -88,16 +115,19 @@ class UsuarioListItem extends StatelessWidget {
 
 class UsuarioIcon extends StatelessWidget {
   final String usuarioUid;
-  UsuarioIcon({Key? key, required this.usuarioUid}) : super(key: key);
+  final bool exibirNome; // Adiciona o parâmetro booleano
+
+  UsuarioIcon({
+    Key? key,
+    required this.usuarioUid,
+    this.exibirNome = false, // Valor padrão é false, não exibir o nome
+  }) : super(key: key);
 
   Future<Usuario?> getUsuario(String uid) async {
-    // Supondo que você tenha uma função que retorna o usuário dado o UID.
-    // Adapte para sua estrutura de dados e coleção.
     DocumentSnapshot usuarioSnapshot =
         await FirebaseFirestore.instance.collection('users').doc(uid).get();
 
     if (usuarioSnapshot.exists) {
-      // Supondo que você tenha um método fromMap para a classe Usuario.
       return Usuario.fromMap(usuarioSnapshot.data() as Map<String, dynamic>);
     }
     return null;
@@ -109,15 +139,21 @@ class UsuarioIcon extends StatelessWidget {
       future: getUsuario(usuarioUid),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
+          return SizedBox(
+            width: 24,
+            height: 24,
+            child: Center(child: CircularProgressIndicator(strokeWidth: 2.0)),
+          );
         }
 
         if (snapshot.hasError) {
-          return Center(child: Text('Erro ao carregar usuário.'));
+          return Text(
+            '!',
+          );
         }
 
         if (!snapshot.hasData || snapshot.data == null) {
-          return Center(child: Text('Usuário não encontrado.'));
+          return Icon(Icons.account_circle, size: 24);
         }
 
         Usuario usuario = snapshot.data!;
@@ -130,20 +166,24 @@ class UsuarioIcon extends StatelessWidget {
               ),
             );
           },
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              CircleAvatar(
-                radius: 30,
-                backgroundImage: NetworkImage(usuario.profilePictureUrl),
-              ),
-              SizedBox(height: 8),
-              Text(
-                usuario.nome.split(' ').first, // Exibe apenas o primeiro nome
-                style: TextStyle(fontSize: 14),
-              ),
-            ],
-          ),
+          child: exibirNome
+              ? Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircleAvatar(
+                      radius: 22,
+                      backgroundImage: NetworkImage(usuario.profilePictureUrl),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      usuario.nome.split(" ").first,
+                    ), // Exibe o nome do usuário
+                  ],
+                )
+              : CircleAvatar(
+                  radius: 18,
+                  backgroundImage: NetworkImage(usuario.profilePictureUrl),
+                ),
         );
       },
     );
@@ -172,10 +212,6 @@ class UsuarioDrawerHeader extends StatelessWidget {
         ),
         Text(
           usuario.nome,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-          ),
         ),
       ])),
     );

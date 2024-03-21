@@ -1,11 +1,9 @@
-// home_page_bloc.dart
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_seringueiro/models/property.dart';
-import 'home_page_event.dart';
-import 'home_page_state.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_seringueiro/common/models/property.dart';
+import 'package:flutter_seringueiro/views/main/home/home_page_event.dart';
+import 'package:flutter_seringueiro/views/main/home/home_page_state.dart';
 
 class HomePageBloc extends Bloc<HomePageEvent, HomePageState> {
   final User user;
@@ -20,19 +18,23 @@ class HomePageBloc extends Bloc<HomePageEvent, HomePageState> {
     try {
       final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-      // Nova consulta para buscar propriedades relacionadas ao usuário
-      QuerySnapshot propertiesSnapshot = await firestore
-          .collectionGroup('property_users')
+      // Primeiro, buscar as relações de usuário-propriedade
+      final propertyUsersSnapshot = await firestore
+          .collection('property_users')
           .where('uid', isEqualTo: user.uid)
           .get();
 
       List<Property> properties = [];
-      for (var doc in propertiesSnapshot.docs) {
-        // Obter o documento da propriedade principal
-        DocumentReference propertyRef = doc.reference.parent.parent!;
-        DocumentSnapshot propertySnapshot = await propertyRef.get();
-        if (propertySnapshot.exists) {
-          properties.add(Property.fromFirestore(propertySnapshot));
+
+      // Para cada relação encontrada, buscar os detalhes da propriedade
+      for (var propertyUserDoc in propertyUsersSnapshot.docs) {
+        var propertyId = propertyUserDoc.data()['propertyId'];
+        if (propertyId != null) {
+          var propertySnapshot =
+              await firestore.collection('properties').doc(propertyId).get();
+          if (propertySnapshot.exists) {
+            properties.add(Property.fromFirestore(propertySnapshot));
+          }
         }
       }
 

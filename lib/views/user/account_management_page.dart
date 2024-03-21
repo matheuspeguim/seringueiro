@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_seringueiro/models/usuario.dart';
+import 'package:flutter_seringueiro/common/models/usuario.dart';
 
 class AccountManagementPage extends StatelessWidget {
   final Usuario usuario;

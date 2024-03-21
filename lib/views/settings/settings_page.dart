@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_seringueiro/common/config/theme_settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -9,6 +10,7 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   bool _notificationsEnabled = false;
   bool _useWeatherServiceForRain = true;
+  ThemeModeSetting _themeModeSetting = ThemeModeSetting.system;
 
   @override
   void initState() {
@@ -22,6 +24,10 @@ class _SettingsPageState extends State<SettingsPage> {
       _notificationsEnabled = prefs.getBool('notificationsEnabled') ?? false;
       _useWeatherServiceForRain =
           prefs.getBool('useWeatherServiceForRain') ?? true;
+      // Carregar a preferência de tema
+      int themeModeIndex =
+          prefs.getInt('themeModeSetting') ?? ThemeModeSetting.system.index;
+      _themeModeSetting = ThemeModeSetting.values[themeModeIndex];
     });
   }
 
@@ -39,6 +45,20 @@ class _SettingsPageState extends State<SettingsPage> {
     setState(() {
       _useWeatherServiceForRain = value;
     });
+  }
+
+  Future<void> _updateThemeModeSetting(ThemeModeSetting? value) async {
+    if (value == null) return; // Se o valor for nulo, simplesmente retorne.
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('themeModeSetting', value.index);
+
+    setState(() {
+      _themeModeSetting = value;
+    });
+
+    // Atualize o tema do aplicativo conforme necessário
+    // Nota: Você pode precisar de um callback ou evento para atualizar o MaterialApp.
   }
 
   @override
@@ -61,6 +81,19 @@ class _SettingsPageState extends State<SettingsPage> {
             trailing: Switch(
               value: _useWeatherServiceForRain,
               onChanged: _updateRainDataPreference,
+            ),
+          ),
+          ListTile(
+            title: Text('Tema do Aplicativo'),
+            trailing: DropdownButton<ThemeModeSetting>(
+              value: _themeModeSetting,
+              onChanged: _updateThemeModeSetting,
+              items: ThemeModeSetting.values.map((setting) {
+                return DropdownMenuItem<ThemeModeSetting>(
+                  value: setting,
+                  child: Text(setting.toString().split('.').last),
+                );
+              }).toList(),
             ),
           ),
         ],

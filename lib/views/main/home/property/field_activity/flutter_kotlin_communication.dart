@@ -1,5 +1,5 @@
 import 'package:flutter/services.dart';
-import 'package:flutter_seringueiro/models/field_activity.dart';
+import 'package:flutter_seringueiro/common/models/field_activity.dart';
 
 class FlutterKotlinCommunication {
   static const MethodChannel _channel =

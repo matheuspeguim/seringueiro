@@ -16,7 +16,6 @@ class _JotinhaPageState extends State<JotinhaPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.green.shade100,
       body: SingleChildScrollView(
         child: Column(
           children: <Widget>[

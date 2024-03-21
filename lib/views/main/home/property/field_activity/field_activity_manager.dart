@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_seringueiro/models/property.dart';
-import 'package:flutter_seringueiro/services/utilidade_service.dart';
-import 'package:flutter_seringueiro/models/field_activity.dart';
+import 'package:flutter_seringueiro/common/models/property.dart';
+import 'package:flutter_seringueiro/common/services/utilidade_service.dart';
+import 'package:flutter_seringueiro/common/models/field_activity.dart';
 import 'package:flutter_seringueiro/views/main/home/property/field_activity/fiel_activity_services.dart';
 import 'package:flutter_seringueiro/views/main/home/property/field_activity/flutter_kotlin_communication.dart';
 
@@ -47,11 +47,8 @@ class FieldActivityManager {
             property.localizacao);
 
     // Cria a atividade
-    DocumentReference docRef = FirebaseFirestore.instance
-        .collection('properties')
-        .doc(property.id)
-        .collection('field_activities')
-        .doc();
+    DocumentReference docRef =
+        FirebaseFirestore.instance.collection('field_activities').doc();
 
     FieldActivity activity = FieldActivity(
       id: docRef.id,
@@ -85,11 +82,22 @@ class FieldActivityManager {
 
     // Exclui o documento da atividade no Firestore
     await FirebaseFirestore.instance
-        .collection('properties')
-        .doc(activity.propertyId)
         .collection('field_activities')
         .doc(activity.id)
         .delete();
+
+// Primeiro, obtenha uma referência à coleção
+    var collectionRef =
+        FirebaseFirestore.instance.collection('activity_points');
+
+// Realize a consulta para encontrar os documentos
+    var querySnapshot =
+        await collectionRef.where('activityId', isEqualTo: activity.id).get();
+
+// Itere sobre os documentos encontrados e exclua cada um
+    for (var doc in querySnapshot.docs) {
+      await doc.reference.delete();
+    }
 
     // Mostra um Snackbar (ou outro feedback) informando que a atividade foi cancelada e excluída
     ScaffoldMessenger.of(context).showSnackBar(
@@ -105,8 +113,6 @@ class FieldActivityManager {
 
     // Atualiza o documento da atividade no Firestore, definindo finalizada como true
     await FirebaseFirestore.instance
-        .collection('properties')
-        .doc(activity.propertyId)
         .collection('field_activities')
         .doc(activity.id)
         .update({'finalizada': true, 'fim': DateTime.now()});
