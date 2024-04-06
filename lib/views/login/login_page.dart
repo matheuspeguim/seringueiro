@@ -26,13 +26,17 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Acesso ao tema atual
+    var currentTheme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: Colors.green.shade900,
+      backgroundColor: currentTheme.colorScheme.background,
       appBar: AppBar(
-        elevation: 50,
-        title: Text('Entrar na conta', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.green.shade900,
-        centerTitle: true,
+        elevation: currentTheme.appBarTheme.elevation ?? 0,
+        title: Text(
+          'Entrar na conta',
+          style: currentTheme.appBarTheme.titleTextStyle,
+        ),
       ),
       body: BlocConsumer<LoginBloc, LoginState>(
         listener: (context, state) {
@@ -52,14 +56,13 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ));
           } else if (state is LoginFailure) {
-            // Aqui você pode mostrar uma mensagem de erro
             ScaffoldMessenger.of(context)
                 .showSnackBar(SnackBar(content: Text(state.error)));
           }
         },
         builder: (context, state) {
           if (state is LoginLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return Center(child: CircularProgressIndicator());
           }
           return SingleChildScrollView(
               child: Center(
@@ -78,11 +81,8 @@ class _LoginPageState extends State<LoginPage> {
                         focusNode: emailFocus,
                         decoration: InputDecoration(
                             labelText: 'E-mail',
-                            labelStyle: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18.0,
-                            )),
-                        style: TextStyle(fontSize: 18.0, color: Colors.white),
+                            labelStyle: currentTheme.textTheme.bodyLarge),
+                        style: currentTheme.textTheme.bodyLarge,
                         onFieldSubmitted: (value) {
                           FocusScope.of(context).requestFocus(senhaFocus);
                         },
@@ -101,37 +101,35 @@ class _LoginPageState extends State<LoginPage> {
                         focusNode: senhaFocus,
                         decoration: InputDecoration(
                           labelText: 'Senha',
-                          labelStyle: TextStyle(
-                            fontSize: 18.0,
-                            color: Colors.white,
-                          ),
+                          labelStyle: currentTheme.textTheme.bodyLarge,
                           suffixIcon: IconButton(
                             icon: Icon(
-                              // Alterna os ícones
                               _senhaVisivel
                                   ? Icons.visibility
                                   : Icons.visibility_off,
-                              color: Colors.white,
+                              color: currentTheme.iconTheme.color,
                             ),
                             onPressed: () {
-                              // Alterna o estado da visibilidade da senha
                               setState(() {
                                 _senhaVisivel = !_senhaVisivel;
                               });
                             },
                           ),
                         ),
-                        style: TextStyle(
-                          fontSize: 18.0,
-                          color: Colors.white,
-                        ),
+                        style: currentTheme.textTheme.bodyLarge,
                         obscureText: !_senhaVisivel,
                         onFieldSubmitted: (value) => _executarLogin(context),
                       ),
                       SizedBox(height: 16.0),
                       ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          foregroundColor: currentTheme.colorScheme.onPrimary,
+                          backgroundColor:
+                              currentTheme.colorScheme.primary, // foreground
+                        ),
                         onPressed: () => _executarLogin(context),
-                        child: Text('Entrar'),
+                        child: Text('Entrar',
+                            style: currentTheme.textTheme.button),
                       ),
                       SizedBox(
                         height: 8.0,
@@ -139,28 +137,27 @@ class _LoginPageState extends State<LoginPage> {
                       TextButton(
                         onPressed: () => _showResetPasswordDialog(context),
                         child: Text("Esqueci minha senha",
-                            style: TextStyle(
-                              color: Colors.white,
-                            )),
+                            style: currentTheme.textTheme.button),
                       ),
                       Divider(
-                        indent: 10,
-                        endIndent: 10,
+                        color: currentTheme.dividerTheme.color,
+                        indent: currentTheme.dividerTheme.indent,
+                        endIndent: currentTheme.dividerTheme.endIndent,
                       ),
                       Center(
                         child: RichText(
                           text: TextSpan(
-                            style: TextStyle(
-                              fontSize: 16,
-                            ),
+                            style: currentTheme.textTheme.bodyMedium,
                             children: <TextSpan>[
                               TextSpan(
                                   text: 'Novo usuário? ',
-                                  style: TextStyle(color: Colors.white)),
+                                  style: TextStyle(
+                                      color: currentTheme
+                                          .textTheme.bodyMedium?.color)),
                               TextSpan(
                                 text: 'Criar uma conta',
                                 style: TextStyle(
-                                    color: Colors.white,
+                                    color: currentTheme.colorScheme.secondary,
                                     fontWeight: FontWeight.bold,
                                     decoration: TextDecoration.underline),
                                 recognizer: TapGestureRecognizer()

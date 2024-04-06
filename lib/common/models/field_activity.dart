@@ -9,7 +9,7 @@ class FieldActivity {
   String atividade;
   String usuarioUid;
   String propertyId;
-  Map<String, dynamic> condicoesClimaticas;
+  //Map<String, dynamic> condicoesClimaticas;
   bool finalizada;
 
   FieldActivity({
@@ -20,7 +20,7 @@ class FieldActivity {
     required this.atividade,
     required this.usuarioUid,
     required this.propertyId,
-    required this.condicoesClimaticas,
+    //required this.condicoesClimaticas,
     required this.finalizada,
   });
 
@@ -39,7 +39,7 @@ class FieldActivity {
       'atividade': atividade,
       'usuarioUid': usuarioUid,
       'propertyId': propertyId,
-      'condicoesClimaticas': condicoesClimaticas,
+      //'condicoesClimaticas': condicoesClimaticas,
       'finalizada': finalizada,
     };
   }
@@ -53,7 +53,7 @@ class FieldActivity {
       atividade: map['atividade'],
       usuarioUid: map['usuarioUid'],
       propertyId: map['propertyId'],
-      condicoesClimaticas: map['condicoesClimaticas'],
+      //condicoesClimaticas: map['condicoesClimaticas'],
       finalizada: map['finalizada'] ?? false,
     );
   }

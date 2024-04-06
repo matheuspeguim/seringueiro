@@ -1,8 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import './property_settings_event.dart';
-import './property_settings_state.dart';
+import 'property_settings_event.dart';
+import 'property_settings_state.dart';
 import 'package:flutter_seringueiro/common/models/property_user.dart';
 
 class PropertySettingsBloc
@@ -33,13 +33,18 @@ class PropertySettingsBloc
   }
 
   Future<List<PropertyUser>> _getPropertyUsers(String propertyId) async {
-    final allUsersDocs = await _firestore
+    final allUsersDocs = await FirebaseFirestore.instance
         .collection('property_users')
         .where('propertyId', isEqualTo: propertyId)
         .get();
-    return allUsersDocs.docs
+
+    // Cria uma lista de Futures de PropertyUser
+    var propertyUserFutures = allUsersDocs.docs
         .map((doc) => PropertyUser.fromFirestore(doc))
         .toList();
+
+    // Aguarda todas as Futures serem resolvidas e retorna a lista de PropertyUser
+    return Future.wait(propertyUserFutures);
   }
 
   void _onLoadPropertySettings(

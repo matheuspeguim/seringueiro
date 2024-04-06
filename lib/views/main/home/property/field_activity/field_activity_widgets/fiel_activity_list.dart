@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_seringueiro/common/models/field_activity.dart';
 import 'package:flutter_seringueiro/common/models/usuario.dart';
 import 'package:flutter_seringueiro/views/main/home/property/field_activity/field_activity_widgets/show_field_activity_details.dart';
-import 'package:flutter_seringueiro/views/main/home/weather/field_activity_weather_icon.dart';
 import 'package:intl/intl.dart';
 
 class FieldActivityList extends StatefulWidget {
@@ -88,8 +87,6 @@ class _FieldActivityListState extends State<FieldActivityList> {
                 "${activity.tabela}\nInício: ${formatarHora(activity.inicio)}\n${duration.inSeconds} segundos",
                 style: theme.textTheme.bodySmall,
               ),
-              trailing: FieldActivityWeatherIcon(
-                  condicoesClimaticas: activity.condicoesClimaticas),
               onTap: () {
                 FieldActivityDetailsDialog(
                   propertyId: activity.propertyId, // Ajuste conforme necessário

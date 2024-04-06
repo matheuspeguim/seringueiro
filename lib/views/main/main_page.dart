@@ -7,8 +7,8 @@ import 'package:flutter_seringueiro/views/main/seachers/user_seacher/user_seache
 import 'package:flutter_seringueiro/views/main/seachers/user_seacher/user_seacher_page.dart';
 import 'package:flutter_seringueiro/views/main/seringuia/seringuia_bloc.dart';
 import 'package:flutter_seringueiro/views/main/seringuia/seringuia_page.dart';
-import 'package:flutter_seringueiro/views/main/home/home_page.dart';
-import 'package:flutter_seringueiro/views/main/home/home_page_bloc.dart';
+import 'package:flutter_seringueiro/views/main/home/home_page/home_page.dart';
+import 'package:flutter_seringueiro/views/main/home/home_page/home_page_bloc.dart';
 import 'package:flutter_seringueiro/views/main/jotinha/jotinha_bloc.dart';
 import 'package:flutter_seringueiro/views/main/jotinha/jotinha_page.dart';
 import 'package:flutter_seringueiro/common/widgets/custom_drawer.dart';
@@ -43,16 +43,11 @@ class _MainPageState extends State<MainPage> {
     if (userDoc.exists) {
       var userData = userDoc.data() as Map<String, dynamic>;
 
-      // Supondo que a classe Usuario tenha um construtor nomeado adequado
-      // que aceita Map<String, dynamic> diretamente.
-      Usuario usuario = Usuario.fromMap(userData);
+      // Agora incluindo o ID no construtor fromMap
+      Usuario usuario = Usuario.fromMap(userData, userDoc.id);
 
       setState(() {
-        // Supondo que a classe Usuario tenha uma propriedade 'nome'
-        // e que você deseje extrair o primeiro nome para exibir.
         userName = usuario.nome.split(" ").first;
-
-        // Salve o objeto Usuario completo para uso posterior.
         _currentUser = usuario;
       });
     }

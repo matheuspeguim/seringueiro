@@ -1,16 +1,17 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
-import 'package:flutter_seringueiro/common/validators/validators.dart';
+import 'package:flutter_seringueiro/common/widgets/custom_profile_image_picker.dart';
 import 'package:flutter_seringueiro/views/registration/email_verification/email_verification_bloc.dart';
 import 'package:flutter_seringueiro/views/registration/email_verification/email_verification_page.dart';
 import 'package:flutter_seringueiro/views/registration/signup/signup_bloc.dart';
 import 'package:flutter_seringueiro/views/registration/signup/signup_event.dart';
 import 'package:flutter_seringueiro/views/registration/signup/signup_state.dart';
+import 'package:flutter_seringueiro/views/registration/signup/signup_widgets/acess_credentials_form.dart';
+import 'package:flutter_seringueiro/views/registration/signup/signup_widgets/personal_details_form.dart';
 import 'package:image_picker/image_picker.dart';
+
+import 'signup_widgets/adress_form.dart';
 
 class SignUpPage extends StatefulWidget {
   SignUpPage({Key? key}) : super(key: key);
@@ -20,378 +21,101 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
-  XFile? _imageFile;
-  final ImagePicker _picker = ImagePicker();
+  GlobalKey<FormState> _personalDetailsFormKey = GlobalKey<FormState>();
+  GlobalKey<FormState> _accessCredentialsFormKey = GlobalKey<FormState>();
+  GlobalKey<FormState> _addressFormKey = GlobalKey<FormState>();
 
-  final _emailController = TextEditingController();
-  final _senhaController = TextEditingController();
-  final _confirmarSenhaController = TextEditingController();
-  final _celularController = MaskedTextController(mask: '(00)00000-0000');
-  final _idPersonalizadoController = TextEditingController();
-  final _nomeController = TextEditingController();
-  final _nascimentoController = MaskedTextController(mask: '00/00/0000');
-  final _cpfController = MaskedTextController(mask: '000.000.000-00');
-  final _rgController = TextEditingController();
-  final _cepController = MaskedTextController(mask: '00000-0000');
-  final _logradouroController = TextEditingController();
-  final _numeroController = TextEditingController();
-  final _bairroController = TextEditingController();
-  final _cidadeController = TextEditingController();
-  final _estadoController = TextEditingController();
+  Map<int, bool> _stepIsValid =
+      {}; // Mapa para controlar a validade de cada etapa
 
-  //Focus
-  final _emailFocus = FocusNode();
-  final _senhaFocus = FocusNode();
-  final _confirmarSenhaFocus = FocusNode();
-  final _celularFocus = FocusNode();
-  final _idPersonalizadoFocus = FocusNode();
-  final _nomeFocus = FocusNode();
-  final _nascimentoFocus = FocusNode();
-  final _cpfFocus = FocusNode();
-  final _rgFocus = FocusNode();
-  final _cepFocus = FocusNode();
-  final _logradouroFocus = FocusNode();
-  final _numeroFocus = FocusNode();
-  final _bairroFocus = FocusNode();
-  final _cidadeFocus = FocusNode();
-  final _estadoFocus = FocusNode();
+  late XFile? _imageFile;
+  // Controladores
+  late TextEditingController _emailController;
+  late TextEditingController _senhaController;
+  late TextEditingController _confirmarSenhaController;
+  late MaskedTextController
+      _celularController; // Usando MaskedTextController para formato específico
+  late TextEditingController _idPersonalizadoController;
+  late TextEditingController _nomeController;
+  late MaskedTextController
+      _nascimentoController; // Usando MaskedTextController para formato específico
+  late MaskedTextController
+      _cpfController; // Usando MaskedTextController para formato específico
+  late TextEditingController _rgController;
+  late MaskedTextController
+      _cepController; // Usando MaskedTextController para formato específico
+  late TextEditingController _logradouroController;
+  late TextEditingController _numeroController;
+  late TextEditingController _bairroController;
+  late TextEditingController _cidadeController;
+  late TextEditingController _estadoController;
+
+  // FocusNodes
+  late FocusNode _emailFocus;
+  late FocusNode _senhaFocus;
+  late FocusNode _confirmarSenhaFocus;
+  late FocusNode _celularFocus;
+  late FocusNode _idPersonalizadoFocus;
+  late FocusNode _nomeFocus;
+  late FocusNode _nascimentoFocus;
+  late FocusNode _cpfFocus;
+  late FocusNode _rgFocus;
+  late FocusNode _cepFocus;
+  late FocusNode _logradouroFocus;
+  late FocusNode _numeroFocus;
+  late FocusNode _bairroFocus;
+  late FocusNode _cidadeFocus;
+  late FocusNode _estadoFocus;
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.green.shade900,
-      appBar: AppBar(
-        title: Text('Criar conta',
-            style: TextStyle(color: Colors.white, fontSize: 33.0)),
-        backgroundColor: Colors.green.shade900,
-        centerTitle: true,
-      ),
-      body: BlocConsumer<SignUpBloc, SignUpState>(
-        listener: (context, state) {
-          if (state is SignUpFailure) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.error), backgroundColor: Colors.red),
-            );
-          } else if (state is SignUpSuccess) {
-            // Navega para a tela seguinte após o sucesso do cadastro
-            Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(
-                builder: (context) => BlocProvider<EmailVerificationBloc>(
-                  create: (context) => EmailVerificationBloc(),
-                  child: EmailVerificationPage(),
-                ),
-              ),
-              (Route<dynamic> route) => false,
-            );
-          }
-        },
-        builder: (context, state) {
-          if (state is SignUpLoading) {
-            // Exibindo um indicador de carregamento
-            return Center(child: CircularProgressIndicator());
-          } else {
-            // Para outros estados, retorna o formulário de cadastro
-            return _buildSignUpForm(context);
-          }
-        },
-      ),
-    );
-  }
+  void initState() {
+    super.initState();
 
-  Widget _buildProfileImage() {
-    return InkWell(
-      onTap: _pickImage,
-      child: CircleAvatar(
-        radius: 60, // Tamanho do avatar
-        backgroundColor: Colors.grey.shade300,
-        backgroundImage:
-            _imageFile != null ? FileImage(File(_imageFile!.path)) : null,
-        child: _imageFile == null
-            ? Icon(Icons.person, size: 60) // Ícone padrão se não houver imagem
-            : null,
-      ),
-    );
-  }
+    _stepIsValid = {
+      0: true, // Inicial
+      1: false, // Perfil
+      2: false, // Detalhes pessoais
+      3: false, // Credenciais de acesso
+      4: false, // Endereço
+    };
+    // Inicialização dos Controladores
+    _emailController = TextEditingController();
+    _senhaController = TextEditingController();
+    _confirmarSenhaController = TextEditingController();
+    _celularController = MaskedTextController(mask: '(00) 00000-0000');
+    _idPersonalizadoController = TextEditingController();
+    _nomeController = TextEditingController();
+    _nascimentoController = MaskedTextController(mask: '00/00/0000');
+    _cpfController = MaskedTextController(mask: '000.000.000-00');
+    _rgController = TextEditingController();
+    _cepController = MaskedTextController(mask: '00000-000');
+    _logradouroController = TextEditingController();
+    _numeroController = TextEditingController();
+    _bairroController = TextEditingController();
+    _cidadeController = TextEditingController();
+    _estadoController = TextEditingController();
 
-  Future<void> _pickImage() async {
-    try {
-      final pickedFile = await _picker.pickImage(
-        source: ImageSource.gallery,
-      );
-      setState(() {
-        _imageFile = pickedFile;
-      });
-    } catch (e) {
-      // Tratar erro
-    }
-  }
-
-  Widget _buildSignUpForm(BuildContext context) {
-    return SingleChildScrollView(
-      padding: EdgeInsets.all(16.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          // Campos do formulário aqui
-          _buildProfileImage(),
-          SizedBox(height: 32.0),
-          _buildTextField(
-            context: context,
-            controller: _emailController,
-            label: 'E-mail',
-            validator: Validators.validarEmail,
-            focusNode: _emailFocus,
-            nextFocusNode: _senhaFocus,
-            keyboardType: TextInputType.emailAddress,
-          ),
-          SizedBox(height: 32.0),
-          _buildTextField(
-              context: context,
-              controller: _senhaController,
-              label: 'Senha',
-              validator: Validators.validarSenha,
-              focusNode: _senhaFocus,
-              nextFocusNode: _confirmarSenhaFocus,
-              keyboardType: TextInputType.text,
-              obscureText: true),
-          SizedBox(height: 32.0),
-          _buildTextField(
-            context: context,
-            controller: _confirmarSenhaController,
-            label: 'Confirmar senha',
-            validator: (valor) => Validators.validarConfirmaSenha(
-                valor ?? '', _senhaController.text),
-            focusNode: _confirmarSenhaFocus,
-            nextFocusNode: _celularFocus,
-            keyboardType: TextInputType.text,
-            obscureText: true,
-          ),
-          SizedBox(height: 32.0),
-          _buildTextField(
-            context: context,
-            controller: _celularController,
-            label: 'Número de celular',
-            validator: Validators.validarCelular,
-            focusNode: _celularFocus,
-            nextFocusNode: _idPersonalizadoFocus,
-            keyboardType: TextInputType.phone,
-          ),
-          SizedBox(height: 32.0),
-          _buildTextField(
-            context: context,
-            controller: _idPersonalizadoController,
-            label: 'Nome de usuário (sem espaço)',
-            validator: Validators.validarIdPersonalizado,
-            focusNode: _idPersonalizadoFocus,
-            nextFocusNode: _nomeFocus,
-            keyboardType: TextInputType.text,
-          ),
-          SizedBox(height: 32.0),
-          _buildTextField(
-            context: context,
-            controller: _nomeController,
-            label: 'Nome completo',
-            validator: Validators.validarNome,
-            focusNode: _nomeFocus,
-            nextFocusNode: _nascimentoFocus,
-            keyboardType: TextInputType.name,
-          ),
-          SizedBox(height: 32.0),
-          _buildTextField(
-            context: context,
-            controller: _nascimentoController,
-            label: 'Data de nascimento',
-            validator: Validators.validarNascimento,
-            focusNode: _nascimentoFocus,
-            nextFocusNode: _cpfFocus,
-            keyboardType: TextInputType.number,
-          ),
-          SizedBox(height: 32.0),
-          _buildTextField(
-            context: context,
-            controller: _cpfController,
-            label: 'CPF',
-            validator: Validators.validarCPF,
-            focusNode: _cpfFocus,
-            nextFocusNode: _rgFocus,
-            keyboardType: TextInputType.number,
-          ),
-          SizedBox(height: 32.0),
-          _buildTextField(
-            context: context,
-            controller: _rgController,
-            label: 'RG',
-            validator: Validators.validarRG,
-            focusNode: _rgFocus,
-            nextFocusNode: _cepFocus,
-            keyboardType: TextInputType.text,
-          ),
-          SizedBox(height: 32.0),
-          _buildTextField(
-            context: context,
-            controller: _cepController,
-            label: 'CEP',
-            validator: Validators.validarCEP,
-            focusNode: _cepFocus,
-            nextFocusNode: _logradouroFocus,
-            keyboardType: TextInputType.number,
-          ),
-          SizedBox(height: 32.0),
-          _buildTextField(
-            context: context,
-            controller: _logradouroController,
-            label: 'Logradouro',
-            validator: Validators.validarRuaOuSitio,
-            focusNode: _logradouroFocus,
-            nextFocusNode: _numeroFocus,
-            keyboardType: TextInputType.text,
-          ),
-          SizedBox(height: 32.0),
-          _buildTextField(
-            context: context,
-            controller: _numeroController,
-            label: 'Número',
-            validator: Validators.validarNumero,
-            focusNode: _numeroFocus,
-            nextFocusNode: _bairroFocus,
-            keyboardType: TextInputType.number,
-          ),
-          SizedBox(height: 32.0),
-          _buildTextField(
-            context: context,
-            controller: _bairroController,
-            label: 'Bairro',
-            validator: Validators.validarBairro,
-            focusNode: _bairroFocus,
-            nextFocusNode: _cidadeFocus,
-            keyboardType: TextInputType.text,
-          ),
-          SizedBox(height: 32.0),
-          _buildTextField(
-            context: context,
-            controller: _cidadeController,
-            label: 'Cidade',
-            validator: Validators.validarCidade,
-            focusNode: _cidadeFocus,
-            nextFocusNode: _estadoFocus,
-            keyboardType: TextInputType.text,
-          ),
-          SizedBox(height: 32.0),
-          _buildTextField(
-            context: context,
-            controller: _estadoController,
-            label: 'Estado',
-            validator: Validators.validarEstado,
-            focusNode: _estadoFocus,
-            keyboardType: TextInputType.text,
-          ),
-          SizedBox(height: 32.0),
-          ElevatedButton(
-            child: Text('Próximo'),
-            onPressed: () => _submitForm(context),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTextField({
-    required BuildContext context,
-    required dynamic
-        controller, // Alterado para aceitar qualquer tipo de controlador
-    required String label,
-    required String? Function(String?) validator,
-    bool obscureText = false,
-    FocusNode? focusNode,
-    FocusNode? nextFocusNode,
-    TextInputType keyboardType =
-        TextInputType.text, // Tornando o tipo de teclado configurável
-  }) {
-    return TextFormField(
-      controller: controller,
-      focusNode: focusNode, // Usando FocusNode
-      validator: validator,
-      autovalidateMode: AutovalidateMode.onUserInteraction,
-      keyboardType: keyboardType, // Usando o tipo de teclado configurável
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: TextStyle(color: Colors.white, fontSize: 18.0),
-      ),
-      style: TextStyle(color: Colors.white, fontSize: 18.0),
-      obscureText: obscureText,
-      onFieldSubmitted: (value) {
-        if (nextFocusNode != null) {
-          FocusScope.of(context).requestFocus(nextFocusNode);
-        }
-      },
-    );
-  }
-
-  void _submitForm(BuildContext context) {
-    if (_validateForm()) {
-      BlocProvider.of<SignUpBloc>(context).add(
-        SignUpSubmitted(
-          email: _emailController.text,
-          senha: _senhaController.text,
-          celular: _celularController.text,
-          idPersonalizado: _idPersonalizadoController.text,
-          nome: _nomeController.text,
-          nascimento: _nascimentoController.text,
-          cpf: _cpfController.text,
-          rg: _rgController.text,
-          cep: _cepController.text,
-          logradouro: _logradouroController.text,
-          numero: _numeroController.text,
-          bairro: _bairroController.text,
-          cidade: _cidadeController.text,
-          estado: _estadoController.text,
-          imageFile: _imageFile,
-        ),
-      );
-    } else {
-      // Mostrar feedback ao usuário de que a validação falhou
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Por favor, corrija os erros no formulário.")),
-      );
-    }
-  }
-
-  bool _validateForm() {
-    // Lista de validadores para cada campo. Cada validador retorna null se o campo for válido, ou uma mensagem de erro se não for.
-    List<String? Function()> validadores = [
-      () => Validators.validarEmail(_emailController.text),
-      () => Validators.validarSenha(_senhaController.text),
-      () => Validators.validarConfirmaSenha(
-          _confirmarSenhaController.text, _senhaController.text),
-      () => Validators.validarCelular(_celularController.text),
-      () => Validators.validarIdPersonalizado(_idPersonalizadoController.text),
-      () => Validators.validarNome(_nomeController.text),
-      () => Validators.validarNascimento(_nascimentoController.text),
-      () => Validators.validarCPF(_cpfController.text),
-      () => Validators.validarRG(_rgController.text),
-      () => Validators.validarCEP(_cepController.text),
-      () => Validators.validarRuaOuSitio(_logradouroController.text),
-      () => Validators.validarNumero(_numeroController.text),
-      () => Validators.validarBairro(_bairroController.text),
-      () => Validators.validarCidade(_cidadeController.text),
-      () => Validators.validarEstado(_estadoController.text),
-    ];
-
-    // Executa cada validador. Se algum validador retornar uma mensagem de erro (não null), retorna false.
-    for (var validar in validadores) {
-      if (validar() != null) {
-        return false;
-      }
-    }
-
-    // Se todos os validadores passarem (todos retornarem null), retorna true.
-    return true;
+    // Inicialização dos FocusNodes
+    _emailFocus = FocusNode();
+    _senhaFocus = FocusNode();
+    _confirmarSenhaFocus = FocusNode();
+    _celularFocus = FocusNode();
+    _idPersonalizadoFocus = FocusNode();
+    _nomeFocus = FocusNode();
+    _nascimentoFocus = FocusNode();
+    _cpfFocus = FocusNode();
+    _rgFocus = FocusNode();
+    _cepFocus = FocusNode();
+    _logradouroFocus = FocusNode();
+    _numeroFocus = FocusNode();
+    _bairroFocus = FocusNode();
+    _cidadeFocus = FocusNode();
+    _estadoFocus = FocusNode();
   }
 
   @override
   void dispose() {
-    // Libera os controladores de texto
+    // Descarte dos Controladores
     _emailController.dispose();
     _senhaController.dispose();
     _confirmarSenhaController.dispose();
@@ -408,7 +132,7 @@ class _SignUpPageState extends State<SignUpPage> {
     _cidadeController.dispose();
     _estadoController.dispose();
 
-    // Libera os focos de texto
+    // Descarte dos FocusNodes
     _emailFocus.dispose();
     _senhaFocus.dispose();
     _confirmarSenhaFocus.dispose();
@@ -426,5 +150,217 @@ class _SignUpPageState extends State<SignUpPage> {
     _estadoFocus.dispose();
 
     super.dispose();
+  }
+
+  int _currentStep = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Criar conta'),
+      ),
+      body: BlocConsumer<SignUpBloc, SignUpState>(
+        listener: (context, state) {
+          if (state is SignUpFailure) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Text(state.error), backgroundColor: Colors.red));
+          } else if (state is SignUpSuccess) {
+            Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(
+                    builder: (context) => BlocProvider<EmailVerificationBloc>(
+                        create: (context) => EmailVerificationBloc(),
+                        child: EmailVerificationPage())),
+                (Route<dynamic> route) => false);
+          }
+        },
+        builder: (context, state) {
+          if (state is SignUpLoading) {
+            return Center(child: CircularProgressIndicator());
+          } else {
+            return _buildStepper();
+          }
+        },
+      ),
+    );
+  }
+
+  Widget _buildStepper() {
+    return Stepper(
+      currentStep: _currentStep,
+      onStepContinue: _next,
+      onStepCancel: _cancel,
+      steps: _getSteps(),
+      controlsBuilder: (BuildContext context, ControlsDetails details) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              if (_currentStep >= 0)
+                TextButton(
+                  onPressed: details.onStepCancel,
+                  child: const Text('VOLTAR'),
+                ),
+              ElevatedButton(
+                onPressed: details.onStepContinue,
+                child: Text(_currentStep == _getSteps().length - 1
+                    ? 'FINALIZAR'
+                    : 'CONTINUAR'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  List<Step> _getSteps() {
+    return [
+      Step(
+        title: const Text('Detalhes pessoais'),
+        content: Form(
+            key: _personalDetailsFormKey,
+            child: PersonalDetailsForm(
+                idPersonalizadoController: _idPersonalizadoController,
+                nomeController: _nomeController,
+                nascimentoController: _nascimentoController,
+                cpfController: _cpfController,
+                rgController: _rgController,
+                celularController: _celularController,
+                idPersonalizadoFocus: _idPersonalizadoFocus,
+                nomeFocus: _nomeFocus,
+                nascimentoFocus: _nascimentoFocus,
+                cpfFocus: _cpfFocus,
+                rgFocus: _rgFocus,
+                celularFocus: _celularFocus)),
+        isActive: _currentStep >= 1,
+      ),
+      Step(
+        title: const Text('Credenciais de acesso'),
+        content: Form(
+            key: _accessCredentialsFormKey,
+            child: AccessCredentialsForm(
+                emailController: _emailController,
+                senhaController: _senhaController,
+                confirmarSenhaController: _confirmarSenhaController,
+                emailFocus: _emailFocus,
+                senhaFocus: _senhaFocus,
+                confirmarSenhaFocus: _confirmarSenhaFocus,
+                celularFocus: _celularFocus)),
+        isActive: _currentStep >= 2,
+      ),
+      Step(
+        title: const Text('Perfil'),
+        content: CustomProfileImagePicker(
+          onImagePicked: (XFile? image) {
+            setState(() {
+              _imageFile = image;
+            });
+            // Opcionalmente, faça algo com a imagem selecionada, como pré-visualização
+          },
+        ), // Assumindo que este widget gerencia sua própria imagem
+        isActive: _currentStep >= 3,
+      ),
+      Step(
+        title: const Text('Endereço'),
+        content: Form(
+            key: _addressFormKey,
+            child: AddressForm(
+                cepController: _cepController,
+                logradouroController: _logradouroController,
+                numeroController: _numeroController,
+                bairroController: _bairroController,
+                cidadeController: _cidadeController,
+                estadoController: _estadoController,
+                cepFocus: _cepFocus,
+                logradouroFocus: _logradouroFocus,
+                numeroFocus: _numeroFocus,
+                bairroFocus: _bairroFocus,
+                cidadeFocus: _cidadeFocus,
+                estadoFocus: _estadoFocus)),
+        isActive: _currentStep >= 4,
+      ),
+    ];
+  }
+
+  void _next() {
+    bool isValid = true; // Inicialmente assuma que a etapa é válida.
+
+    // Realiza a validação condicional baseada na etapa atual do Stepper.
+    switch (_currentStep) {
+      case 0:
+        isValid = _personalDetailsFormKey.currentState?.validate() ?? false;
+        break;
+      case 1:
+        isValid = _accessCredentialsFormKey.currentState?.validate() ?? false;
+        break;
+      case 2:
+        isValid = true;
+        break;
+      case 3:
+        isValid = _addressFormKey.currentState?.validate() ?? false;
+        break;
+      default:
+        break;
+    }
+
+    // Se a etapa atual não for válida, interrompe a função aqui.
+    if (!isValid) return;
+
+    // Avança para a próxima etapa ou submete o formulário se estiver na última etapa.
+    if (_currentStep < _getSteps().length - 1) {
+      setState(() {
+        _currentStep += 1; // Avança para a próxima etapa.
+      });
+    } else {
+      _submitForm(); // Chamada para a função de submissão do formulário na última etapa.
+    }
+  }
+
+  void _cancel() {
+    if (_currentStep > 0) {
+      setState(() => _currentStep -= 1);
+    }
+  }
+
+  void _submitForm() {
+    // Coletando os valores dos controladores de texto.
+    String email = _emailController.text.trim();
+    String senha = _senhaController.text.trim();
+    String celular = _celularController.text.trim();
+    String idPersonalizado = _idPersonalizadoController.text.trim();
+    String nome = _nomeController.text.trim();
+    String nascimento = _nascimentoController.text.trim();
+    String cpf = _cpfController.text.trim();
+    String rg = _rgController.text.trim();
+    String cep = _cepController.text.trim();
+    String logradouro = _logradouroController.text.trim();
+    String numero = _numeroController.text.trim();
+    String bairro = _bairroController.text.trim();
+    String cidade = _cidadeController.text.trim();
+    String estado = _estadoController.text.trim();
+    XFile? imageFile = _imageFile; // Diretamente usando XFile? para o evento.
+
+    // Disparando o evento de submissão com todos os dados coletados, incluindo o arquivo de imagem.
+    BlocProvider.of<SignUpBloc>(context).add(
+      SignUpSubmitted(
+        email: email,
+        senha: senha,
+        celular: celular,
+        idPersonalizado: idPersonalizado,
+        nome: nome,
+        nascimento: nascimento,
+        cpf: cpf,
+        rg: rg,
+        cep: cep,
+        logradouro: logradouro,
+        numero: numero,
+        bairro: bairro,
+        cidade: cidade,
+        estado: estado,
+        imageFile: imageFile, // Passando XFile? diretamente.
+      ),
+    );
   }
 }

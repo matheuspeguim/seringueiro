@@ -6,9 +6,9 @@ import 'package:flutter_seringueiro/views/main/home/property/field_activity/fiel
 import 'package:flutter_seringueiro/common/models/property.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_widgets/admin_widgets.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_widgets/agronomo_widgets.dart';
-import 'package:flutter_seringueiro/views/main/home/property/property_widgets/property_buttons_widget/property_button_event.dart';
+import 'package:flutter_seringueiro/views/main/home/property/property_widgets/property_buttons_widget/property_buttons_event.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_widgets/property_buttons_widget/property_buttons_state.dart';
-import 'package:flutter_seringueiro/views/main/home/property/property_widgets/propietario_widgets.dart';
+import 'package:flutter_seringueiro/views/main/home/property/property_widgets/proprietario_widgets.dart';
 import 'package:flutter_seringueiro/views/main/home/property/property_widgets/seringueiro_widgets.dart';
 
 class PropertyButtonsBloc
@@ -38,12 +38,13 @@ class PropertyButtonsBloc
             querySnapshot.docs.first.data() as Map<String, dynamic>;
         var buttons = <Widget>[];
 
-        // Obter a propriedade
+        // Obter a propriedade de forma assíncrona
         DocumentSnapshot propertyDoc = await firestore
             .collection('properties')
             .doc(event.propertyId)
             .get();
-        Property property = Property.fromFirestore(propertyDoc);
+        // Garante que a instância de Property é criada após a chamada assíncrona ser completada
+        Property property = await Property.fromFirestore(propertyDoc);
         User user = event.user;
         FieldActivityManager activityManager = FieldActivityManager();
 
@@ -60,7 +61,6 @@ class PropertyButtonsBloc
           buttons
               .addAll(ProprietarioWidgets.buildProprietarioWidgets(property));
         }
-
         if (userRoleData['admin'] == true) {
           buttons.addAll(AdminWidgets.buildAdminWidgets(context, property));
         }

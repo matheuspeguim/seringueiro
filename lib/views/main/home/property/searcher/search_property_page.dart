@@ -2,8 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_seringueiro/views/main/home/property/new_property/new_property_bloc.dart';
-import 'package:flutter_seringueiro/views/main/home/property/new_property/new_property_page.dart';
+import 'package:flutter_seringueiro/views/main/home/new_property/new_property_page/new_property_bloc.dart';
+import 'package:flutter_seringueiro/views/main/home/new_property/new_property_page/new_property_page.dart';
 
 class SearchPropertyPage extends StatefulWidget {
   final User user;
@@ -59,7 +59,7 @@ class _SearchPropertyPageState extends State<SearchPropertyPage> {
                             MaterialPageRoute(builder: (context) {
                               return BlocProvider<NewPropertyBloc>(
                                 create: (context) => NewPropertyBloc(),
-                                child: NewPropertyPage(user: widget.user),
+                                child: NewPropertyPage(),
                               );
                             }),
                           );

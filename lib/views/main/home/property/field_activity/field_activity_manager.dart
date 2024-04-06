@@ -42,9 +42,6 @@ class FieldActivityManager {
     }
 
     // Obtém condições climáticas
-    var condicoesClimaticas =
-        await FieldActivityServices.obterCondicoesClimaticas(
-            property.localizacao);
 
     // Cria a atividade
     DocumentReference docRef =
@@ -59,7 +56,6 @@ class FieldActivityManager {
       atividade: atividade,
       usuarioUid: user.uid,
       propertyId: property.id,
-      condicoesClimaticas: condicoesClimaticas,
       finalizada: false,
     );
 

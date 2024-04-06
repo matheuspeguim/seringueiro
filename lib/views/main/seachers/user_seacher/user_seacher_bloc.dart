@@ -27,7 +27,8 @@ class UserSearchBloc extends Bloc<UserSearchEvent, UserSearchState> {
             .get();
 
         final users = querySnapshot.docs
-            .map((doc) => Usuario.fromMap(doc.data() as Map<String, dynamic>))
+            .map((doc) => Usuario.fromMap(
+                doc.data() as Map<String, dynamic>, doc.id)) // Ajuste aqui
             .toList();
 
         if (users.isEmpty) {

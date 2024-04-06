@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_seringueiro/common/models/usuario.dart';
@@ -94,10 +95,21 @@ class _AddUserToPropertyWidgetState extends State<AddUserToPropertyWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return CustomButton(
-      icon: Icons.add,
-      label: 'Convidar',
-      onPressed: _handleAddUser,
-    );
+    // Obtem o UID do usuário atual
+    final String? currentUserId = FirebaseAuth.instance.currentUser?.uid;
+
+    // Verifica se o UID do usuário atual é igual ao UID do usuário passado ao widget
+    if (widget.usuario.id == currentUserId) {
+      // Se for igual, retorna um Container vazio
+      return Container();
+    } else {
+      // Se for diferente, retorna o CustomButton como antes
+      return CustomButton(
+        elevation: 10,
+        icon: Icons.add,
+        label: 'Convidar',
+        onPressed: _handleAddUser,
+      );
+    }
   }
 }

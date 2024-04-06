@@ -1,37 +1,68 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_seringueiro/common/models/property.dart';
 import 'package:flutter_seringueiro/common/models/usuario.dart';
 import 'package:flutter_seringueiro/views/user/profile_page/profile_page.dart';
 
 class PropertyUser {
   final String id;
-  final String uid;
-  final String propertyId;
+  final Usuario usuario; // Composição: PropertyUser contém um Usuario
+  final Property propriedade; // Composição: PropertyUser contém uma Propriedade
   final bool administrador;
   final bool seringueiro;
   final bool agronomo;
   final bool proprietario;
+  final bool usuarioAutorizado;
+  final bool propriedadeAutorizada;
 
   PropertyUser({
     required this.id,
-    required this.uid,
-    required this.propertyId,
+    required this.usuario,
+    required this.propriedade,
     this.administrador = false,
     this.seringueiro = false,
     this.agronomo = false,
     this.proprietario = false,
+    this.usuarioAutorizado = false,
+    this.propriedadeAutorizada = false,
   });
 
-  factory PropertyUser.fromFirestore(DocumentSnapshot doc) {
-    Map data = doc.data() as Map<String, dynamic>;
+  // Método para construir PropertyUser a partir do Firestore, incluindo Usuario e Propriedade
+  static Future<PropertyUser> fromFirestore(DocumentSnapshot doc) async {
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+
+    // Busca os detalhes do Usuario
+    DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(data['uid'])
+        .get();
+    if (!userSnapshot.exists) {
+      throw Exception("Usuário não encontrado");
+    }
+    Usuario usuario = Usuario.fromMap(
+        userSnapshot.data() as Map<String, dynamic>, userSnapshot.id);
+
+    // Busca os detalhes da Propriedade
+    DocumentSnapshot propertySnapshot = await FirebaseFirestore.instance
+        .collection('properties')
+        .doc(data['propertyId'])
+        .get();
+    if (!propertySnapshot.exists) {
+      throw Exception("Propriedade não encontrada");
+    }
+    // Ajuste aqui: Use `await` para aguardar a propriedade ser resolvida antes de continuar
+    Property propriedade = await Property.fromFirestore(propertySnapshot);
+
     return PropertyUser(
       id: doc.id,
-      uid: data['uid'],
-      propertyId: data['propertyId'],
-      administrador: data['admin'] ?? false,
+      usuario: usuario,
+      propriedade: propriedade,
+      administrador: data['administrador'] ?? false,
       seringueiro: data['seringueiro'] ?? false,
       agronomo: data['agronomo'] ?? false,
       proprietario: data['proprietario'] ?? false,
+      usuarioAutorizado: data['usuarioAutorizado'] ?? false,
+      propriedadeAutorizada: data['propriedadeAutorizada'] ?? false,
     );
   }
 }
@@ -49,7 +80,12 @@ class PropertyUserListItem extends StatelessWidget {
   Future<Usuario?> _fetchUserDetails(String userId) async {
     final docSnapshot =
         await FirebaseFirestore.instance.collection('users').doc(userId).get();
-    return docSnapshot.exists ? Usuario.fromMap(docSnapshot.data()!) : null;
+    if (docSnapshot.exists) {
+      // Ajuste na chamada para incluir o ID do documento
+      return Usuario.fromMap(
+          docSnapshot.data() as Map<String, dynamic>, docSnapshot.id);
+    }
+    return null;
   }
 
   String _getUserRoles(PropertyUser propertyUser) => [
@@ -189,7 +225,7 @@ class PropertyUserListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<Usuario?>(
-      future: _fetchUserDetails(propertyUser.uid),
+      future: _fetchUserDetails(propertyUser.usuario.id),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const ListTile(title: Text('Carregando...'));

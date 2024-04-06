@@ -58,6 +58,7 @@ class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
 
       // Salva os dados adicionais no Firestore
       await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+        'id': user.uid,
         'email': event.email,
         'celular': event.celular,
         'idPersonalizado': event.idPersonalizado,

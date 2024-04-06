@@ -1,7 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_seringueiro/common/services/open_weather_api_service.dart';
 
 class FieldActivityServices {
   // Verifica se existe alguma atividade em andamento para um usuário e propriedade específicos
@@ -74,18 +72,5 @@ class FieldActivityServices {
     );
 
     return confirmado == true ? tabelaSelecionada : null;
-  }
-
-  // Obtém as condições climáticas para uma localização específica usando uma API de clima
-  static Future<Map<String, dynamic>> obterCondicoesClimaticas(
-      GeoPoint localizacao) async {
-    OpenWeatherApiService weatherService =
-        OpenWeatherApiService(apiKey: dotenv.env['OPENWEATHER_API_KEY']!);
-    try {
-      return await weatherService.weatherToFieldActivity(
-          localizacao.latitude, localizacao.longitude);
-    } catch (e) {
-      return {/* Dados climáticos padrão ou vazios */};
-    }
   }
 }

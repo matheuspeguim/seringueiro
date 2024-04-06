@@ -67,52 +67,50 @@ class _FieldActivityControlPanelState extends State<FieldActivityControlPanel> {
         // Aqui, você implementa a lógica para exibir o controle da atividade
         // incluindo informações sobre a atividade e botões para ações como pausar ou finalizar
         return Visibility(
-          visible:
-              true, // Certifique-se de que 'activity' é uma variável existente no seu código
+          visible: true,
           child: Card(
-            elevation: 5,
-            color: Colors.blueGrey[800],
-            margin: const EdgeInsets.all(10),
+            color: Theme.of(context)
+                .colorScheme
+                .surface, // Cor alterada para usar o tema
+            margin: const EdgeInsets.all(4),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(8.0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    'Atividade em andamento:',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      'Atividade em andamento',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface), // Estilo customizado baseado no tema
                     ),
                   ),
                   SizedBox(height: 12),
                   Text(
                     '${activity.atividade.toUpperCase()}',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.white70,
-                    ),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface), // Estilo customizado baseado no tema
                   ),
                   Text(
                     '${activity.tabela}',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.white70,
-                    ),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurface),
                   ),
                   SizedBox(height: 12),
-                  TimeElapsedDisplay(
-                      startTime: activity
-                          .inicio), // Este é o widget personalizado que você forneceu
+                  TimeElapsedDisplay(startTime: activity.inicio),
                   SizedBox(height: 12),
                   LinearProgressIndicator(
-                    backgroundColor: Colors.grey[200],
-                    valueColor:
-                        AlwaysStoppedAnimation<Color>(Colors.lightGreenAccent),
+                    backgroundColor: Theme.of(context).colorScheme.background,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                        Theme.of(context).colorScheme.primary),
                   ),
                   SizedBox(height: 12),
                   Row(

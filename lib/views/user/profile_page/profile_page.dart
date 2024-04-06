@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_seringueiro/common/models/usuario.dart';
@@ -15,8 +16,6 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Scaffold(
       appBar: AppBar(
         title: Text(usuario.nome),
@@ -94,26 +93,36 @@ class ProfilePage extends StatelessWidget {
               "São considerados dados das duas últimas safras, ou mais recentes.",
               style: Theme.of(context).textTheme.bodySmall),
           const SizedBox(width: 10),
-          PercentageCircle(
-              titulo: "Frequência",
-              valor: 56,
-              themeColor: themeColor.textTheme.bodyLarge!.color!),
-          PercentageCircle(
-              titulo: "Técnica",
-              valor: 65,
-              themeColor: themeColor.textTheme.bodyLarge!.color!),
-          PercentageCircle(
-              titulo: "Manejo",
-              valor: 100,
-              themeColor: themeColor.textTheme.bodyLarge!.color!),
-          PercentageCircle(
-              titulo: "Reposição",
-              valor: 87,
-              themeColor: themeColor.textTheme.bodyLarge!.color!),
-          PercentageCircle(
-              titulo: "Consumo",
-              valor: 18,
-              themeColor: themeColor.textTheme.bodyLarge!.color!),
+          Row(children: [
+            PercentageCircle(
+                titulo: "Frequência",
+                valor: 56,
+                themeColor: themeColor.textTheme.bodyLarge!.color!),
+          ]),
+          Row(children: [
+            PercentageCircle(
+                titulo: "Técnica",
+                valor: 56,
+                themeColor: themeColor.textTheme.bodyLarge!.color!),
+          ]),
+          Row(children: [
+            PercentageCircle(
+                titulo: "Manejo",
+                valor: 56,
+                themeColor: themeColor.textTheme.bodyLarge!.color!),
+          ]),
+          Row(children: [
+            PercentageCircle(
+                titulo: "Reposição",
+                valor: 56,
+                themeColor: themeColor.textTheme.bodyLarge!.color!),
+          ]),
+          Row(children: [
+            PercentageCircle(
+                titulo: "Consumo",
+                valor: 56,
+                themeColor: themeColor.textTheme.bodyLarge!.color!),
+          ]),
         ],
       ),
     );

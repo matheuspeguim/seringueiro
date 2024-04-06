@@ -27,8 +27,12 @@ class SearchPropertyBloc
           .where('nomeDaPropriedade', isEqualTo: event.propertyName)
           .get();
 
-      List<Property> properties =
+      // Prepara uma lista para armazenar os futures de Property
+      var propertyFutures =
           querySnapshot.docs.map((doc) => Property.fromFirestore(doc)).toList();
+
+      // Aguarda todos os futures serem resolvidos
+      List<Property> properties = await Future.wait(propertyFutures);
 
       emit(SearchSuccess(properties));
     } catch (e) {

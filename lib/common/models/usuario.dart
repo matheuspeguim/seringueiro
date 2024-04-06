@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_seringueiro/views/user/profile_page/profile_page.dart';
 
 class Usuario {
+  final String id;
   final String email;
   final String celular;
   final String cpf;
@@ -24,6 +25,7 @@ class Usuario {
       'https://firebasestorage.googleapis.com/v0/b/seringueiroapp.appspot.com/o/profilePictures%2Fvecteezy_illustration-of-human-icon-vector-user-symbol-icon-modern_8442086.jpg?alt=media&token=cdadba3c-68db-4d1b-ace3-b18d7b4733a2';
 
   Usuario({
+    required this.id,
     required this.email,
     required this.celular,
     required this.cpf,
@@ -40,28 +42,30 @@ class Usuario {
     required this.numero,
   }) : this.profilePictureUrl = profilePictureUrl ?? _defaultProfilePictureUrl;
 
-  factory Usuario.fromMap(Map<String, dynamic> data) {
+  factory Usuario.fromMap(Map<String, dynamic> data, String id) {
     return Usuario(
-        email: data['email'],
-        celular: data['celular'],
-        cpf: data['cpf'],
-        nascimento: (data['nascimento'] as Timestamp)
-            .toDate(), // Convertendo de Timestamp para DateTime
-        idPersonalizado: data['idPersonalizado'],
-        nome: data['nome'],
-        profilePictureUrl: data['profilePictureUrl'],
-        rg: data['rg'],
-        bairro: data['bairro'],
-        cep: data['cep'],
-        cidade: data['cidade'],
-        estado: data['estado'],
-        logradouro: data['logradouro'],
-        numero: data['numero']);
+      id: id,
+      email: data['email'] as String,
+      celular: data['celular'] as String,
+      cpf: data['cpf'] as String,
+      nascimento: (data['nascimento'] as Timestamp).toDate(),
+      idPersonalizado: data['idPersonalizado'] as String,
+      nome: data['nome'] as String,
+      profilePictureUrl: data['profilePictureUrl'] as String?,
+      rg: data['rg'] as String,
+      bairro: data['bairro'] as String,
+      cep: data['cep'] as String,
+      cidade: data['cidade'] as String,
+      estado: data['estado'] as String,
+      logradouro: data['logradouro'] as String,
+      numero: data['numero'] as String,
+    );
   }
 
   factory Usuario.fromFirebaseUser(
       User user, Map<String, dynamic> firestoreData) {
     return Usuario(
+        id: firestoreData['id'],
         email: firestoreData['email'],
         celular: firestoreData['celular'],
         cpf: firestoreData['cpf'],
@@ -128,7 +132,8 @@ class UsuarioIcon extends StatelessWidget {
         await FirebaseFirestore.instance.collection('users').doc(uid).get();
 
     if (usuarioSnapshot.exists) {
-      return Usuario.fromMap(usuarioSnapshot.data() as Map<String, dynamic>);
+      return Usuario.fromMap(
+          usuarioSnapshot.data() as Map<String, dynamic>, usuarioSnapshot.id);
     }
     return null;
   }

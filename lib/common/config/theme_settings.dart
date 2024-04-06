@@ -7,7 +7,8 @@ final ThemeData lightTheme = ThemeData(
   colorScheme: ColorScheme.light(
     primary: Color(0xFF4CAF50), // Verde Vibrante como cor primária
     onPrimary: Colors.white, // Para ícones e texto em cima do primário
-    secondary: Color(0xFF76B947), // Para destacar elementos secundários
+    secondary: Color.fromARGB(
+        255, 151, 205, 165), // Para destacar elementos secundários
     onSecondary: Colors.white, // Para ícones e texto em cima do secundário
     error: Colors.red, // Cor para erros
     onError: Colors.white, // Para ícones e texto em cima de erros
@@ -46,8 +47,8 @@ final ThemeData darkTheme = ThemeData(
   colorScheme: ColorScheme.dark(
     primary: Color(0xFF66BB6A), // Verde Vibrante adaptado para o modo escuro
     onPrimary: Color(0xFF121212), // Para ícones e texto em cima do primário
-    secondary: Color(
-        0xFF66BB6A), // Adaptado para o modo escuro, mantendo a energia e foco
+    secondary: Color.fromARGB(255, 50, 100,
+        60), // Adaptado para o modo escuro, mantendo a energia e foco
     onSecondary: Color(0xFF121212), // Para ícones e texto em cima do secundário
     error: Colors.red.shade800, // Cor para erros adaptada para o modo escuro
     onError: Colors.white, // Para ícones e texto em cima de erros

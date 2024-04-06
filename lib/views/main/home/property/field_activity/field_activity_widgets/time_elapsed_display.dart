@@ -47,7 +47,7 @@ class _TimeElapsedDisplayState extends State<TimeElapsedDisplay> {
       style: TextStyle(
         fontSize: 24.0,
         fontWeight: FontWeight.bold,
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.onSurface,
       ),
     );
   }

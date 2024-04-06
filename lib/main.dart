@@ -3,12 +3,19 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_seringueiro/common/config/theme_settings.dart';
+import 'package:flutter_seringueiro/common/models/weather/current_weather.dart';
+import 'package:flutter_seringueiro/common/models/weather/daily_feels_like.dart';
+import 'package:flutter_seringueiro/common/models/weather/daily_temperature.dart';
+import 'package:flutter_seringueiro/common/models/weather/daily_weather.dart';
+import 'package:flutter_seringueiro/common/models/weather/hourly_weather.dart';
+import 'package:flutter_seringueiro/common/models/weather/minutely_weather.dart';
+import 'package:flutter_seringueiro/common/models/weather/weather_alert.dart';
+import 'package:flutter_seringueiro/common/models/weather/weather_condition.dart';
+import 'package:flutter_seringueiro/common/models/weather/weather_response.dart';
 import 'package:flutter_seringueiro/firebase_options.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'views/login/login_page_wrapper.dart';
-import 'common/services/storage_service/local_storage_service.dart';
-// Importe seus adapters do Hive aqui
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,43 +26,23 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Inicialização específica para plataformas que não são web
+  // Inicialização do Hive
   await Hive.initFlutter();
   Hive
-    ..registerAdapter(TimestampAdapter())
-    ..registerAdapter(DurationAdapter())
-    ..registerAdapter(FieldActivityAdapter())
-    ..registerAdapter(ActivityPointAdapter())
-    ..registerAdapter(WeatherDataAdapter())
-    ..registerAdapter(GeoPointAdapter());
+    ..registerAdapter(CurrentWeatherAdapter())
+    ..registerAdapter(DailyFeelsLikeAdapter())
+    ..registerAdapter(DailyTemperatureAdapter())
+    ..registerAdapter(DailyWeatherAdapter())
+    ..registerAdapter(HourlyWeatherAdapter())
+    ..registerAdapter(MinutelyWeatherAdapter())
+    ..registerAdapter(WeatherAlertAdapter())
+    ..registerAdapter(WeatherConditionAdapter())
+    ..registerAdapter(WeatherResponseAdapter());
 
-  LocalStorageService localStorageService = LocalStorageService();
-  await localStorageService.init();
-  await localStorageService.verificarConexaoESincronizarSeNecessario();
-
-  bool initializationSuccess = await _initializeApp();
-
-  runApp(MyApp(initializationSuccess: initializationSuccess));
-}
-
-Future<bool> _initializeApp() async {
-  try {
-    // Inicialização específica do serviço de armazenamento local, apenas para mobile
-    LocalStorageService localStorageService = LocalStorageService();
-    await localStorageService.init();
-    await localStorageService.verificarConexaoESincronizarSeNecessario();
-
-    return true;
-  } catch (_) {
-    return false;
-  }
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  final bool initializationSuccess;
-
-  MyApp({required this.initializationSuccess});
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -68,19 +55,7 @@ class MyApp extends StatelessWidget {
       title: 'Seringueiro',
       theme: lightTheme,
       darkTheme: darkTheme,
-      home: FutureBuilder(
-        future: _initializeApp(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            if (initializationSuccess) {
-              return LoginPageWrapper();
-            } else {
-              return ErrorScreen();
-            }
-          }
-          return LoadingScreen();
-        },
-      ),
+      home: LoginPageWrapper(),
     );
   }
 }
